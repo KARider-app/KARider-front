@@ -77,3 +77,5 @@ export interface PagedResult<T> {
   totalPaginas: number
   tieneSiguiente: boolean
 }
+
+export type EditarViajeRequest = Omit<PublicarViajeRequest, 'publicar'>

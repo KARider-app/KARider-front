@@ -1,5 +1,6 @@
 import { apiClient } from '@/core/http/apiClient'
 import type {
+  EditarViajeRequest,
   EstadoViaje,
   PagedResult,
   PublicarViajeRequest,
@@ -22,4 +23,6 @@ export const viajesApi = {
       .then((r) => r.data),
   detalle: (id: string) =>
     apiClient.get<ViajeDetalle>(`/viajes/${encodeURIComponent(id)}`).then((r) => r.data),
+  editar: (id: string, p: EditarViajeRequest) =>
+    apiClient.put<ViajeDetalle>(`/viajes/${encodeURIComponent(id)}`, p).then((r) => r.data),
 }

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { aFechaInput, sumarDias } from '@/core/utils/fechas'
-import { paso1Esquema, paso2Esquema } from '../esquemas'
+import { crearEditarEsquema, paso1Esquema, paso2Esquema } from '../esquemas'
 
 const manana = aFechaInput(sumarDias(new Date(), 1))
 
@@ -63,5 +63,26 @@ describe('paso2Esquema (HU-05)', () => {
     expect(
       paso2Esquema.safeParse({ ...base, gastoTotal: 100, notas: 'x'.repeat(501) }).success,
     ).toBe(false)
+  })
+})
+
+describe('crearEditarEsquema (HU-09)', () => {
+  const datos = { ...valido, gastoTotal: 160, notas: '', vehiculoId: '' }
+
+  it('acepta los datos de ruta y gastos combinados', () => {
+    const esquema = crearEditarEsquema(() => 0)
+    expect(esquema.safeParse(datos).success).toBe(true)
+  })
+
+  it('rechaza ofrecer menos asientos que los ya reservados', () => {
+    const esquema = crearEditarEsquema(() => 3)
+    const r = esquema.safeParse({ ...datos, asientos: 2 })
+    expect(r.success).toBe(false)
+    if (!r.success) expect(r.error.issues.map((i) => i.path.join('.'))).toContain('asientos')
+  })
+
+  it('acepta ofrecer exactamente los asientos ya reservados', () => {
+    const esquema = crearEditarEsquema(() => 3)
+    expect(esquema.safeParse({ ...datos, asientos: 3 }).success).toBe(true)
   })
 })

@@ -48,3 +48,10 @@ export const paso2Esquema = z.object({
 
 export type Paso1 = z.infer<typeof paso1Esquema>
 export type Paso2 = z.infer<typeof paso2Esquema>
+
+/** HU-09: un solo formulario; no se pueden ofrecer menos asientos que los ya reservados. */
+export const crearEditarEsquema = (reservados: () => number) =>
+  z.intersection(paso1Esquema, paso2Esquema).refine((d) => d.asientos >= reservados(), {
+    path: ['asientos'],
+    message: `Ya hay ${reservados()} reservados: ofrece al menos ${reservados()}`,
+  })
