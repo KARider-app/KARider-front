@@ -77,8 +77,9 @@ describe('crearEditarEsquema (HU-09)', () => {
   it('rechaza ofrecer menos asientos que los ya reservados', () => {
     const esquema = crearEditarEsquema(() => 3)
     const r = esquema.safeParse({ ...datos, asientos: 2 })
+    const errores = r.success ? [] : r.error.issues.map((i) => i.path.join('.'))
     expect(r.success).toBe(false)
-    if (!r.success) expect(r.error.issues.map((i) => i.path.join('.'))).toContain('asientos')
+    expect(errores).toContain('asientos')
   })
 
   it('acepta ofrecer exactamente los asientos ya reservados', () => {
