@@ -10,6 +10,7 @@ import AlertMessage from '@/shared/components/AlertMessage.vue'
 import BaseButton from '@/shared/components/BaseButton.vue'
 import { mensajeDeError } from '@/shared/composables/useApiError'
 import { useDetalleViaje } from '../../application/useDetalleViaje'
+import { esEditable } from '../../domain/aporte'
 import type { EstadoViaje } from '../../domain/tipos'
 import TarjetaVehiculo from '../components/TarjetaVehiculo.vue'
 
@@ -50,6 +51,9 @@ const textoEstado: Record<EstadoViaje, string> = {
   Cancelado: 'Cancelado',
 }
 
+const recienEditado = computed(() => route.query.editado === '1')
+const editable = computed(() => esEditable(viaje.value))
+
 watch(
   () => route.params.id,
   (id) => {
@@ -64,6 +68,7 @@ watch(
     <p v-if="cargando && !viaje" class="texto-suave centrado">Cargando viaje…</p>
 
     <AlertMessage v-if="error" tipo="error">{{ mensajeDeError(error) }}</AlertMessage>
+    <AlertMessage v-if="recienEditado" tipo="exito">Cambios guardados.</AlertMessage>
 
     <template v-if="viaje">
       <AlertMessage v-if="recienPublicado && viaje.estado === 'Programado'" tipo="exito">
@@ -136,6 +141,14 @@ watch(
         @click="publicarBorrador"
       >
         PUBLICAR AHORA
+      </BaseButton>
+      <BaseButton
+        v-if="editable"
+        variante="secundario"
+        bloque
+        @click="router.push({ name: 'viaje-editar', params: { id: viaje.id } })"
+      >
+        EDITAR VIAJE
       </BaseButton>
       <RouterLink v-if="!viaje.esPropietario" :to="{ name: 'buscar' }" class="centrado">
         Volver a la búsqueda

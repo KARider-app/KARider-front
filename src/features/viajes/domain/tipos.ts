@@ -105,6 +105,8 @@ export interface PagedResult<T> {
   tieneSiguiente: boolean
 }
 
+export type EditarViajeRequest = Omit<PublicarViajeRequest, 'publicar'>
+
 export interface BuscarViajesParams {
   destino?: string
   puntoEncuentroId?: number

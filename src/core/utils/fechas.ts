@@ -20,3 +20,12 @@ export function sumarDias(d: Date, dias: number): Date {
   r.setDate(r.getDate() + dias)
   return r
 }
+
+/** Convierte el ISO que manda la API en la fecha y hora locales de los inputs. */
+export function aFechaYHoraLocal(iso: string): { fecha: string; hora: string } {
+  const d = new Date(iso)
+  return {
+    fecha: aFechaInput(d),
+    hora: `${dosDigitos(d.getHours())}:${dosDigitos(d.getMinutes())}`,
+  }
+}

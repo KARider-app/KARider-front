@@ -1,6 +1,7 @@
 import { apiClient } from '@/core/http/apiClient'
 import type {
   BuscarViajesParams,
+  EditarViajeRequest,
   EstadoViaje,
   PagedResult,
   PublicarViajeRequest,
@@ -24,6 +25,8 @@ export const viajesApi = {
       .then((r) => r.data),
   detalle: (id: string) =>
     apiClient.get<ViajeDetalle>(`/viajes/${encodeURIComponent(id)}`).then((r) => r.data),
+  editar: (id: string, p: EditarViajeRequest) =>
+    apiClient.put<ViajeDetalle>(`/viajes/${encodeURIComponent(id)}`, p).then((r) => r.data),
   /** HU-06: viajes programados con cupo; los parámetros vacíos no se envían. */
   buscar: (p: BuscarViajesParams) =>
     apiClient
