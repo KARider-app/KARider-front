@@ -12,7 +12,7 @@ interface Opcion {
   destino?: RouteLocationRaw
 }
 
-/** Las 5 opciones del MVP. Las que no son del Sprint 1 se muestran como «Próximamente». */
+/** Las 5 opciones del MVP. Las que aún no existen se muestran como «Próximamente». */
 const opciones = computed<Opcion[]>(() => [
   auth.autenticado
     ? {
@@ -37,8 +37,16 @@ const opciones = computed<Opcion[]>(() => [
           : 'Regístrate como conductor con tu vehículo',
         destino: auth.autenticado ? undefined : { name: 'registro', query: { rol: 'Conductor' } },
       },
-  { titulo: 'Consultar viajes', descripcion: 'Próximamente' },
-  { titulo: 'Mapa de ruta', descripcion: 'Próximamente' },
+  {
+    titulo: 'Consultar viajes',
+    descripcion: 'Busca un viaje compatible con tu horario y aparta tu asiento',
+    destino: { name: 'buscar' },
+  },
+  {
+    titulo: 'Mapa de ruta',
+    descripcion: 'Sigue a tu conductor desde tu reserva confirmada',
+    destino: { name: 'mis-reservas' },
+  },
   { titulo: 'Mi perfil', descripcion: 'Próximamente' },
 ])
 </script>

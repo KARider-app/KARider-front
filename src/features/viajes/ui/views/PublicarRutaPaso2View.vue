@@ -210,8 +210,16 @@ function guardar(publicar: boolean) {
               class="sr-only"
             />
 
-            <!-- Presenta los datos del vehículo de esta opción. -->
-            <TarjetaVehiculo v-bind="v" />
+            <!-- Nombre accesible de la opción: el lector de pantalla lo anuncia al elegir el vehículo. -->
+            <span class="sr-only">
+              {{ v.modelo }} {{ v.color }}, placas {{ v.placas }},
+              {{ v.verificado ? 'verificado' : 'sin verificar' }}
+            </span>
+
+            <!-- Presenta los datos del vehículo de esta opción (solo visual; el texto accesible está arriba). -->
+            <span class="vehiculos__tarjeta" aria-hidden="true">
+              <TarjetaVehiculo v-bind="v" />
+            </span>
           </label>
         </fieldset>
 
@@ -356,5 +364,9 @@ function guardar(publicar: boolean) {
 .notas__error {
   font-size: 0.8125rem;
   color: var(--color-error);
+}
+
+.vehiculos__tarjeta {
+  display: block;
 }
 </style>

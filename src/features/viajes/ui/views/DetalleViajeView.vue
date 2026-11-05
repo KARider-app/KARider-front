@@ -2,6 +2,10 @@
 import { computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { fechaHora, mxn } from '@/core/utils/formato'
+import CompartirUbicacion from '@/features/reservas/ui/components/CompartirUbicacion.vue'
+import FichaConductor from '@/features/reservas/ui/components/FichaConductor.vue'
+import PanelReserva from '@/features/reservas/ui/components/PanelReserva.vue'
+import type { Reserva } from '@/features/reservas/domain/tipos'
 import AlertMessage from '@/shared/components/AlertMessage.vue'
 import BaseButton from '@/shared/components/BaseButton.vue'
 import { mensajeDeError } from '@/shared/composables/useApiError'
@@ -15,6 +19,29 @@ const router = useRouter()
 const { viaje, cargando, error, publicando, cargar, publicarBorrador } = useDetalleViaje()
 
 const recienPublicado = computed(() => route.query.publicado === '1')
+const folioNuevo = computed(() =>
+  typeof route.query.folio === 'string' ? route.query.folio : null,
+)
+
+/** El conductor comparte su ubicación solo en viajes programados o en curso. */
+const puedeCompartirUbicacion = computed(
+  () => viaje.value?.esPropietario && ['Programado', 'EnCurso'].includes(viaje.value.estado),
+)
+
+/** HU-07: tras reservar, la reserva confirmada lleva al mapa (P8); si queda pendiente se muestra aquí. */
+async function alReservar(reserva: Reserva) {
+  if (reserva.estado === 'Confirmada') {
+    await router.push({ name: 'mapa-reserva', params: { id: reserva.id } })
+    return
+  }
+  await router.replace({ query: { ...route.query, folio: reserva.folio } })
+  if (viaje.value) await cargar(viaje.value.id)
+}
+
+/** Vuelve a pedir el viaje (por ejemplo, si el cupo cambió mientras el pasajero decidía). */
+function recargar() {
+  if (viaje.value) void cargar(viaje.value.id)
+}
 
 const textoEstado: Record<EstadoViaje, string> = {
   Borrador: 'Borrador',
@@ -46,6 +73,9 @@ watch(
     <template v-if="viaje">
       <AlertMessage v-if="recienPublicado && viaje.estado === 'Programado'" tipo="exito">
         ¡Tu ruta ya está publicada en el campus UTTT!
+      </AlertMessage>
+      <AlertMessage v-if="folioNuevo && viaje.miReserva" tipo="exito">
+        Solicitud enviada. Tu folio es {{ folioNuevo }}.
       </AlertMessage>
 
       <header class="cabecera">
@@ -79,6 +109,10 @@ watch(
           <p>{{ viaje.asientosDisponibles }} disponibles de {{ viaje.asientosOfrecidos }}</p>
         </div>
         <div>
+          <h2 class="seccion-titulo">Conductor</h2>
+          <FichaConductor :conductor="viaje.conductor" :es-pasajero="!viaje.esPropietario" />
+        </div>
+        <div>
           <h2 class="seccion-titulo">Vehículo</h2>
           <TarjetaVehiculo v-bind="viaje.vehiculo" />
         </div>
@@ -87,6 +121,17 @@ watch(
           <p class="notas">{{ viaje.notas }}</p>
         </div>
       </section>
+
+      <!-- P7: el pasajero aparta 1 o 2 asientos -->
+      <PanelReserva
+        v-if="!viaje.esPropietario && viaje.estado !== 'Borrador'"
+        :viaje="viaje"
+        @reservada="alReservar"
+        @actualizar="recargar"
+      />
+
+      <!-- P8 (conductor): comparte su posición con los pasajeros confirmados -->
+      <CompartirUbicacion v-if="puedeCompartirUbicacion" :viaje-id="viaje.id" />
 
       <BaseButton
         v-if="viaje.estado === 'Borrador' && viaje.esPropietario"
@@ -105,6 +150,9 @@ watch(
       >
         EDITAR VIAJE
       </BaseButton>
+      <RouterLink v-if="!viaje.esPropietario" :to="{ name: 'buscar' }" class="centrado">
+        Volver a la búsqueda
+      </RouterLink>
       <RouterLink :to="{ name: 'inicio' }" class="centrado">Ir al inicio</RouterLink>
     </template>
   </main>

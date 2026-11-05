@@ -15,7 +15,8 @@ jobs:
         with:
           node-version: 22
           cache: npm
-      - run: npm ci
+      # --ignore-scripts: no ejecuta scripts de instalación de terceros (cadena de suministro)
+      - run: npm ci --ignore-scripts
       - run: npm run lint
       - run: npm run test:ci
       - run: npm run build

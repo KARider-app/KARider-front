@@ -38,7 +38,20 @@ export default defineConfig({
             options: { cacheName: 'catalogos' },
           },
           // Autenticación y datos personales: NUNCA en caché
-          { urlPattern: /\/api\/v1\/(auth|perfil|vehiculos|viajes)(\/|$|\?)/, handler: 'NetworkOnly' },
+          {
+            urlPattern: /\/api\/v1\/(auth|perfil|vehiculos|viajes|reservas)(\/|$|\?)/,
+            handler: 'NetworkOnly',
+          },
+          // Teselas del mapa (HU-08): las ya vistas se muestran sin conexión
+          {
+            urlPattern: /^https:\/\/tile\.openstreetmap\.org\//,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'mapa-osm',
+              expiration: { maxEntries: 200, maxAgeSeconds: 60 * 60 * 24 * 7 },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
         ],
       },
     }),

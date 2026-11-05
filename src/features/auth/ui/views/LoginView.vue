@@ -99,12 +99,7 @@ function entrarComoPasajero() {
         :placeholder="`matricula@${env.dominio}`"
         @blur="validarCampo('correoInstitucional')"
       />
-      <PasswordInput
-        v-model="valores.password"
-        etiqueta="Contraseña"
-        autocomplete="current-password"
-        :error="errores.password"
-      />
+      <PasswordInput v-model="valores.password" etiqueta="Contraseña" :error="errores.password" />
 
       <div class="opciones-login">
         <label class="recordar">

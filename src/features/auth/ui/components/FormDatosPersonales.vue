@@ -35,6 +35,7 @@ const opcionesCuatrimestre = Array.from({ length: 11 }, (_, i) => ({
     v-model="datos.nombreCompleto"
     etiqueta="Nombre completo"
     :error="errores.nombreCompleto"
+    type="text"
     autocomplete="name"
     placeholder="Como aparece en tu credencial"
     @blur="emit('validar', 'nombreCompleto')"
@@ -89,7 +90,7 @@ const opcionesCuatrimestre = Array.from({ length: 11 }, (_, i) => ({
   <PasswordInput
     v-model="datos.password"
     etiqueta="Contraseña"
-    autocomplete="new-password"
+    nueva
     :error="errores.password"
     ayuda="Mínimo 8 caracteres con mayúscula, minúscula, número y carácter especial."
     @blur="emit('validar', 'password')"
@@ -97,7 +98,7 @@ const opcionesCuatrimestre = Array.from({ length: 11 }, (_, i) => ({
   <PasswordInput
     v-model="datos.confirmarPassword"
     etiqueta="Confirma tu contraseña"
-    autocomplete="new-password"
+    nueva
     :error="errores.confirmarPassword"
     @blur="emit('validar', 'confirmarPassword')"
   />

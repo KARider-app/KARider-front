@@ -99,14 +99,14 @@ function restablecer() {
       <PasswordInput
         v-model="cambioValores.nuevaPassword"
         etiqueta="Nueva contraseña"
-        autocomplete="new-password"
+        nueva
         :error="cambio.errores.value.nuevaPassword"
         ayuda="Mínimo 8 caracteres con mayúscula, minúscula, número y carácter especial."
       />
       <PasswordInput
         v-model="cambioValores.confirmarPassword"
         etiqueta="Confirma la nueva contraseña"
-        autocomplete="new-password"
+        nueva
         :error="cambio.errores.value.confirmarPassword"
       />
       <AlertMessage v-if="cambio.errorGeneral.value" tipo="error">

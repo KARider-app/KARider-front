@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { registrarGuards } from './guards'
 
-// Rutas del Sprint 1
+// Rutas de los Sprints 1 y 2
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   scrollBehavior: () => ({ top: 0 }),
@@ -53,10 +53,28 @@ const router = createRouter({
       component: () => import('@/features/viajes/ui/views/MisBorradoresView.vue'),
     },
     {
+      path: '/viajes',
+      name: 'buscar',
+      meta: { requiereSesion: true },
+      component: () => import('@/features/viajes/ui/views/BuscarViajesView.vue'),
+    },
+    {
       path: '/viajes/:id',
       name: 'viaje',
       meta: { requiereSesion: true },
       component: () => import('@/features/viajes/ui/views/DetalleViajeView.vue'),
+    },
+    {
+      path: '/reservas',
+      name: 'mis-reservas',
+      meta: { requiereSesion: true },
+      component: () => import('@/features/reservas/ui/views/MisReservasView.vue'),
+    },
+    {
+      path: '/reservas/:id/mapa',
+      name: 'mapa-reserva',
+      meta: { requiereSesion: true },
+      component: () => import('@/features/reservas/ui/views/MapaReservaView.vue'),
     },
     { path: '/:ruta(.*)*', redirect: { name: 'inicio' } },
     {

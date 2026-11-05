@@ -8,7 +8,8 @@ defineProps<{
   etiqueta: string
   error?: string
   ayuda?: string
-  autocomplete: 'current-password' | 'new-password'
+  /** true = contraseña nueva (registro o cambio); false = contraseña actual (inicio de sesión). */
+  nueva?: boolean
 }>()
 
 const modelo = defineModel<string>({ default: '' })
@@ -23,7 +24,7 @@ const visible = ref(false)
       :error="error"
       :ayuda="ayuda"
       :type="visible ? 'text' : 'password'"
-      :autocomplete="autocomplete"
+      :autocomplete="nueva ? 'new-password' : 'current-password'"
       autocapitalize="off"
       spellcheck="false"
       v-bind="$attrs"
