@@ -73,76 +73,82 @@ function limpiarDestino() {
 <template>
   <main class="flex flex-col min-h-full flex-1 bg-[#F3F7FA] text-[#1D2D44]">
     <form
-      class="bg-[#1D2D44] text-white px-5 pt-4 pb-4 rounded-b-2xl shadow-sm"
+      class="bg-[#1D2D44] text-white px-5 pt-4 pb-4 rounded-b-2xl md:rounded-none md:px-8 md:py-6 shadow-sm"
       role="search"
       @submit.prevent="ejecutar"
     >
-      <div class="flex items-center justify-between mb-3">
-        <RouterLink
-          :to="{ name: 'inicio' }"
-          class="flex items-center gap-1.5 text-xs text-[#C9DCE8] hover:text-white"
-        >
-          <ArrowLeft class="w-4 h-4" aria-hidden="true" />
-          <span>Volver</span>
-        </RouterLink>
-        <h1 class="text-xs font-bold tracking-wide font-sans">Viajes Universitarios</h1>
-        <span
-          class="text-[11px] font-semibold bg-white/10 px-2.5 py-0.5 rounded-full text-[#C9DCE8]"
-          role="status"
-          aria-live="polite"
-        >
-          {{ total }} disponibles
-        </span>
-      </div>
+      <div class="md:max-w-6xl md:mx-auto">
+        <div class="flex items-center justify-between mb-3">
+          <RouterLink
+            :to="{ name: 'inicio' }"
+            class="flex items-center gap-1.5 text-xs text-[#C9DCE8] hover:text-white"
+          >
+            <ArrowLeft class="w-4 h-4" aria-hidden="true" />
+            <span>Volver</span>
+          </RouterLink>
+          <h1 class="text-xs md:text-base font-bold tracking-wide font-sans">
+            Viajes Universitarios
+          </h1>
+          <span
+            class="text-[11px] font-semibold bg-white/10 px-2.5 py-0.5 rounded-full text-[#C9DCE8]"
+            role="status"
+            aria-live="polite"
+          >
+            {{ total }} disponibles
+          </span>
+        </div>
 
-      <div class="relative">
-        <label for="buscar-destino" class="sr-only">Destino</label>
-        <Search class="w-4 h-4 text-[#8AA9C4] absolute left-3 top-3" aria-hidden="true" />
-        <input
-          id="buscar-destino"
-          v-model="filtros.destino"
-          type="search"
-          placeholder="Buscar destino (Pachuca, Tula, Tepeji, Actopan)..."
-          autocomplete="off"
-          maxlength="100"
-          class="w-full pl-9 pr-9 py-2 text-xs rounded-xl bg-white text-[#1D2D44] placeholder-[#4B5563] outline-none shadow-inner [&::-webkit-search-cancel-button]:hidden"
-        />
-        <button
-          v-if="filtros.destino"
-          type="button"
-          class="absolute right-3 top-2.5 text-[#4B5563] hover:text-[#1D2D44]"
-          aria-label="Limpiar búsqueda"
-          @click="limpiarDestino"
-        >
-          <X class="w-4 h-4" aria-hidden="true" />
-        </button>
-      </div>
+        <div class="relative">
+          <label for="buscar-destino" class="sr-only">Destino</label>
+          <Search class="w-4 h-4 text-[#8AA9C4] absolute left-3 top-3" aria-hidden="true" />
+          <input
+            id="buscar-destino"
+            v-model="filtros.destino"
+            type="search"
+            placeholder="Buscar destino (Pachuca, Tula, Tepeji, Actopan)..."
+            autocomplete="off"
+            maxlength="100"
+            class="w-full pl-9 pr-9 py-2 md:py-3 text-xs md:text-sm rounded-xl bg-white text-[#1D2D44] placeholder-[#4B5563] outline-none shadow-inner [&::-webkit-search-cancel-button]:hidden"
+          />
+          <button
+            v-if="filtros.destino"
+            type="button"
+            class="absolute right-3 top-2.5 text-[#4B5563] hover:text-[#1D2D44]"
+            aria-label="Limpiar búsqueda"
+            @click="limpiarDestino"
+          >
+            <X class="w-4 h-4" aria-hidden="true" />
+          </button>
+        </div>
 
-      <!-- Catálogo controlado de puntos de encuentro (regla 4) -->
-      <div
-        class="flex items-center gap-1.5 overflow-x-auto pt-3 pb-1 text-xs [scrollbar-width:none]"
-        role="group"
-        aria-label="Punto de encuentro"
-      >
-        <button
-          v-for="o in opcionesPuntos"
-          :key="o.valor"
-          type="button"
-          class="px-2.5 py-1 rounded-lg font-medium whitespace-nowrap text-[11px] transition-all"
-          :class="
-            Number(filtros.puntoEncuentroId) === o.valor
-              ? 'bg-[#0284C7] text-white font-bold shadow-xs'
-              : 'bg-white/10 text-[#C9DCE8] hover:bg-white/20'
-          "
-          :aria-pressed="Number(filtros.puntoEncuentroId) === o.valor"
-          @click="filtros.puntoEncuentroId = o.valor"
+        <!-- Catálogo controlado de puntos de encuentro (regla 4) -->
+        <div
+          class="flex items-center gap-1.5 overflow-x-auto pt-3 pb-1 text-xs [scrollbar-width:none]"
+          role="group"
+          aria-label="Punto de encuentro"
         >
-          {{ o.texto }}
-        </button>
+          <button
+            v-for="o in opcionesPuntos"
+            :key="o.valor"
+            type="button"
+            class="px-2.5 py-1 rounded-lg font-medium whitespace-nowrap text-[11px] transition-all"
+            :class="
+              Number(filtros.puntoEncuentroId) === o.valor
+                ? 'bg-[#0284C7] text-white font-bold shadow-xs'
+                : 'bg-white/10 text-[#C9DCE8] hover:bg-white/20'
+            "
+            :aria-pressed="Number(filtros.puntoEncuentroId) === o.valor"
+            @click="filtros.puntoEncuentroId = o.valor"
+          >
+            {{ o.texto }}
+          </button>
+        </div>
       </div>
     </form>
 
-    <div class="px-5 py-2.5 flex items-center justify-between text-xs text-[#3E5C76]">
+    <div
+      class="px-5 py-2.5 md:px-8 md:pt-6 md:pb-2 flex items-center justify-between text-xs text-[#3E5C76] md:max-w-[76rem] md:mx-auto md:w-full"
+    >
       <div class="flex items-center gap-1.5">
         <SlidersHorizontal class="w-3.5 h-3.5 text-[#8AA9C4]" aria-hidden="true" />
         <span class="font-semibold text-[11px]">Ordenar por:</span>
@@ -166,7 +172,7 @@ function limpiarDestino() {
       </div>
     </div>
 
-    <div class="p-5 pt-1 space-y-3 flex-1">
+    <div class="p-5 pt-1 space-y-3 flex-1 md:px-8 md:pb-8 md:max-w-[76rem] md:mx-auto md:w-full">
       <AlertMessage v-if="error" tipo="error">{{ mensajeDeError(error) }}</AlertMessage>
 
       <template v-if="buscado && !error">
@@ -202,7 +208,7 @@ function limpiarDestino() {
 
         <template v-else>
           <p class="sr-only" role="status">{{ textoContador }}</p>
-          <ul class="space-y-3">
+          <ul class="space-y-3 md:space-y-0 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-4">
             <li v-for="v in viajes" :key="v.id">
               <TarjetaViaje :viaje="v" />
             </li>
@@ -210,6 +216,7 @@ function limpiarDestino() {
         </template>
 
         <BaseButton
+          class="md:max-w-xs md:mx-auto md:flex"
           v-if="tieneSiguiente"
           variante="secundario"
           bloque

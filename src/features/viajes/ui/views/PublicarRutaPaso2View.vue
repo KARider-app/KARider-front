@@ -154,7 +154,11 @@ function guardar(publicar: boolean) {
     </EncabezadoPantalla>
 
     <!-- El formulario publica el viaje cuando se envía. -->
-    <form class="p-5 space-y-4 flex-1" novalidate @submit.prevent="guardar(true)">
+    <form
+      class="p-5 space-y-4 flex-1 md:px-8 md:py-8 md:max-w-[76rem] md:mx-auto md:w-full md:grid md:grid-cols-2 md:gap-6 md:space-y-0 md:items-start md:content-start"
+      novalidate
+      @submit.prevent="guardar(true)"
+    >
       <!-- Calcula el aporte usando el gasto total y los asientos disponibles. -->
       <CalculadoraAporte
         v-model="valores.gastoTotal"
@@ -240,7 +244,7 @@ function guardar(publicar: boolean) {
       </TarjetaSeccion>
 
       <!-- Muestra errores que deben corregirse en el primer paso. -->
-      <AlertMessage v-if="errorPaso1" tipo="error">
+      <AlertMessage class="md:col-span-2" v-if="errorPaso1" tipo="error">
         <span v-for="m in mensajesPaso1" :key="m">{{ m }}</span>
 
         <!-- Permite regresar a corregir la ruta o el horario. -->
@@ -250,11 +254,11 @@ function guardar(publicar: boolean) {
       </AlertMessage>
 
       <!-- Muestra errores generales del envío del formulario. -->
-      <AlertMessage v-if="errorGeneral" tipo="error">
+      <AlertMessage class="md:col-span-2" v-if="errorGeneral" tipo="error">
         {{ mensajeDeError(errorGeneral) }}
       </AlertMessage>
 
-      <div class="pt-2 space-y-2">
+      <div class="pt-2 space-y-2 md:col-span-2 md:max-w-md md:mx-auto md:w-full">
         <!-- Botón principal para publicar el viaje. -->
         <BaseButton
           type="submit"
