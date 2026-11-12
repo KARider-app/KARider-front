@@ -5,6 +5,7 @@ import { env } from '@/core/config/env'
 import AlertMessage from '@/shared/components/AlertMessage.vue'
 import BaseButton from '@/shared/components/BaseButton.vue'
 import BaseInput from '@/shared/components/BaseInput.vue'
+import LogoKarider from '@/shared/components/LogoKarider.vue'
 import PasswordInput from '@/shared/components/PasswordInput.vue'
 import RoleSelector from '@/shared/components/RoleSelector.vue'
 import { mensajeDeError } from '@/shared/composables/useApiError'
@@ -73,7 +74,8 @@ function entrarComoPasajero() {
 
 <template>
   <main class="pantalla">
-    <header>
+    <header class="encabezado">
+      <LogoKarider />
       <h1 class="pantalla__titulo">Iniciar sesión</h1>
       <p class="pantalla__subtitulo">Accede con tu cuenta {{ env.appNombre }} de la UTTT</p>
     </header>
@@ -137,6 +139,12 @@ function entrarComoPasajero() {
 </template>
 
 <style scoped>
+.encabezado {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-2);
+}
+
 .opciones-login {
   display: flex;
   flex-wrap: wrap;

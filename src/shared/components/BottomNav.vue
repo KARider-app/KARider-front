@@ -82,8 +82,8 @@ const items = computed<Item[]>(() => [
   justify-content: space-around;
   height: calc(var(--alto-nav) + env(safe-area-inset-bottom));
   padding-bottom: env(safe-area-inset-bottom);
-  background: var(--color-primario);
-  box-shadow: 0 -2px 12px rgb(29 45 68 / 20%);
+  background: var(--color-superficie);
+  border-top: 1px solid var(--color-borde);
 }
 
 .nav__item {
@@ -95,16 +95,16 @@ const items = computed<Item[]>(() => [
   gap: 2px;
   border: 0;
   background: transparent;
-  color: #c6d2e3;
+  color: var(--color-deshabilitado);
   font-size: 0.6875rem;
-  font-weight: 600;
+  font-weight: 700;
   text-decoration: none;
   cursor: pointer;
 }
 
 .nav__item svg {
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
   fill: none;
   stroke: currentColor;
   stroke-width: 2;
@@ -113,15 +113,11 @@ const items = computed<Item[]>(() => [
 }
 
 .nav__item.router-link-exact-active {
-  color: #fff;
-}
-
-.nav__item.router-link-exact-active svg {
-  stroke: #38bdf8;
+  color: var(--color-acento);
 }
 
 .nav__item--inactivo {
   cursor: default;
-  opacity: 0.45;
+  opacity: 0.6;
 }
 </style>

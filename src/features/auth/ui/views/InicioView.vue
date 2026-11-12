@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { RouteLocationRaw } from 'vue-router'
-import { env } from '@/core/config/env'
+import LogoKarider from '@/shared/components/LogoKarider.vue'
 import { useAuthStore } from '../../application/useAuthStore'
 
 const auth = useAuthStore()
@@ -54,7 +54,7 @@ const opciones = computed<Opcion[]>(() => [
 <template>
   <main class="pantalla">
     <header class="encabezado">
-      <h1 class="marca">{{ env.appNombre }}</h1>
+      <LogoKarider tamano="lg" etiqueta class="encabezado__logo" />
       <p class="pantalla__subtitulo">Viajes compartidos entre la comunidad UTTT</p>
     </header>
 
@@ -78,20 +78,20 @@ const opciones = computed<Opcion[]>(() => [
 
 <style scoped>
 .encabezado {
-  padding: var(--espacio-5) var(--espacio-4);
+  padding: var(--espacio-6) var(--espacio-4);
   border-radius: var(--radio-lg);
-  background: var(--color-primario);
-  color: #fff;
+  background: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  box-shadow: var(--sombra-sm);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--espacio-2);
+  text-align: center;
 }
 
-.encabezado .pantalla__subtitulo {
-  color: #c6d2e3;
-}
-
-.marca {
-  font-size: 2rem;
-  font-weight: 800;
-  letter-spacing: -0.02em;
+.encabezado__logo {
+  margin-bottom: var(--espacio-1);
 }
 
 .opciones {

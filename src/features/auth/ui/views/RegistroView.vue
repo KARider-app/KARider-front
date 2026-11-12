@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { env } from '@/core/config/env'
 import AlertMessage from '@/shared/components/AlertMessage.vue'
 import BaseButton from '@/shared/components/BaseButton.vue'
+import LogoKarider from '@/shared/components/LogoKarider.vue'
 import RoleSelector from '@/shared/components/RoleSelector.vue'
 import { mensajeDeError } from '@/shared/composables/useApiError'
 import { useFormulario } from '@/shared/composables/useFormulario'
@@ -70,7 +71,8 @@ function registrar() {
 
 <template>
   <main class="pantalla">
-    <header>
+    <header class="encabezado">
+      <LogoKarider />
       <h1 class="pantalla__titulo">Crear cuenta</h1>
       <p class="pantalla__subtitulo">
         {{
@@ -129,3 +131,11 @@ function registrar() {
     </p>
   </main>
 </template>
+
+<style scoped>
+.encabezado {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-2);
+}
+</style>
