@@ -94,11 +94,13 @@ function continuar() {
 <template>
   <!-- Contenedor principal de la pantalla de publicación. -->
   <main class="pantalla">
-    <header>
-      <!-- Indica al usuario en qué parte del proceso se encuentra. -->
-      <p class="texto-suave">Paso 1 de 2</p>
-      <h1 class="pantalla__titulo">Publicar ruta</h1>
-      <p class="pantalla__subtitulo">
+    <header class="encabezado">
+      <div class="encabezado__fila">
+        <RouterLink :to="{ name: 'inicio' }" class="encabezado__volver">← Volver</RouterLink>
+        <span class="encabezado__titulo">PUBLICAR RUTA</span>
+        <span class="encabezado__paso">Paso 1 de 2</span>
+      </div>
+      <p class="encabezado__subtitulo">
         Indica de dónde sales, a dónde vas y cuántos lugares ofreces.
       </p>
     </header>
@@ -191,4 +193,50 @@ function continuar() {
     </form>
   </main>
 </template>
-```
+
+<style scoped>
+.encabezado {
+  padding: var(--espacio-4) var(--espacio-4) var(--espacio-5);
+  border-radius: var(--radio-lg);
+  background: var(--color-primario);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-1);
+}
+
+.encabezado__fila {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espacio-2);
+}
+
+.encabezado__volver {
+  color: #c6d2e3;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.encabezado__titulo {
+  font-size: 0.8125rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.encabezado__paso {
+  padding: 2px var(--espacio-2);
+  border-radius: var(--radio-pill);
+  background: rgb(255 255 255 / 12%);
+  color: #c6d2e3;
+  font-size: 0.6875rem;
+  font-weight: 600;
+}
+
+.encabezado__subtitulo {
+  color: #c6d2e3;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+</style>

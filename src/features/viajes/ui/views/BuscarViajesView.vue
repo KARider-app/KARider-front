@@ -68,48 +68,54 @@ const sinResultados = computed(
 
 <template>
   <main class="pantalla">
-    <header>
-      <h1 class="pantalla__titulo">Consultar viajes</h1>
-      <p class="pantalla__subtitulo">Encuentra un viaje compatible con tu horario y ubicación.</p>
-    </header>
-
-    <form class="formulario tarjeta" role="search" @submit.prevent="ejecutar">
-      <BaseInput
-        v-model="filtros.destino"
-        etiqueta="Destino"
-        type="search"
-        placeholder="Ej. Pachuca"
-        autocomplete="off"
-        maxlength="100"
-      />
-      <BaseSelect
-        v-model="filtros.puntoEncuentroId"
-        etiqueta="Punto de encuentro"
-        :opciones="opcionesPuntos"
-      />
-
-      <fieldset class="orden">
-        <legend class="orden__etiqueta">Ordenar por</legend>
-        <div class="orden__opciones">
-          <label
-            v-for="o in ordenes"
-            :key="o.valor"
-            class="orden__opcion"
-            :class="{ 'orden__opcion--activa': filtros.orden === o.valor }"
-          >
-            <input
-              v-model="filtros.orden"
-              type="radio"
-              name="orden"
-              :value="o.valor"
-              class="sr-only"
-            />
-            {{ o.texto }}
-          </label>
+    <form class="formulario" role="search" @submit.prevent="ejecutar">
+      <header class="encabezado">
+        <div class="encabezado__fila">
+          <RouterLink :to="{ name: 'inicio' }" class="encabezado__volver">← Volver</RouterLink>
+          <span class="encabezado__titulo">Viajes universitarios</span>
+          <span class="encabezado__contador">{{ total }} disponibles</span>
         </div>
-      </fieldset>
+        <BaseInput
+          v-model="filtros.destino"
+          etiqueta="Destino"
+          class="encabezado__buscador"
+          type="search"
+          placeholder="Buscar destino (Pachuca, Tula, Tepeji, Actopan)…"
+          autocomplete="off"
+          maxlength="100"
+        />
+      </header>
 
-      <BaseButton type="submit" variante="acento" bloque :cargando="cargando">BUSCAR</BaseButton>
+      <div class="formulario tarjeta">
+        <BaseSelect
+          v-model="filtros.puntoEncuentroId"
+          etiqueta="Punto de encuentro"
+          :opciones="opcionesPuntos"
+        />
+
+        <fieldset class="orden">
+          <legend class="orden__etiqueta">Ordenar por</legend>
+          <div class="orden__opciones">
+            <label
+              v-for="o in ordenes"
+              :key="o.valor"
+              class="orden__opcion"
+              :class="{ 'orden__opcion--activa': filtros.orden === o.valor }"
+            >
+              <input
+                v-model="filtros.orden"
+                type="radio"
+                name="orden"
+                :value="o.valor"
+                class="sr-only"
+              />
+              {{ o.texto }}
+            </label>
+          </div>
+        </fieldset>
+
+        <BaseButton type="submit" variante="acento" bloque :cargando="cargando">BUSCAR</BaseButton>
+      </div>
     </form>
 
     <AlertMessage v-if="error" tipo="error">{{ mensajeDeError(error) }}</AlertMessage>
@@ -160,6 +166,58 @@ const sinResultados = computed(
 </template>
 
 <style scoped>
+.encabezado {
+  padding: var(--espacio-4) var(--espacio-4) var(--espacio-5);
+  border-radius: var(--radio-lg);
+  background: var(--color-primario);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-3);
+}
+
+.encabezado__fila {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espacio-2);
+}
+
+.encabezado__volver {
+  color: #c6d2e3;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.encabezado__titulo {
+  font-size: 0.9375rem;
+  font-weight: 800;
+}
+
+.encabezado__contador {
+  padding: 2px var(--espacio-2);
+  border-radius: var(--radio-pill);
+  background: rgb(255 255 255 / 15%);
+  color: #fff;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.encabezado__buscador :deep(.campo__etiqueta) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+}
+
+.encabezado__buscador :deep(.campo__input) {
+  background: #fff;
+  border-color: transparent;
+}
+
 .orden {
   display: flex;
   flex-direction: column;
