@@ -74,8 +74,10 @@ function entrarComoPasajero() {
 
 <template>
   <main class="pantalla">
+    <span class="insignia">1. Login institucional</span>
+
     <header class="encabezado">
-      <LogoKarider />
+      <LogoKarider tamano="lg" />
       <h1 class="pantalla__titulo">Iniciar sesión</h1>
       <p class="pantalla__subtitulo">Accede con tu cuenta {{ env.appNombre }} de la UTTT</p>
     </header>
@@ -139,10 +141,25 @@ function entrarComoPasajero() {
 </template>
 
 <style scoped>
+.insignia {
+  align-self: flex-start;
+  padding: var(--espacio-1) var(--espacio-3);
+  border-radius: var(--radio-pill);
+  background: var(--color-primario);
+  color: #fff;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
 .encabezado {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: var(--espacio-2);
+  padding: var(--espacio-5) 0 var(--espacio-2);
+  text-align: center;
 }
 
 .opciones-login {

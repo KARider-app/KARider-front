@@ -72,15 +72,9 @@ function registrar() {
 <template>
   <main class="pantalla">
     <header class="encabezado">
-      <LogoKarider />
-      <h1 class="pantalla__titulo">Crear cuenta</h1>
-      <p class="pantalla__subtitulo">
-        {{
-          esConductor
-            ? 'Regístrate como conductor y comparte tus viajes'
-            : 'Regístrate como pasajero y encuentra viaje al campus'
-        }}
-      </p>
+      <LogoKarider tamano="lg" />
+      <h1 class="pantalla__titulo">Registro y validación institucional</h1>
+      <p class="pantalla__subtitulo">Crea tu cuenta con tus credenciales de la universidad</p>
     </header>
 
     <form class="formulario" novalidate @submit.prevent="registrar">
@@ -136,6 +130,9 @@ function registrar() {
 .encabezado {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: var(--espacio-2);
+  padding: var(--espacio-5) 0 var(--espacio-2);
+  text-align: center;
 }
 </style>
