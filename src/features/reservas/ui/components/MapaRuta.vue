@@ -99,7 +99,7 @@ onBeforeUnmount(() => {
 <template>
   <div
     ref="contenedor"
-    class="relative w-full h-[290px] bg-[#DDE5EE] overflow-hidden z-0"
+    class="relative w-full h-[290px] md:h-[420px] lg:h-[calc(100dvh-11rem)] lg:min-h-[480px] bg-[#DDE5EE] overflow-hidden z-0"
     role="img"
     aria-label="Mapa con el punto de encuentro, el destino y la ubicación del conductor"
   />

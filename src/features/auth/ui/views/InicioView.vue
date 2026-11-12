@@ -152,79 +152,90 @@ const compromisos = [
 <template>
   <!-- Con sesión: Dashboard -->
   <main v-if="auth.autenticado" class="flex flex-col min-h-full flex-1 bg-[#F3F7FA] text-[#1D2D44]">
-    <header class="bg-[#1D2D44] text-white px-5 pt-5 pb-5 rounded-b-3xl shadow-md">
-      <div class="flex items-center justify-between mb-4">
-        <LogoKarider variant="horizontal" size="sm" text-color="light" />
-      </div>
-      <div
-        class="flex items-center justify-between bg-white/10 backdrop-blur-md p-3 rounded-2xl border border-white/15"
-      >
-        <div class="flex items-center gap-3 min-w-0">
-          <div class="relative shrink-0">
-            <img
-              v-if="auth.usuario?.fotoUrl"
-              :src="auth.usuario.fotoUrl"
-              :alt="auth.usuario.nombreCompleto"
-              class="w-12 h-12 rounded-full object-cover border-2 border-[#8AA9C4]"
-            />
-            <div
-              v-else
-              class="w-12 h-12 rounded-full border-2 border-[#8AA9C4] bg-[#3E5C76] flex items-center justify-center text-sm font-black"
-              aria-hidden="true"
-            >
-              {{ iniciales }}
+    <header
+      class="bg-[#1D2D44] text-white px-5 pt-5 pb-5 rounded-b-3xl md:rounded-none md:px-8 md:py-8 shadow-md"
+    >
+      <div class="md:max-w-6xl md:mx-auto md:flex md:items-center md:gap-4">
+        <div class="flex items-center justify-between mb-4 md:hidden">
+          <LogoKarider variant="horizontal" size="sm" text-color="light" />
+        </div>
+        <div
+          class="md:flex-1 flex items-center justify-between bg-white/10 backdrop-blur-md p-3 rounded-2xl border border-white/15"
+        >
+          <div class="flex items-center gap-3 min-w-0">
+            <div class="relative shrink-0">
+              <img
+                v-if="auth.usuario?.fotoUrl"
+                :src="auth.usuario.fotoUrl"
+                :alt="auth.usuario.nombreCompleto"
+                class="w-12 h-12 rounded-full object-cover border-2 border-[#8AA9C4]"
+              />
+              <div
+                v-else
+                class="w-12 h-12 rounded-full border-2 border-[#8AA9C4] bg-[#3E5C76] flex items-center justify-center text-sm font-black"
+                aria-hidden="true"
+              >
+                {{ iniciales }}
+              </div>
+              <div
+                class="absolute -bottom-1 -right-1 bg-emerald-500 rounded-full p-0.5 border border-[#1D2D44]"
+              >
+                <ShieldCheck class="w-3 h-3 text-white" aria-hidden="true" />
+              </div>
             </div>
-            <div
-              class="absolute -bottom-1 -right-1 bg-emerald-500 rounded-full p-0.5 border border-[#1D2D44]"
-            >
-              <ShieldCheck class="w-3 h-3 text-white" aria-hidden="true" />
+            <div class="min-w-0">
+              <span class="text-sm font-bold block truncate">{{
+                auth.usuario?.nombreCompleto
+              }}</span>
+              <span class="text-[11px] text-[#C9DCE8] block leading-tight truncate">
+                {{ auth.usuario?.correoInstitucional }}
+              </span>
             </div>
-          </div>
-          <div class="min-w-0">
-            <span class="text-sm font-bold block truncate">{{ auth.usuario?.nombreCompleto }}</span>
-            <span class="text-[11px] text-[#C9DCE8] block leading-tight truncate">
-              {{ auth.usuario?.correoInstitucional }}
-            </span>
           </div>
         </div>
-      </div>
-      <div
-        class="mt-4 flex items-center justify-between bg-[#111827]/40 p-1 rounded-xl border border-white/10"
-      >
-        <span class="text-[11px] font-semibold text-[#C9DCE8] pl-2">Modo activo:</span>
-        <span
-          class="px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1 text-white shadow-xs"
-          :class="auth.esConductor ? 'bg-[#0284C7]' : 'bg-[#3E5C76]'"
+        <div
+          class="mt-4 md:mt-0 md:w-64 flex items-center justify-between bg-[#111827]/40 p-1 md:p-2 rounded-xl border border-white/10"
         >
-          <Car v-if="auth.esConductor" class="w-3.5 h-3.5" aria-hidden="true" />
-          <UserCheck v-else class="w-3.5 h-3.5" aria-hidden="true" />
-          <span>{{ auth.usuario?.rol }}</span>
-        </span>
+          <span class="text-[11px] font-semibold text-[#C9DCE8] pl-2">Modo activo:</span>
+          <span
+            class="px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1 text-white shadow-xs"
+            :class="auth.esConductor ? 'bg-[#0284C7]' : 'bg-[#3E5C76]'"
+          >
+            <Car v-if="auth.esConductor" class="w-3.5 h-3.5" aria-hidden="true" />
+            <UserCheck v-else class="w-3.5 h-3.5" aria-hidden="true" />
+            <span>{{ auth.usuario?.rol }}</span>
+          </span>
+        </div>
       </div>
     </header>
 
-    <div class="p-5 space-y-4 flex-1">
+    <div class="p-5 space-y-4 flex-1 md:px-8 md:py-8 md:max-w-[76rem] md:mx-auto md:w-full">
       <div>
-        <h1 class="text-xs font-bold uppercase tracking-wider text-[#3E5C76] mb-2 font-sans">
+        <h1
+          class="text-xs md:text-sm font-bold uppercase tracking-wider text-[#3E5C76] mb-2 md:mb-4 font-sans"
+        >
           Acciones Rápidas
         </h1>
-        <nav class="grid grid-cols-2 gap-2.5" aria-label="Acciones rápidas">
+        <nav
+          class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2.5 md:gap-4"
+          aria-label="Acciones rápidas"
+        >
           <RouterLink
             v-for="a in acciones"
             :key="a.titulo"
             :to="a.destino"
-            class="p-3.5 rounded-2xl bg-white border border-[#C9DCE8] shadow-xs flex items-center gap-3 text-left transition-all"
+            class="p-3.5 md:p-5 rounded-2xl bg-white border border-[#C9DCE8] shadow-xs flex items-center md:flex-col md:items-start gap-3 text-left transition-all hover:shadow-md"
             :class="a.hover"
           >
             <div
-              class="w-10 h-10 rounded-xl bg-[#EAF2F8] flex items-center justify-center shrink-0"
+              class="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-[#EAF2F8] flex items-center justify-center shrink-0"
               :class="a.color"
             >
               <component :is="a.icono" class="w-5 h-5" aria-hidden="true" />
             </div>
             <div>
-              <div class="text-xs font-bold text-[#1D2D44]">{{ a.titulo }}</div>
-              <div class="text-[10px] text-[#4B5563]">{{ a.descripcion }}</div>
+              <div class="text-xs md:text-sm font-bold text-[#1D2D44]">{{ a.titulo }}</div>
+              <div class="text-[10px] md:text-xs text-[#4B5563]">{{ a.descripcion }}</div>
             </div>
           </RouterLink>
         </nav>
@@ -238,7 +249,7 @@ const compromisos = [
     class="flex flex-col min-h-full flex-1 bg-gradient-to-b from-[#EAF2F8] via-[#F3F7FA] to-white text-[#1D2D44]"
   >
     <header
-      class="pt-4 px-5 pb-3 flex items-center justify-between border-b border-[#C9DCE8]/50 bg-white/60 backdrop-blur-xs"
+      class="md:hidden pt-4 px-5 pb-3 flex items-center justify-between border-b border-[#C9DCE8]/50 bg-white/60 backdrop-blur-xs"
     >
       <LogoKarider variant="horizontal" size="xs" :show-subtitle="false" />
       <div
@@ -249,19 +260,55 @@ const compromisos = [
       </div>
     </header>
 
-    <div class="px-5 pt-4 pb-5 text-center flex flex-col items-center">
-      <div class="my-1 p-2 bg-white/70 rounded-3xl border border-[#C9DCE8]/70 shadow-sm">
-        <LogoKarider variant="full" size="lg" />
-      </div>
-      <h1 class="text-xl sm:text-2xl font-black text-[#1D2D44] tracking-tight mt-3 leading-tight">
-        Carpooling Universitario UTTT
-      </h1>
-      <p class="text-xs text-[#3E5C76] mt-1.5 max-w-xs leading-relaxed">
-        Comparte ruta desde el campus, divide gasolina de forma justa y viaja seguro con compañeros
-        universitarios.
-      </p>
+    <!-- Celular: una columna. Tablet/PC: marca a la izquierda y flujo del MVP a la derecha. -->
+    <div
+      class="px-5 pt-4 pb-5 text-center flex flex-col items-center md:grid md:grid-cols-2 md:items-center md:gap-10 lg:gap-16 md:text-left md:px-8 md:py-14 md:max-w-[76rem] md:mx-auto md:w-full md:flex-1"
+    >
+      <div class="flex flex-col items-center md:items-start">
+        <div
+          class="hidden md:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-300/60 text-xs font-extrabold text-emerald-800 mb-5"
+        >
+          <ShieldCheck class="w-4 h-4 text-emerald-600" aria-hidden="true" />
+          <span>Validación UTTT</span>
+        </div>
+        <div class="my-1 p-2 md:p-4 bg-white/70 rounded-3xl border border-[#C9DCE8]/70 shadow-sm">
+          <LogoKarider variant="full" size="lg" />
+        </div>
+        <h1
+          class="text-xl sm:text-2xl md:text-4xl lg:text-5xl font-black text-[#1D2D44] tracking-tight mt-3 md:mt-6 leading-tight"
+        >
+          Carpooling Universitario UTTT
+        </h1>
+        <p
+          class="text-xs md:text-base text-[#3E5C76] mt-1.5 md:mt-3 max-w-xs md:max-w-md leading-relaxed"
+        >
+          Comparte ruta desde el campus, divide gasolina de forma justa y viaja seguro con
+          compañeros universitarios.
+        </p>
 
-      <nav class="w-full mt-5 space-y-2" aria-label="Flujo del MVP">
+        <!-- Compromisos: en tablet/PC bajo el texto de la marca -->
+        <div class="hidden md:grid grid-cols-3 gap-3 text-center mt-8 w-full max-w-md">
+          <div
+            v-for="c in compromisos"
+            :key="c.titulo"
+            class="p-3 rounded-2xl bg-white border border-[#EDEDED] shadow-xs"
+          >
+            <component
+              :is="c.icono"
+              class="w-6 h-6 mx-auto mb-1"
+              :class="c.color"
+              aria-hidden="true"
+            />
+            <span class="font-bold text-[#1D2D44] block text-xs">{{ c.titulo }}</span>
+            <span class="text-[10px] text-[#4B5563]">{{ c.descripcion }}</span>
+          </div>
+        </div>
+      </div>
+
+      <nav
+        class="w-full mt-5 md:mt-0 space-y-2 md:space-y-3 md:p-6 md:bg-white md:rounded-3xl md:border md:border-[#C9DCE8] md:shadow-xl"
+        aria-label="Flujo del MVP"
+      >
         <h2
           class="text-[11px] font-extrabold text-[#3E5C76] uppercase tracking-wider text-left px-1 font-sans"
         >
@@ -301,7 +348,7 @@ const compromisos = [
       </nav>
     </div>
 
-    <section class="px-5 py-4 space-y-2 border-t border-[#C9DCE8]/50 bg-white">
+    <section class="md:hidden px-5 py-4 space-y-2 border-t border-[#C9DCE8]/50 bg-white">
       <h2 class="text-[11px] font-bold uppercase tracking-wider text-[#3E5C76] font-sans">
         Compromiso Institucional UTTT
       </h2>

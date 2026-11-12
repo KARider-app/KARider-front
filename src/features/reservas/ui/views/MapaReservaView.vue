@@ -113,49 +113,62 @@ const gpsEnVivo = computed(() => confirmada.value && viajeActivo.value && !!ubic
 
 <template>
   <main class="flex flex-col min-h-full flex-1 bg-[#F3F7FA] text-[#1D2D44] relative">
-    <header class="bg-[#1D2D44] text-white px-4 pt-3.5 pb-3 shadow-md z-20 shrink-0">
-      <div class="flex items-center justify-between mb-1.5">
-        <RouterLink
-          :to="{ name: 'mis-reservas' }"
-          class="flex items-center gap-1 text-xs text-[#C9DCE8] hover:text-white transition-colors"
-        >
-          <ArrowLeft class="w-4 h-4" aria-hidden="true" />
-          <span>Volver</span>
-        </RouterLink>
-        <div
-          v-if="gpsEnVivo"
-          class="flex items-center gap-1.5 bg-emerald-500/20 border border-emerald-400/40 px-2.5 py-0.5 rounded-full"
-        >
-          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" aria-hidden="true" />
-          <span class="text-[10px] font-bold text-emerald-300 tracking-wide uppercase">
-            GPS En Vivo • PWA
+    <header
+      class="bg-[#1D2D44] text-white px-4 pt-3.5 pb-3 md:px-8 md:py-5 shadow-md z-20 shrink-0"
+    >
+      <div class="md:max-w-7xl md:mx-auto">
+        <div class="flex items-center justify-between mb-1.5">
+          <RouterLink
+            :to="{ name: 'mis-reservas' }"
+            class="flex items-center gap-1 text-xs text-[#C9DCE8] hover:text-white transition-colors"
+          >
+            <ArrowLeft class="w-4 h-4" aria-hidden="true" />
+            <span>Volver</span>
+          </RouterLink>
+          <div
+            v-if="gpsEnVivo"
+            class="flex items-center gap-1.5 bg-emerald-500/20 border border-emerald-400/40 px-2.5 py-0.5 rounded-full"
+          >
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" aria-hidden="true" />
+            <span class="text-[10px] font-bold text-emerald-300 tracking-wide uppercase">
+              GPS En Vivo • PWA
+            </span>
+          </div>
+          <span class="text-[11px] font-mono font-semibold text-[#8AA9C4]">
+            {{ reserva?.folio }}
           </span>
         </div>
-        <span class="text-[11px] font-mono font-semibold text-[#8AA9C4]">
-          {{ reserva?.folio }}
-        </span>
-      </div>
-      <div class="flex items-center justify-between gap-2">
-        <div class="min-w-0">
-          <h1 class="text-sm font-extrabold text-white flex items-center gap-1.5 font-sans">
-            <Navigation class="w-4 h-4 text-[#0284C7]" aria-hidden="true" />
-            <span>Mapa de Ubicación y Ruta</span>
-          </h1>
-          <p v-if="reserva" class="text-[11px] text-[#C9DCE8] truncate max-w-[240px]">
-            {{ reserva.viaje.puntoEncuentro.nombre }} → {{ reserva.viaje.destino }}
-          </p>
-        </div>
-        <div v-if="reserva" class="text-right shrink-0">
-          <span class="text-xs font-black text-white bg-white/10 px-2 py-0.5 rounded-lg block">
-            {{ mxn(reserva.montoAporte) }} MXN
-          </span>
-          <span class="text-[9px] text-[#8AA9C4]">{{ reserva.estado.toLowerCase() }}</span>
+        <div class="flex items-center justify-between gap-2">
+          <div class="min-w-0">
+            <h1
+              class="text-sm md:text-xl font-extrabold text-white flex items-center gap-1.5 font-sans"
+            >
+              <Navigation class="w-4 h-4 text-[#0284C7]" aria-hidden="true" />
+              <span>Mapa de Ubicación y Ruta</span>
+            </h1>
+            <p
+              v-if="reserva"
+              class="text-[11px] md:text-sm text-[#C9DCE8] truncate max-w-[240px] md:max-w-none"
+            >
+              {{ reserva.viaje.puntoEncuentro.nombre }} → {{ reserva.viaje.destino }}
+            </p>
+          </div>
+          <div v-if="reserva" class="text-right shrink-0">
+            <span class="text-xs font-black text-white bg-white/10 px-2 py-0.5 rounded-lg block">
+              {{ mxn(reserva.montoAporte) }} MXN
+            </span>
+            <span class="text-[9px] text-[#8AA9C4]">{{ reserva.estado.toLowerCase() }}</span>
+          </div>
         </div>
       </div>
     </header>
 
     <!-- Aviso breve (toast) al copiar el folio -->
-    <div v-if="copiado" class="absolute top-16 left-4 right-4 z-40" role="status">
+    <div
+      v-if="copiado"
+      class="absolute top-16 left-4 right-4 md:left-auto md:right-8 md:w-80 z-40"
+      role="status"
+    >
       <div
         class="p-2.5 rounded-xl bg-[#111827] text-white border border-emerald-500/50 shadow-xl flex items-center gap-2 text-xs"
       >
@@ -171,11 +184,15 @@ const gpsEnVivo = computed(() => confirmada.value && viajeActivo.value && !!ubic
       <AlertMessage tipo="error">{{ mensajeDeError(error) }}</AlertMessage>
     </div>
 
-    <template v-if="reserva">
+    <!-- PC: mapa grande a la izquierda y tarjetas a la derecha -->
+    <div
+      v-if="reserva"
+      class="flex-1 flex flex-col lg:grid lg:grid-cols-5 lg:gap-6 lg:px-8 lg:py-8 lg:max-w-[84rem] lg:mx-auto lg:w-full lg:items-start"
+    >
       <!-- Mapa en tiempo real (HU-08) -->
       <div
         v-if="confirmada && puntoEncuentro"
-        class="relative w-full shrink-0 border-b border-[#C9DCE8]"
+        class="relative w-full shrink-0 border-b border-[#C9DCE8] lg:col-span-3 lg:sticky lg:top-20 lg:rounded-2xl lg:overflow-hidden lg:border lg:shadow-md"
       >
         <MapaRuta
           :punto-encuentro="puntoEncuentro"
@@ -204,7 +221,10 @@ const gpsEnVivo = computed(() => confirmada.value && viajeActivo.value && !!ubic
         </div>
       </div>
 
-      <div class="flex-1 p-4 space-y-3 pb-6">
+      <div
+        class="flex-1 p-4 space-y-3 pb-6 md:px-8 md:py-6 md:max-w-3xl md:mx-auto md:w-full lg:col-span-2 lg:p-0 lg:max-w-none"
+        :class="confirmada && puntoEncuentro ? '' : 'lg:col-span-5 lg:max-w-3xl lg:mx-auto'"
+      >
         <AlertMessage v-if="textoEstadoReserva" tipo="aviso">{{ textoEstadoReserva }}</AlertMessage>
 
         <template v-if="confirmada">
@@ -377,6 +397,6 @@ const gpsEnVivo = computed(() => confirmada.value && viajeActivo.value && !!ubic
           </RouterLink>
         </div>
       </div>
-    </template>
+    </div>
   </main>
 </template>

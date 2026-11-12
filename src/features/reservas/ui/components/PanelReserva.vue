@@ -10,7 +10,11 @@ import { useReservar } from '../../application/useReservar'
 import { MAX_ASIENTOS_POR_RESERVA, maximoReservable, montoEstimado } from '../../domain/asientos'
 import type { Reserva } from '../../domain/tipos'
 
-const props = defineProps<{ viaje: ViajeDetalle }>()
+const props = defineProps<{
+  viaje: ViajeDetalle
+  /** En PC se muestra como tarjeta en la columna lateral (no fijo abajo). */
+  lateral?: boolean
+}>()
 const emit = defineEmits<{
   reservada: [reserva: Reserva]
   /** El cupo cambió mientras el pasajero decidía: hay que volver a pedir el viaje. */
@@ -41,7 +45,12 @@ async function apartar() {
 
 <template>
   <section
-    class="sticky bottom-(--alto-nav) z-10 p-4 bg-white border-t border-[#C9DCE8] shadow-lg"
+    class="p-4 bg-white"
+    :class="
+      lateral
+        ? 'rounded-2xl border border-[#C9DCE8] shadow-md'
+        : 'sticky bottom-(--alto-nav) md:bottom-0 z-10 border-t border-[#C9DCE8] shadow-lg md:px-8 md:[&>*]:max-w-3xl md:[&>*]:mx-auto'
+    "
     aria-label="Reserva"
   >
     <!-- Ya tiene una reserva activa en este viaje -->

@@ -6,6 +6,7 @@ import AlertMessage from '@/shared/components/AlertMessage.vue'
 import BaseButton from '@/shared/components/BaseButton.vue'
 import RoleSelector from '@/shared/components/RoleSelector.vue'
 import LogoKarider from '@/shared/components/LogoKarider.vue'
+import DisenoAuth from '../components/DisenoAuth.vue'
 import { ArrowLeft, ArrowRight } from 'lucide-vue-next'
 import { mensajeDeError } from '@/shared/composables/useApiError'
 import { useFormulario } from '@/shared/composables/useFormulario'
@@ -71,84 +72,86 @@ function registrar() {
 </script>
 
 <template>
-  <main class="flex flex-col min-h-full flex-1 bg-white text-[#1D2D44]">
-    <header
-      class="pt-4 px-5 pb-3 bg-gradient-to-b from-[#EAF2F8] to-white border-b border-[#C9DCE8]/60 flex flex-col items-center text-center"
-    >
-      <div class="w-full flex items-center justify-between mb-2">
-        <RouterLink
-          :to="{ name: 'login' }"
-          class="text-xs text-[#3E5C76] hover:text-[#1D2D44] font-semibold flex items-center gap-1"
-        >
-          <ArrowLeft class="w-3.5 h-3.5" aria-hidden="true" />
-          <span>Iniciar Sesión</span>
-        </RouterLink>
-        <span
-          class="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#1D2D44] text-white"
-        >
-          Registro UTTT
-        </span>
-      </div>
-      <LogoKarider variant="horizontal" size="sm" class="my-1" />
-      <h1 class="text-lg font-black text-[#1D2D44] mt-1">Registro y Validación Institucional</h1>
-      <p class="text-xs text-[#3E5C76]">Crea tu cuenta con tus credenciales de la Universidad</p>
-    </header>
-
-    <div class="p-5 flex-1 flex flex-col justify-between max-w-md mx-auto w-full">
-      <form class="space-y-3" novalidate @submit.prevent="registrar">
-        <RoleSelector
-          v-model="valores.rol"
-          corto
-          :etiqueta="`¿Cómo usarás ${env.appNombre} principalmente?`"
-        />
-
-        <FormDatosPersonales
-          v-model="valores"
-          :errores="errores"
-          :carreras="catalogos.carreras"
-          :dominio="env.dominio"
-          @validar="validarCampo"
-        />
-        <p v-if="correoDuplicado && errores.correoInstitucional" class="text-xs text-[#4B5563]">
-          ¿Ya tienes cuenta?
+  <DisenoAuth>
+    <main class="flex flex-col min-h-full flex-1 bg-white text-[#1D2D44]">
+      <header
+        class="pt-4 px-5 pb-3 bg-gradient-to-b from-[#EAF2F8] to-white border-b border-[#C9DCE8]/60 flex flex-col items-center text-center"
+      >
+        <div class="w-full flex items-center justify-between mb-2">
           <RouterLink
-            :to="{ name: 'login', query: { correo: valores.correoInstitucional } }"
-            class="font-bold text-[#0284C7] hover:underline"
+            :to="{ name: 'login' }"
+            class="text-xs text-[#3E5C76] hover:text-[#1D2D44] font-semibold flex items-center gap-1"
           >
-            Iniciar sesión
+            <ArrowLeft class="w-3.5 h-3.5" aria-hidden="true" />
+            <span>Iniciar Sesión</span>
           </RouterLink>
-        </p>
+          <span
+            class="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#1D2D44] text-white"
+          >
+            Registro UTTT
+          </span>
+        </div>
+        <LogoKarider variant="horizontal" size="sm" class="my-1 lg:hidden" />
+        <h1 class="text-lg font-black text-[#1D2D44] mt-1">Registro y Validación Institucional</h1>
+        <p class="text-xs text-[#3E5C76]">Crea tu cuenta con tus credenciales de la Universidad</p>
+      </header>
 
-        <FormVehiculo
-          v-if="esConductor"
-          v-model="valores.vehiculo"
-          :errores="errores"
-          @validar="validarCampo"
-        />
+      <div class="p-5 flex-1 flex flex-col justify-between max-w-md mx-auto w-full">
+        <form class="space-y-3" novalidate @submit.prevent="registrar">
+          <RoleSelector
+            v-model="valores.rol"
+            corto
+            :etiqueta="`¿Cómo usarás ${env.appNombre} principalmente?`"
+          />
 
-        <AlertMessage v-if="catalogos.error" tipo="aviso">
-          No pudimos cargar las carreras. {{ mensajeDeError(catalogos.error) }}
-        </AlertMessage>
+          <FormDatosPersonales
+            v-model="valores"
+            :errores="errores"
+            :carreras="catalogos.carreras"
+            :dominio="env.dominio"
+            @validar="validarCampo"
+          />
+          <p v-if="correoDuplicado && errores.correoInstitucional" class="text-xs text-[#4B5563]">
+            ¿Ya tienes cuenta?
+            <RouterLink
+              :to="{ name: 'login', query: { correo: valores.correoInstitucional } }"
+              class="font-bold text-[#0284C7] hover:underline"
+            >
+              Iniciar sesión
+            </RouterLink>
+          </p>
 
-        <AlertMessage v-if="errorGeneral" tipo="error">
-          {{ mensajeDeError(errorGeneral) }}
-        </AlertMessage>
+          <FormVehiculo
+            v-if="esConductor"
+            v-model="valores.vehiculo"
+            :errores="errores"
+            @validar="validarCampo"
+          />
 
-        <BaseButton type="submit" bloque :cargando="enviando" class="mt-2">
-          <span>Verificar con Correo Institucional</span>
-          <ArrowRight class="w-4 h-4" aria-hidden="true" />
-        </BaseButton>
-      </form>
+          <AlertMessage v-if="catalogos.error" tipo="aviso">
+            No pudimos cargar las carreras. {{ mensajeDeError(catalogos.error) }}
+          </AlertMessage>
 
-      <div class="mt-4 pt-3 border-t border-[#EDEDED] text-center">
-        <span class="text-xs text-[#4B5563]">¿Ya tienes tu cuenta universitaria? </span>
-        <RouterLink
-          :to="{ name: 'login' }"
-          class="text-xs font-bold text-[#0284C7] hover:underline"
-        >
-          Iniciar Sesión
-        </RouterLink>
+          <AlertMessage v-if="errorGeneral" tipo="error">
+            {{ mensajeDeError(errorGeneral) }}
+          </AlertMessage>
+
+          <BaseButton type="submit" bloque :cargando="enviando" class="mt-2">
+            <span>Verificar con Correo Institucional</span>
+            <ArrowRight class="w-4 h-4" aria-hidden="true" />
+          </BaseButton>
+        </form>
+
+        <div class="mt-4 pt-3 border-t border-[#EDEDED] text-center">
+          <span class="text-xs text-[#4B5563]">¿Ya tienes tu cuenta universitaria? </span>
+          <RouterLink
+            :to="{ name: 'login' }"
+            class="text-xs font-bold text-[#0284C7] hover:underline"
+          >
+            Iniciar Sesión
+          </RouterLink>
+        </div>
       </div>
-    </div>
-  </main>
+    </main>
+  </DisenoAuth>
 </template>
