@@ -4,7 +4,6 @@ import { useRoute, useRouter } from 'vue-router'
 import { env } from '@/core/config/env'
 import AlertMessage from '@/shared/components/AlertMessage.vue'
 import BaseButton from '@/shared/components/BaseButton.vue'
-import LogoKarider from '@/shared/components/LogoKarider.vue'
 import RoleSelector from '@/shared/components/RoleSelector.vue'
 import { mensajeDeError } from '@/shared/composables/useApiError'
 import { useFormulario } from '@/shared/composables/useFormulario'
@@ -46,6 +45,10 @@ const esConductor = computed(() => valores.value.rol === 'Conductor')
 /** Muestra el enlace «Iniciar sesión» junto al error de correo duplicado. */
 const correoDuplicado = ref(false)
 
+// Binding dinámico: una ruta estática aquí haría que el compilador de Vue la trate
+// como un asset a resolver en build, y falla en Windows por ser absoluta a public/.
+const iconoSrc = '/logo-karider.png'
+
 onMounted(catalogos.cargarCarreras)
 
 function registrar() {
@@ -72,9 +75,9 @@ function registrar() {
 <template>
   <main class="pantalla">
     <header class="encabezado">
-      <LogoKarider tamano="lg" />
-      <h1 class="pantalla__titulo">Registro y validación institucional</h1>
-      <p class="pantalla__subtitulo">Crea tu cuenta con tus credenciales de la universidad</p>
+      <img class="encabezado__icono" :src="iconoSrc" alt="" aria-hidden="true" width="64" height="64" />
+      <h1 class="pantalla__titulo">Registro</h1>
+      <p class="pantalla__subtitulo">Crea tu cuenta</p>
     </header>
 
     <form class="formulario" novalidate @submit.prevent="registrar">
@@ -134,5 +137,11 @@ function registrar() {
   gap: var(--espacio-2);
   padding: var(--espacio-5) 0 var(--espacio-2);
   text-align: center;
+}
+
+.encabezado__icono {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
 }
 </style>
