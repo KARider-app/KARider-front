@@ -78,7 +78,7 @@ function registrar() {
     </header>
 
     <form class="formulario" novalidate @submit.prevent="registrar">
-      <RoleSelector v-model="valores.rol" etiqueta="¿Cómo quieres registrarte?" />
+      <RoleSelector v-model="valores.rol" etiqueta="¿Cómo usarás KARider principalmente?" />
 
       <div class="formulario tarjeta">
         <FormDatosPersonales

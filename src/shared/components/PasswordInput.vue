@@ -29,6 +29,17 @@ const visible = ref(false)
       spellcheck="false"
       v-bind="$attrs"
     >
+      <template #etiqueta-extra>
+        <slot name="etiqueta-extra" />
+      </template>
+      <template #prefijo>
+        <span class="campo__icono campo__icono--prefijo" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            <rect x="5" y="11" width="14" height="10" rx="2" />
+            <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+          </svg>
+        </span>
+      </template>
       <template #sufijo>
         <button
           type="button"

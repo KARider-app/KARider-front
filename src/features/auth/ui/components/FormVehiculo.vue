@@ -31,7 +31,18 @@ const opcionesCapacidad = [1, 2, 3, 4].map((n) => ({
       :error="errores['vehiculo.modelo']"
       placeholder="Ej. Nissan Versa"
       @blur="emit('validar', 'vehiculo.modelo')"
-    />
+    >
+      <template #prefijo>
+        <span class="campo__icono campo__icono--prefijo" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            <path d="M5 11l1.5-4.5A2 2 0 0 1 8.4 5h7.2a2 2 0 0 1 1.9 1.5L19 11" />
+            <rect x="3" y="11" width="18" height="6" rx="2" />
+            <circle cx="7.5" cy="17" r="1.5" />
+            <circle cx="16.5" cy="17" r="1.5" />
+          </svg>
+        </span>
+      </template>
+    </BaseInput>
     <BaseInput
       v-model="vehiculo.placas"
       etiqueta="Placas"
@@ -41,7 +52,17 @@ const opcionesCapacidad = [1, 2, 3, 4].map((n) => ({
       maxlength="10"
       placeholder="Ej. HNX-421-C"
       @blur="emit('validar', 'vehiculo.placas')"
-    />
+    >
+      <template #prefijo>
+        <span class="campo__icono campo__icono--prefijo" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            <rect x="3" y="5" width="18" height="14" rx="2" />
+            <path d="M3 10h18" />
+            <path d="M7 15h4" />
+          </svg>
+        </span>
+      </template>
+    </BaseInput>
     <div class="fila">
       <BaseInput
         v-model="vehiculo.color"

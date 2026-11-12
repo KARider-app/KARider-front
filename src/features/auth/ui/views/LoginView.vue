@@ -88,11 +88,11 @@ function entrarComoPasajero() {
     </AlertMessage>
 
     <form class="formulario tarjeta" novalidate @submit.prevent="iniciarSesion">
-      <RoleSelector v-model="valores.rol" etiqueta="¿Cómo quieres entrar?" />
+      <RoleSelector v-model="valores.rol" etiqueta="Ingresar con rol de" />
 
       <BaseInput
         v-model="valores.correoInstitucional"
-        etiqueta="Correo institucional"
+        :etiqueta="`Correo institucional (@${env.dominio})`"
         :error="errores.correoInstitucional"
         type="email"
         inputmode="email"
@@ -100,15 +100,29 @@ function entrarComoPasajero() {
         autocapitalize="off"
         :placeholder="`matricula@${env.dominio}`"
         @blur="validarCampo('correoInstitucional')"
-      />
-      <PasswordInput v-model="valores.password" etiqueta="Contraseña" :error="errores.password" />
+      >
+        <template #prefijo>
+          <span class="campo__icono campo__icono--prefijo" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <path d="M3 5h18v14H3z" />
+              <path d="m3 7 9 6 9-6" />
+            </svg>
+          </span>
+        </template>
+      </BaseInput>
+      <PasswordInput v-model="valores.password" etiqueta="Contraseña institucional" :error="errores.password">
+        <template #etiqueta-extra>
+          <RouterLink :to="{ name: 'recuperar' }" class="enlace-olvidaste">
+            ¿Olvidaste tu contraseña?
+          </RouterLink>
+        </template>
+      </PasswordInput>
 
       <div class="opciones-login">
         <label class="recordar">
           <input v-model="valores.recordarme" type="checkbox" />
           Recordar mis credenciales
         </label>
-        <RouterLink :to="{ name: 'recuperar' }">¿Olvidaste tu contraseña?</RouterLink>
       </div>
 
       <AlertMessage v-if="errorGeneral" tipo="error">
@@ -128,6 +142,9 @@ function entrarComoPasajero() {
 
       <BaseButton type="submit" bloque :cargando="enviando" :disabled="espera.activo.value">
         {{ espera.activo.value ? `Espera ${espera.restante.value} s` : 'INICIAR SESIÓN' }}
+        <svg v-if="!espera.activo.value" class="boton__flecha" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M5 12h14M13 6l6 6-6 6" />
+        </svg>
       </BaseButton>
     </form>
 
@@ -168,5 +185,21 @@ function entrarComoPasajero() {
   width: 18px;
   height: 18px;
   accent-color: var(--color-primario);
+}
+
+.enlace-olvidaste {
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.boton__flecha {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 </style>

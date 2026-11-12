@@ -22,8 +22,12 @@ function alEscribir(evento: Event) {
 
 <template>
   <div class="campo" :class="{ 'campo--error': error }">
-    <label class="campo__etiqueta" :for="id">{{ etiqueta }}</label>
-    <div class="campo__control">
+    <div class="campo__fila-etiqueta">
+      <label class="campo__etiqueta" :for="id">{{ etiqueta }}</label>
+      <slot name="etiqueta-extra" />
+    </div>
+    <div class="campo__control" :class="{ 'campo__control--con-prefijo': !!$slots.prefijo }">
+      <slot name="prefijo" />
       <input
         :id="id"
         class="campo__input"
@@ -47,6 +51,13 @@ function alEscribir(evento: Event) {
   gap: var(--espacio-1);
 }
 
+.campo__fila-etiqueta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espacio-2);
+}
+
 .campo__etiqueta {
   font-size: 0.875rem;
   font-weight: 600;
@@ -65,6 +76,10 @@ function alEscribir(evento: Event) {
   border: 1px solid var(--color-borde);
   border-radius: var(--radio-sm);
   background: var(--color-superficie);
+}
+
+.campo__control--con-prefijo .campo__input {
+  padding-left: 44px;
 }
 
 .campo__input:focus {
