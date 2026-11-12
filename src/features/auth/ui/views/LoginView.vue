@@ -74,8 +74,6 @@ function entrarComoPasajero() {
 
 <template>
   <main class="pantalla">
-    <span class="insignia">1. Login institucional</span>
-
     <header class="encabezado">
       <LogoKarider tamano="lg" />
       <h1 class="pantalla__titulo">Iniciar sesión</h1>
@@ -141,18 +139,6 @@ function entrarComoPasajero() {
 </template>
 
 <style scoped>
-.insignia {
-  align-self: flex-start;
-  padding: var(--espacio-1) var(--espacio-3);
-  border-radius: var(--radio-pill);
-  background: var(--color-primario);
-  color: #fff;
-  font-size: 0.6875rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
 .encabezado {
   display: flex;
   flex-direction: column;
