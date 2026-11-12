@@ -1,147 +1,56 @@
-@import './tokens.css';
+/*
+ * Estilos globales de KARider.
+ * El diseño replica los mockups oficiales de AI Studio (Tailwind CSS v4), por eso
+ * las pantallas usan las mismas utilidades y la misma paleta que los mockups.
+ */
+@import 'tailwindcss';
 
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
+@theme {
+  --font-heading: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+
+  --color-karider-ice: #eaf2f8;
+  --color-karider-sky: #c9dce8;
+  --color-karider-steel: #8aa9c4;
+  --color-karider-slate: #3e5c76;
+  --color-karider-navy: #1d2d44;
+  --color-karider-pin: #0284c7;
 }
 
-html {
-  -webkit-text-size-adjust: 100%;
-}
+@layer base {
+  :root {
+    /* Alto de la barra de navegación inferior (incluye el área segura de iOS). */
+    --alto-nav: calc(54px + env(safe-area-inset-bottom));
+  }
 
-body {
-  margin: 0;
-  min-height: 100dvh;
-  font-family: var(--fuente);
-  font-size: 16px;
-  line-height: 1.5;
-  color: var(--color-texto);
-  background: var(--color-fondo);
-}
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
 
-h1,
-h2,
-h3 {
-  margin: 0;
-  line-height: 1.25;
-}
+  body {
+    min-height: 100dvh;
+    font-family: var(--font-sans);
+    color: #1d2d44;
+    background-color: #f0f4f8;
+    -webkit-font-smoothing: antialiased;
+  }
 
-p {
-  margin: 0;
-}
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-heading);
+  }
 
-a {
-  color: var(--color-acento);
-}
+  ::selection {
+    background-color: #3e5c76;
+    color: #fff;
+  }
 
-button,
-input,
-select,
-textarea {
-  font: inherit;
-  color: inherit;
-}
-
-:focus-visible {
-  outline: 3px solid var(--color-acento);
-  outline-offset: 2px;
-}
-
-/* Contenedor de cada pantalla */
-.pantalla {
-  width: 100%;
-  max-width: var(--ancho-max);
-  margin: 0 auto;
-  padding: var(--espacio-5) var(--espacio-4) calc(var(--alto-nav) + var(--espacio-6));
-  display: flex;
-  flex-direction: column;
-  gap: var(--espacio-4);
-}
-
-.pantalla__titulo {
-  font-size: 1.5rem;
-  font-weight: 700;
-}
-
-.pantalla__subtitulo {
-  color: var(--color-texto-suave);
-}
-
-.tarjeta {
-  background: var(--color-superficie);
-  border: 1px solid var(--color-borde);
-  border-radius: var(--radio-md);
-  padding: var(--espacio-4);
-  box-shadow: var(--sombra-sm);
-}
-
-.formulario {
-  display: flex;
-  flex-direction: column;
-  gap: var(--espacio-4);
-}
-
-.seccion-titulo {
-  font-size: 1rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--color-texto-suave);
-}
-
-.fila {
-  display: flex;
-  gap: var(--espacio-3);
-}
-
-.fila > * {
-  flex: 1;
-  min-width: 0;
-}
-
-.texto-suave {
-  color: var(--color-texto-suave);
-  font-size: 0.875rem;
-}
-
-.centrado {
-  text-align: center;
-}
-
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-}
-
-/* Icono dentro de un campo (BaseInput/PasswordInput), vía slot #prefijo o #sufijo. */
-.campo__icono {
-  position: absolute;
-  display: grid;
-  place-items: center;
-  width: 20px;
-  height: 20px;
-  color: var(--color-texto-suave);
-  pointer-events: none;
-}
-
-.campo__icono svg {
-  width: 20px;
-  height: 20px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.campo__icono--prefijo {
-  left: var(--espacio-3);
+  :focus-visible {
+    outline: 2px solid #0284c7;
+    outline-offset: 2px;
+  }
 }

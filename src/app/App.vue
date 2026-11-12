@@ -24,6 +24,12 @@ onBeforeUnmount(() => window.removeEventListener('karider:sesion-expirada', alEx
 </script>
 
 <template>
-  <RouterView />
-  <BottomNav :autenticado="auth.autenticado" :es-conductor="auth.esConductor" @salir="salir" />
+  <div class="min-h-dvh bg-[#F0F4F8] text-[#1D2D44] flex justify-center font-sans">
+    <div
+      class="w-full max-w-[400px] min-h-dvh bg-[#F8FAFC] flex flex-col relative shadow-2xl pb-(--alto-nav)"
+    >
+      <RouterView />
+    </div>
+    <BottomNav :autenticado="auth.autenticado" :es-conductor="auth.esConductor" @salir="salir" />
+  </div>
 </template>

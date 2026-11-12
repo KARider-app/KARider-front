@@ -1,4 +1,3 @@
-
 <script setup lang="ts">
 // Importa las funciones de Vue para crear valores calculados
 // y ejecutar acciones cuando el componente se monta.
@@ -19,6 +18,9 @@ import AlertMessage from '@/shared/components/AlertMessage.vue'
 import BaseButton from '@/shared/components/BaseButton.vue'
 import BaseInput from '@/shared/components/BaseInput.vue'
 import BaseSelect from '@/shared/components/BaseSelect.vue'
+import EncabezadoPantalla from '@/shared/components/EncabezadoPantalla.vue'
+import TarjetaSeccion from '@/shared/components/TarjetaSeccion.vue'
+import { ArrowRight, Calendar, Clock, MapPin } from 'lucide-vue-next'
 
 // Función que transforma errores técnicos en mensajes comprensibles.
 import { mensajeDeError } from '@/shared/composables/useApiError'
@@ -50,10 +52,7 @@ const store = usePublicarViajeStore()
 const { borrador } = storeToRefs(store)
 
 // Configura los valores y las validaciones correspondientes al paso 1.
-const { valores, errores, validar, validarCampo } = useFormulario(
-  paso1Esquema,
-  borrador,
-)
+const { valores, errores, validar, validarCampo } = useFormulario(paso1Esquema, borrador)
 
 // Establece la fecha actual como límite mínimo para seleccionar la salida.
 const hoy = new Date()
@@ -69,15 +68,11 @@ const opcionesPunto = computed(() =>
 
 // Busca el punto de encuentro seleccionado para mostrar su descripción.
 const puntoSeleccionado = computed(() =>
-  catalogos.puntosEncuentro.find(
-    (p) => p.id === Number(valores.value.puntoEncuentroId),
-  ),
+  catalogos.puntosEncuentro.find((p) => p.id === Number(valores.value.puntoEncuentroId)),
 )
 
 // Detecta si la carga de vehículos terminó y no existen vehículos disponibles.
-const sinVehiculo = computed(
-  () => store.vehiculosCargados && store.vehiculos.length === 0,
-)
+const sinVehiculo = computed(() => store.vehiculosCargados && store.vehiculos.length === 0)
 
 // Al montar la pantalla, solicita los puntos de encuentro y los vehículos.
 onMounted(() => {
@@ -93,45 +88,43 @@ function continuar() {
 
 <template>
   <!-- Contenedor principal de la pantalla de publicación. -->
-  <main class="pantalla">
-    <header class="encabezado">
-      <div class="encabezado__fila">
-        <RouterLink :to="{ name: 'inicio' }" class="encabezado__volver">← Volver</RouterLink>
-        <span class="encabezado__titulo">PUBLICAR RUTA</span>
-        <span class="encabezado__paso">Paso 1 de 2</span>
-      </div>
-      <p class="encabezado__subtitulo">
-        Indica de dónde sales, a dónde vas y cuántos lugares ofreces.
+  <main class="flex flex-col min-h-full flex-1 bg-[#F3F7FA] text-[#1D2D44]">
+    <EncabezadoPantalla
+      titulo="Publicar Ruta (Conductor)"
+      :volver="{ name: 'inicio' }"
+      etiqueta="Paso 1 de 2"
+    >
+      <p class="text-xs text-[#C9DCE8]">
+        Comparte tu trayecto desde el campus y divide los gastos de combustible.
       </p>
-    </header>
-
-    <!-- Informa al usuario cuando no tiene vehículos disponibles. -->
-    <AlertMessage v-if="sinVehiculo" tipo="aviso">
-      Aún no tienes un vehículo registrado. Necesitas uno activo para publicar viajes.
-    </AlertMessage>
-
-    <!-- Muestra los errores relacionados con la carga de vehículos. -->
-    <AlertMessage v-if="store.errorVehiculos" tipo="error">
-      {{ mensajeDeError(store.errorVehiculos) }}
-    </AlertMessage>
-
-    <!-- Informa si ocurrió un problema al cargar los puntos de encuentro. -->
-    <AlertMessage v-if="catalogos.error" tipo="error">
-      No pudimos cargar los puntos de encuentro.
-      {{ mensajeDeError(catalogos.error) }}
-    </AlertMessage>
+    </EncabezadoPantalla>
 
     <!-- Evita que el formulario recargue la página al enviarse. -->
-    <form class="formulario" novalidate @submit.prevent="continuar">
+    <form class="p-5 space-y-4 flex-1" novalidate @submit.prevent="continuar">
+      <!-- Informa al usuario cuando no tiene vehículos disponibles. -->
+      <AlertMessage v-if="sinVehiculo" tipo="aviso">
+        Aún no tienes un vehículo registrado. Necesitas uno activo para publicar viajes.
+      </AlertMessage>
+
+      <!-- Muestra los errores relacionados con la carga de vehículos. -->
+      <AlertMessage v-if="store.errorVehiculos" tipo="error">
+        {{ mensajeDeError(store.errorVehiculos) }}
+      </AlertMessage>
+
+      <!-- Informa si ocurrió un problema al cargar los puntos de encuentro. -->
+      <AlertMessage v-if="catalogos.error" tipo="error">
+        No pudimos cargar los puntos de encuentro.
+        {{ mensajeDeError(catalogos.error) }}
+      </AlertMessage>
 
       <!-- Sección para configurar el recorrido del viaje. -->
-      <section class="formulario tarjeta" aria-label="Ruta">
-
+      <TarjetaSeccion titulo="1. Puntos de la Ruta" :icono="MapPin" color-icono="text-[#0284C7]">
         <!-- Permite elegir el punto de encuentro de salida. -->
         <BaseSelect
           v-model="valores.puntoEncuentroId"
-          etiqueta="Punto de encuentro en el campus"
+          etiqueta="Punto de Encuentro en Campus UTTT *"
           placeholder="Selecciona el punto de encuentro"
+          suave
           :opciones="opcionesPunto"
           :error="errores.puntoEncuentroId"
           :ayuda="puntoSeleccionado?.descripcion"
@@ -141,28 +134,27 @@ function continuar() {
         <!-- Campo para introducir el destino final del recorrido. -->
         <BaseInput
           v-model="valores.destino"
-          etiqueta="Destino final"
+          etiqueta="Destino Final *"
+          suave
           :error="errores.destino"
           maxlength="150"
-          placeholder="Ej. Centro de Tula"
+          placeholder="Ej. Pachuca Plaza Galerías / Tula Centro"
           @blur="validarCampo('destino')"
         />
 
         <!-- Permite agregar y administrar las paradas intermedias. -->
-        <ParadasChips
-          v-model="valores.paradas"
-          :error="errores.paradas"
-        />
-      </section>
+        <ParadasChips v-model="valores.paradas" :error="errores.paradas" />
+      </TarjetaSeccion>
 
       <!-- Sección para establecer la fecha, hora y capacidad del viaje. -->
-      <section class="formulario tarjeta" aria-label="Horario y capacidad">
-        <div class="fila">
-
+      <TarjetaSeccion titulo="2. Horario y Capacidad" :icono="Clock">
+        <div class="grid grid-cols-2 gap-2.5">
           <!-- El usuario selecciona una fecha dentro del rango permitido. -->
           <BaseInput
             v-model="valores.fecha"
             etiqueta="Fecha"
+            suave
+            :icono="Calendar"
             type="date"
             :min="fechaMin"
             :max="fechaMax"
@@ -172,7 +164,9 @@ function continuar() {
           <!-- Campo para indicar la hora de salida. -->
           <BaseInput
             v-model="valores.hora"
-            etiqueta="Hora de salida"
+            etiqueta="Hora de Salida *"
+            suave
+            :icono="Clock"
             type="time"
             :error="errores.hora"
           />
@@ -184,59 +178,21 @@ function continuar() {
           :capacidad="store.capacidad"
           :error="errores.asientos"
         />
-      </section>
+      </TarjetaSeccion>
 
       <!-- Envía al paso 2; se desactiva si no hay vehículos disponibles. -->
-      <BaseButton type="submit" bloque :disabled="sinVehiculo">
-        CONTINUAR
-      </BaseButton>
+      <div class="pt-2 space-y-2">
+        <BaseButton type="submit" bloque :disabled="sinVehiculo" class="!font-bold">
+          <span>Continuar</span>
+          <ArrowRight class="w-4 h-4" aria-hidden="true" />
+        </BaseButton>
+        <RouterLink
+          :to="{ name: 'borradores' }"
+          class="block w-full py-2 rounded-xl text-xs font-semibold text-center text-[#4B5563] hover:text-[#1D2D44]"
+        >
+          Ver mis borradores
+        </RouterLink>
+      </div>
     </form>
   </main>
 </template>
-
-<style scoped>
-.encabezado {
-  padding: var(--espacio-4) var(--espacio-4) var(--espacio-5);
-  border-radius: var(--radio-lg);
-  background: var(--color-primario);
-  color: #fff;
-  display: flex;
-  flex-direction: column;
-  gap: var(--espacio-1);
-}
-
-.encabezado__fila {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--espacio-2);
-}
-
-.encabezado__volver {
-  color: #c6d2e3;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  text-decoration: none;
-}
-
-.encabezado__titulo {
-  font-size: 0.8125rem;
-  font-weight: 800;
-  letter-spacing: 0.04em;
-}
-
-.encabezado__paso {
-  padding: 2px var(--espacio-2);
-  border-radius: var(--radio-pill);
-  background: rgb(255 255 255 / 12%);
-  color: #c6d2e3;
-  font-size: 0.6875rem;
-  font-weight: 600;
-}
-
-.encabezado__subtitulo {
-  color: #c6d2e3;
-  font-size: 0.8125rem;
-  line-height: 1.5;
-}
-</style>
