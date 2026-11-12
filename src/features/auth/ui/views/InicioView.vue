@@ -54,7 +54,7 @@ const opciones = computed<Opcion[]>(() => [
 <template>
   <main class="pantalla">
     <header class="encabezado">
-      <LogoKarider tamano="lg" etiqueta class="encabezado__logo" />
+      <LogoKarider tamano="lg" class="encabezado__logo" />
       <p class="pantalla__subtitulo">Viajes compartidos entre la comunidad UTTT</p>
     </header>
 
