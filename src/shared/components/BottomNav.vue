@@ -1,123 +1,99 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import type { RouteLocationRaw } from 'vue-router'
+import { computed, type Component } from 'vue'
+import { useRoute, type RouteLocationRaw } from 'vue-router'
+import { CirclePlus, LogIn, LogOut, MapPin, Search, UserCheck } from 'lucide-vue-next'
 
 const props = defineProps<{ autenticado: boolean; esConductor: boolean }>()
 const emit = defineEmits<{ salir: [] }>()
 
+const route = useRoute()
+
 interface Item {
   clave: string
   texto: string
-  icono: string
+  icono: Component
   destino?: RouteLocationRaw
-  /** Pantallas de sprints posteriores. */
-  proximamente?: boolean
+  /** Rutas en las que la pestaña se marca como activa. */
+  rutas: string[]
+  /** Color de la pestaña activa (como en los mockups: navy o azul pin). */
+  colorActivo: string
 }
 
-// Trazos SVG (24×24) de cada ícono
-const iconos = {
-  login: 'M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M10 17l5-5-5-5M15 12H3',
-  salir: 'M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9',
-  publicar: 'M12 3a9 9 0 100 18 9 9 0 000-18zM12 8v8M8 12h8',
-  consultar: 'M11 19a8 8 0 100-16 8 8 0 000 16zM21 21l-4.3-4.3',
-  mapa: 'M12 2a7 7 0 00-7 7c0 5.25 7 12 7 12s7-6.75 7-12a7 7 0 00-7-7zM12 12a3 3 0 100-6 3 3 0 000 6z',
-  perfil: 'M20 21a8 8 0 00-16 0M12 13a5 5 0 100-10 5 5 0 000 10z',
-}
+const NAVY = 'text-[#1D2D44] font-bold'
+const PIN = 'text-[#0284C7] font-bold'
 
 const items = computed<Item[]>(() => [
   props.autenticado
-    ? { clave: 'salir', texto: 'Salir', icono: iconos.salir }
-    : { clave: 'login', texto: 'Login', icono: iconos.login, destino: { name: 'login' } },
+    ? { clave: 'salir', texto: 'Salir', icono: LogOut, rutas: [], colorActivo: NAVY }
+    : {
+        clave: 'login',
+        texto: 'Login',
+        icono: LogIn,
+        destino: { name: 'login' },
+        rutas: ['login', 'registro', 'verificar', 'recuperar'],
+        colorActivo: NAVY,
+      },
   ...(props.esConductor
     ? [
         {
           clave: 'publicar',
           texto: 'Publicar',
-          icono: iconos.publicar,
+          icono: CirclePlus,
           destino: { name: 'publicar-1' },
+          rutas: ['publicar-1', 'publicar-2', 'borradores', 'viaje-editar'],
+          colorActivo: PIN,
         },
       ]
     : []),
-  { clave: 'consultar', texto: 'Consultar', icono: iconos.consultar, destino: { name: 'buscar' } },
-  { clave: 'mapa', texto: 'Mapa Ruta', icono: iconos.mapa, destino: { name: 'mis-reservas' } },
-  { clave: 'perfil', texto: 'Perfil', icono: iconos.perfil, destino: { name: 'perfil' } },
+  {
+    clave: 'consultar',
+    texto: 'Consultar',
+    icono: Search,
+    destino: { name: 'buscar' },
+    rutas: ['buscar', 'viaje'],
+    colorActivo: PIN,
+  },
+  {
+    clave: 'mapa',
+    texto: 'Mapa Ruta',
+    icono: MapPin,
+    destino: { name: 'mis-reservas' },
+    rutas: ['mis-reservas', 'mapa-reserva'],
+    colorActivo: PIN,
+  },
+  {
+    clave: 'perfil',
+    texto: 'Perfil',
+    icono: UserCheck,
+    destino: { name: 'perfil' },
+    rutas: ['perfil'],
+    colorActivo: NAVY,
+  },
 ])
+
+function clases(item: Item) {
+  const activo = item.rutas.includes(String(route.name ?? ''))
+  return [
+    'flex flex-col items-center gap-0.5 transition-colors',
+    activo ? item.colorActivo : 'text-[#4B5563] hover:text-[#1D2D44]',
+  ]
+}
 </script>
 
 <template>
-  <nav class="nav" aria-label="Navegación principal">
+  <nav
+    class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[400px] h-(--alto-nav) bg-white border-t border-[#C9DCE8] px-2 pb-[env(safe-area-inset-bottom)] flex items-center justify-around select-none shadow-lg z-20"
+    aria-label="Navegación principal"
+  >
     <template v-for="item in items" :key="item.clave">
-      <RouterLink v-if="item.destino" :to="item.destino" class="nav__item">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path :d="item.icono" /></svg>
-        <span>{{ item.texto }}</span>
+      <RouterLink v-if="item.destino" :to="item.destino" :class="clases(item)">
+        <component :is="item.icono" class="w-5 h-5" aria-hidden="true" />
+        <span class="text-[10px]">{{ item.texto }}</span>
       </RouterLink>
-      <button
-        v-else-if="item.clave === 'salir'"
-        type="button"
-        class="nav__item"
-        @click="emit('salir')"
-      >
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path :d="item.icono" /></svg>
-        <span>{{ item.texto }}</span>
+      <button v-else type="button" :class="clases(item)" @click="emit('salir')">
+        <component :is="item.icono" class="w-5 h-5" aria-hidden="true" />
+        <span class="text-[10px]">{{ item.texto }}</span>
       </button>
-      <span
-        v-else
-        class="nav__item nav__item--inactivo"
-        aria-disabled="true"
-        :title="item.proximamente ? 'Disponible en el siguiente sprint' : undefined"
-      >
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path :d="item.icono" /></svg>
-        <span>{{ item.texto }}</span>
-      </span>
     </template>
   </nav>
 </template>
-
-<style scoped>
-.nav {
-  position: fixed;
-  inset: auto 0 0;
-  z-index: 10;
-  display: flex;
-  justify-content: space-around;
-  height: calc(var(--alto-nav) + env(safe-area-inset-bottom));
-  padding-bottom: env(safe-area-inset-bottom);
-  background: var(--color-superficie);
-  border-top: 1px solid var(--color-borde);
-}
-
-.nav__item {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 2px;
-  border: 0;
-  background: transparent;
-  color: var(--color-deshabilitado);
-  font-size: 0.6875rem;
-  font-weight: 700;
-  text-decoration: none;
-  cursor: pointer;
-}
-
-.nav__item svg {
-  width: 22px;
-  height: 22px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.nav__item.router-link-exact-active {
-  color: var(--color-acento);
-}
-
-.nav__item--inactivo {
-  cursor: default;
-  opacity: 0.6;
-}
-</style>

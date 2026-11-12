@@ -4,17 +4,21 @@ const asientos = defineModel<number>({ required: true })
 </script>
 
 <template>
-  <fieldset class="asientos">
-    <legend class="asientos__etiqueta">Asientos disponibles</legend>
-    <div class="asientos__opciones">
+  <fieldset>
+    <legend class="block text-xs font-semibold text-[#3E5C76] mb-1.5">
+      Asientos Disponibles para Compañeros *
+    </legend>
+    <div class="grid grid-cols-4 gap-2">
       <label
         v-for="n in 4"
         :key="n"
-        class="asientos__opcion"
-        :class="{
-          'asientos__opcion--activa': asientos === n,
-          'asientos__opcion--inactiva': n > capacidad,
-        }"
+        class="py-2 rounded-xl text-xs font-bold border transition-all flex flex-col items-center has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[#0284C7]"
+        :class="[
+          asientos === n
+            ? 'border-[#1D2D44] bg-[#1D2D44] text-white shadow-xs'
+            : 'border-[#C9DCE8] bg-[#F8FAFC] text-[#1D2D44] hover:bg-[#EAF2F8]',
+          n > capacidad ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer',
+        ]"
       >
         <input
           v-model="asientos"
@@ -24,68 +28,13 @@ const asientos = defineModel<number>({ required: true })
           :disabled="n > capacidad"
           class="sr-only"
         />
-        {{ n }}
+        <span>{{ n }}</span>
+        <span class="text-[9px] opacity-80">{{ n === 1 ? 'cupo' : 'cupos' }}</span>
       </label>
     </div>
-    <p v-if="error" class="asientos__error" role="alert">{{ error }}</p>
-    <p v-else-if="capacidad < 4" class="texto-suave">
+    <p v-if="error" class="text-[10px] font-semibold text-red-600 mt-1" role="alert">{{ error }}</p>
+    <p v-else-if="capacidad < 4" class="text-[10px] text-[#4B5563] mt-1">
       Tu vehículo admite hasta {{ capacidad }} {{ capacidad === 1 ? 'pasajero' : 'pasajeros' }}.
     </p>
   </fieldset>
 </template>
-
-<style scoped>
-.asientos {
-  display: flex;
-  flex-direction: column;
-  gap: var(--espacio-2);
-  margin: 0;
-  padding: 0;
-  border: 0;
-}
-
-.asientos__etiqueta {
-  margin-bottom: var(--espacio-2);
-  font-size: 0.875rem;
-  font-weight: 600;
-}
-
-.asientos__opciones {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: var(--espacio-2);
-}
-
-.asientos__opcion {
-  display: grid;
-  place-items: center;
-  min-height: 52px;
-  border: 2px solid var(--color-borde);
-  border-radius: var(--radio-md);
-  background: var(--color-superficie);
-  font-size: 1.25rem;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.asientos__opcion--activa {
-  border-color: var(--color-primario);
-  background: var(--color-primario);
-  color: #fff;
-}
-
-.asientos__opcion--inactiva {
-  cursor: not-allowed;
-  opacity: 0.35;
-}
-
-.asientos__opcion:has(input:focus-visible) {
-  outline: 3px solid var(--color-acento);
-  outline-offset: 2px;
-}
-
-.asientos__error {
-  font-size: 0.8125rem;
-  color: var(--color-error);
-}
-</style>

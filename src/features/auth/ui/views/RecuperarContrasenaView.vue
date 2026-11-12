@@ -5,6 +5,8 @@ import { env } from '@/core/config/env'
 import AlertMessage from '@/shared/components/AlertMessage.vue'
 import BaseButton from '@/shared/components/BaseButton.vue'
 import BaseInput from '@/shared/components/BaseInput.vue'
+import LogoKarider from '@/shared/components/LogoKarider.vue'
+import { ArrowLeft, KeyRound, Mail, Send } from 'lucide-vue-next'
 import PasswordInput from '@/shared/components/PasswordInput.vue'
 import { mensajeDeError } from '@/shared/composables/useApiError'
 import { useFormulario } from '@/shared/composables/useFormulario'
@@ -59,10 +61,27 @@ function restablecer() {
 </script>
 
 <template>
-  <main class="pantalla">
-    <header>
-      <h1 class="pantalla__titulo">Recuperar contraseña</h1>
-      <p class="pantalla__subtitulo">
+  <main class="flex flex-col min-h-full flex-1 bg-white text-[#1D2D44]">
+    <header
+      class="pt-4 px-5 pb-3 bg-gradient-to-b from-[#EAF2F8] to-white border-b border-[#C9DCE8]/60 flex flex-col items-center text-center"
+    >
+      <div class="w-full flex items-center justify-between mb-2">
+        <RouterLink
+          :to="{ name: 'login' }"
+          class="text-xs text-[#3E5C76] hover:text-[#1D2D44] font-semibold flex items-center gap-1"
+        >
+          <ArrowLeft class="w-3.5 h-3.5" aria-hidden="true" />
+          <span>Iniciar Sesión</span>
+        </RouterLink>
+        <span
+          class="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#1D2D44] text-white"
+        >
+          Recuperar acceso
+        </span>
+      </div>
+      <LogoKarider variant="horizontal" size="sm" class="my-1" />
+      <h1 class="text-lg font-black text-[#1D2D44] mt-1">Recuperar Contraseña</h1>
+      <p class="text-xs text-[#3E5C76]">
         {{
           paso === 1
             ? 'Te enviaremos un código a tu correo institucional.'
@@ -71,55 +90,76 @@ function restablecer() {
       </p>
     </header>
 
-    <form v-if="paso === 1" class="formulario tarjeta" novalidate @submit.prevent="solicitarCodigo">
-      <BaseInput
-        v-model="solicitudValores.correoInstitucional"
-        etiqueta="Correo institucional"
-        :error="solicitud.errores.value.correoInstitucional"
-        type="email"
-        inputmode="email"
-        autocomplete="username"
-        autocapitalize="off"
-        :placeholder="`matricula@${env.dominio}`"
-      />
-      <AlertMessage v-if="solicitud.errorGeneral.value" tipo="error">
-        {{ mensajeDeError(solicitud.errorGeneral.value) }}
-      </AlertMessage>
-      <BaseButton type="submit" bloque :cargando="solicitud.enviando.value">
-        ENVIAR CÓDIGO
-      </BaseButton>
-    </form>
+    <div class="p-5 flex-1 flex flex-col justify-between max-w-md mx-auto w-full">
+      <form v-if="paso === 1" class="space-y-4" novalidate @submit.prevent="solicitarCodigo">
+        <BaseInput
+          v-model="solicitudValores.correoInstitucional"
+          :etiqueta="`Correo Institucional (@${env.dominio})`"
+          :error="solicitud.errores.value.correoInstitucional"
+          :icono="Mail"
+          type="email"
+          inputmode="email"
+          autocomplete="username"
+          autocapitalize="off"
+          :placeholder="`tunombre.apellido@${env.dominio}`"
+        />
+        <AlertMessage v-if="solicitud.errorGeneral.value" tipo="error">
+          {{ mensajeDeError(solicitud.errorGeneral.value) }}
+        </AlertMessage>
+        <BaseButton type="submit" bloque :cargando="solicitud.enviando.value">
+          <Send class="w-4 h-4" aria-hidden="true" />
+          <span>Enviar código</span>
+        </BaseButton>
+      </form>
 
-    <form v-else class="formulario tarjeta" novalidate @submit.prevent="restablecer">
-      <AlertMessage v-if="aviso" tipo="info">{{ aviso }}</AlertMessage>
-      <CodigoVerificacionInput
-        v-model="cambioValores.codigo"
-        :error="cambio.errores.value.codigo"
-      />
-      <PasswordInput
-        v-model="cambioValores.nuevaPassword"
-        etiqueta="Nueva contraseña"
-        nueva
-        :error="cambio.errores.value.nuevaPassword"
-        ayuda="Mínimo 8 caracteres con mayúscula, minúscula, número y carácter especial."
-      />
-      <PasswordInput
-        v-model="cambioValores.confirmarPassword"
-        etiqueta="Confirma la nueva contraseña"
-        nueva
-        :error="cambio.errores.value.confirmarPassword"
-      />
-      <AlertMessage v-if="cambio.errorGeneral.value" tipo="error">
-        {{ mensajeDeError(cambio.errorGeneral.value) }}
-      </AlertMessage>
-      <BaseButton type="submit" bloque :cargando="cambio.enviando.value">
-        CAMBIAR CONTRASEÑA
-      </BaseButton>
-      <BaseButton variante="texto" @click="paso = 1">Solicitar otro código</BaseButton>
-    </form>
+      <form v-else class="space-y-4" novalidate @submit.prevent="restablecer">
+        <div
+          class="w-16 h-16 rounded-2xl bg-[#EAF2F8] text-[#1D2D44] flex items-center justify-center mx-auto border-2 border-[#8AA9C4]"
+        >
+          <KeyRound class="w-8 h-8 text-[#0284C7]" aria-hidden="true" />
+        </div>
+        <AlertMessage v-if="aviso" tipo="info">{{ aviso }}</AlertMessage>
+        <CodigoVerificacionInput
+          v-model="cambioValores.codigo"
+          :error="cambio.errores.value.codigo"
+        />
+        <PasswordInput
+          v-model="cambioValores.nuevaPassword"
+          etiqueta="Nueva contraseña"
+          nueva
+          :error="cambio.errores.value.nuevaPassword"
+          ayuda="Mínimo 8 caracteres con mayúscula, minúscula, número y carácter especial."
+        />
+        <PasswordInput
+          v-model="cambioValores.confirmarPassword"
+          etiqueta="Confirma la nueva contraseña"
+          nueva
+          :error="cambio.errores.value.confirmarPassword"
+        />
+        <AlertMessage v-if="cambio.errorGeneral.value" tipo="error">
+          {{ mensajeDeError(cambio.errorGeneral.value) }}
+        </AlertMessage>
+        <BaseButton type="submit" bloque :cargando="cambio.enviando.value">
+          Cambiar contraseña
+        </BaseButton>
+        <button
+          type="button"
+          class="text-xs text-[#3E5C76] hover:underline block mx-auto"
+          @click="paso = 1"
+        >
+          Solicitar otro código
+        </button>
+      </form>
 
-    <p class="centrado">
-      <RouterLink :to="{ name: 'login' }">Volver a iniciar sesión</RouterLink>
-    </p>
+      <div class="mt-4 pt-3 border-t border-[#EDEDED] text-center">
+        <span class="text-xs text-[#4B5563]">¿Ya recordaste tu contraseña? </span>
+        <RouterLink
+          :to="{ name: 'login' }"
+          class="text-xs font-bold text-[#0284C7] hover:underline"
+        >
+          Iniciar Sesión
+        </RouterLink>
+      </div>
+    </div>
   </main>
 </template>

@@ -14,6 +14,9 @@ import type { ApiError } from '@/core/http/apiError'
 // Componentes reutilizables para mensajes y botones.
 import AlertMessage from '@/shared/components/AlertMessage.vue'
 import BaseButton from '@/shared/components/BaseButton.vue'
+import EncabezadoPantalla from '@/shared/components/EncabezadoPantalla.vue'
+import TarjetaSeccion from '@/shared/components/TarjetaSeccion.vue'
+import { Car, Check } from 'lucide-vue-next'
 
 // Convierte errores técnicos en mensajes comprensibles para el usuario.
 import { mensajeDeError } from '@/shared/composables/useApiError'
@@ -52,14 +55,10 @@ const store = usePublicarViajeStore()
 const { borrador } = storeToRefs(store)
 
 // Configura el formulario con sus valores, errores y funciones de envío.
-const {
-  valores,
-  errores,
-  errorGeneral,
-  enviando,
-  enviar,
-  validarCampo,
-} = useFormulario(paso2Esquema, borrador)
+const { valores, errores, errorGeneral, enviando, enviar, validarCampo } = useFormulario(
+  paso2Esquema,
+  borrador,
+)
 
 // Conserva el error relacionado con los datos del paso 1, si existe.
 const errorPaso1 = ref<ApiError | null>(null)
@@ -108,20 +107,18 @@ function guardar(publicar: boolean) {
       const viaje = await store.enviar(datos, publicar)
 
       // Redirige a la pantalla correspondiente según el resultado.
-      await (
-        publicar
-          // Si se publicó, abre el detalle del viaje.
-          ? router.push({
-              name: 'viaje',
-              params: { id: viaje.id },
-              query: { publicado: '1' },
-            })
-          // Si se guardó como borrador, abre la lista de borradores.
-          : router.push({
-              name: 'borradores',
-              query: { guardado: '1' },
-            })
-      )
+      await (publicar
+        ? // Si se publicó, abre el detalle del viaje.
+          router.push({
+            name: 'viaje',
+            params: { id: viaje.id },
+            query: { publicado: '1' },
+          })
+        : // Si se guardó como borrador, abre la lista de borradores.
+          router.push({
+            name: 'borradores',
+            query: { guardado: '1' },
+          }))
     },
     {
       // Intercepta los errores para identificar si corresponden al paso 1.
@@ -132,8 +129,7 @@ function guardar(publicar: boolean) {
         // Comprueba si el error es del paso 1 por su código
         // o porque afecta campos que no pertenecen al paso 2.
         const esDelPaso1 =
-          CODIGOS_PASO_1.includes(e.code) ||
-          llaves.some((k) => !CAMPOS_PASO_2.includes(k))
+          CODIGOS_PASO_1.includes(e.code) || llaves.some((k) => !CAMPOS_PASO_2.includes(k))
 
         // Conserva el error para mostrarlo y permitir corregir el paso 1.
         if (esDelPaso1) errorPaso1.value = e
@@ -148,19 +144,17 @@ function guardar(publicar: boolean) {
 
 <template>
   <!-- Contenedor principal de la pantalla. -->
-  <main class="pantalla">
-    <header>
-      <!-- Identifica el segundo paso del proceso de publicación. -->
-      <p class="texto-suave">Paso 2 de 2</p>
-      <h1 class="pantalla__titulo">Aporte solidario</h1>
-      <p class="pantalla__subtitulo">
-        Calcula cuánto aporta cada pasajero y publica tu viaje.
-      </p>
-    </header>
+  <main class="flex flex-col min-h-full flex-1 bg-[#F3F7FA] text-[#1D2D44]">
+    <EncabezadoPantalla
+      titulo="Publicar Ruta (Conductor)"
+      :volver="{ name: 'publicar-1' }"
+      etiqueta="Paso 2 de 2"
+    >
+      <p class="text-xs text-[#C9DCE8]">Calcula cuánto aporta cada pasajero y publica tu viaje.</p>
+    </EncabezadoPantalla>
 
     <!-- El formulario publica el viaje cuando se envía. -->
-    <form class="formulario" novalidate @submit.prevent="guardar(true)">
-
+    <form class="p-5 space-y-4 flex-1" novalidate @submit.prevent="guardar(true)">
       <!-- Calcula el aporte usando el gasto total y los asientos disponibles. -->
       <CalculadoraAporte
         v-model="valores.gastoTotal"
@@ -169,17 +163,10 @@ function guardar(publicar: boolean) {
         @validar="validarCampo('gastoTotal')"
       />
 
-      <!-- Sección que muestra o permite seleccionar el vehículo. -->
-      <section class="formulario tarjeta" aria-labelledby="titulo-vehiculo">
-        <h2 id="titulo-vehiculo" class="seccion-titulo">
-          Vehículo registrado
-        </h2>
-
+      <!-- Sección que muestra o permite seleccionar el vehículo, y las notas. -->
+      <TarjetaSeccion titulo="4. Vehículo Registrado" :icono="Car">
         <!-- Informa que los vehículos todavía se están cargando. -->
-        <p
-          v-if="!store.vehiculosCargados && !store.errorVehiculos"
-          class="texto-suave"
-        >
+        <p v-if="!store.vehiculosCargados && !store.errorVehiculos" class="text-xs text-[#4B5563]">
           Cargando tu vehículo…
         </p>
 
@@ -190,25 +177,20 @@ function guardar(publicar: boolean) {
         />
 
         <!-- Si hay varios vehículos, permite seleccionar uno. -->
-        <fieldset v-else-if="store.vehiculos.length > 1" class="vehiculos">
+        <fieldset v-else-if="store.vehiculos.length > 1" class="space-y-2">
           <legend class="sr-only">Elige el vehículo del viaje</legend>
 
           <!-- Genera una opción seleccionable para cada vehículo. -->
           <label
             v-for="v in store.vehiculos"
             :key="v.id"
-            class="vehiculos__opcion"
-            :class="{
-              'vehiculos__opcion--activa': valores.vehiculoId === v.id,
-            }"
+            class="vehiculos__opcion block rounded-xl cursor-pointer transition-all has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[#0284C7]"
+            :class="
+              valores.vehiculoId === v.id ? 'ring-2 ring-[#1D2D44]' : 'opacity-80 hover:opacity-100'
+            "
           >
             <!-- Guarda el identificador del vehículo seleccionado. -->
-            <input
-              v-model="valores.vehiculoId"
-              type="radio"
-              :value="v.id"
-              class="sr-only"
-            />
+            <input v-model="valores.vehiculoId" type="radio" :value="v.id" class="sr-only" />
 
             <!-- Nombre accesible de la opción: el lector de pantalla lo anuncia al elegir el vehículo. -->
             <span class="sr-only">
@@ -217,7 +199,7 @@ function guardar(publicar: boolean) {
             </span>
 
             <!-- Presenta los datos del vehículo de esta opción (solo visual; el texto accesible está arriba). -->
-            <span class="vehiculos__tarjeta" aria-hidden="true">
+            <span class="vehiculos__tarjeta block" aria-hidden="true">
               <TarjetaVehiculo v-bind="v" />
             </span>
           </label>
@@ -232,41 +214,37 @@ function guardar(publicar: boolean) {
         <AlertMessage v-if="store.errorVehiculos" tipo="error">
           {{ mensajeDeError(store.errorVehiculos) }}
         </AlertMessage>
-      </section>
 
-      <!-- Sección para escribir indicaciones adicionales a los pasajeros. -->
-      <section class="tarjeta notas">
-        <label for="notas" class="seccion-titulo">
-          Notas para los pasajeros
-        </label>
-
-        <!-- Campo de texto con un límite máximo de caracteres. -->
-        <textarea
-          id="notas"
-          v-model="valores.notas"
-          rows="4"
-          :maxlength="MAX_NOTAS"
-          placeholder="Ej. Salgo puntual; espero 5 minutos en el punto de encuentro."
-          :aria-invalid="!!errores.notas"
-        ></textarea>
-
-        <!-- Muestra el error de validación y el contador de caracteres. -->
-        <p class="notas__pie">
-          <span v-if="errores.notas" class="notas__error" role="alert">
-            {{ errores.notas }}
-          </span>
-          <span class="texto-suave">
-            {{ valores.notas.length }}/{{ MAX_NOTAS }}
-          </span>
-        </p>
-      </section>
+        <!-- Indicaciones adicionales a los pasajeros. -->
+        <div>
+          <label for="notas" class="block text-xs font-semibold text-[#3E5C76] mb-1">
+            Indicaciones o Notas para los Pasajeros
+          </label>
+          <textarea
+            id="notas"
+            v-model="valores.notas"
+            rows="2"
+            :maxlength="MAX_NOTAS"
+            placeholder="Ej. Espacio en cajuela, salgo puntual terminando clase..."
+            class="w-full p-2.5 text-xs rounded-xl border bg-white outline-none resize-none focus:border-[#1D2D44]"
+            :class="errores.notas ? 'border-red-300' : 'border-[#C9DCE8]'"
+            :aria-invalid="!!errores.notas"
+          ></textarea>
+          <p class="flex justify-between gap-2 text-[10px]">
+            <span v-if="errores.notas" class="font-semibold text-red-600" role="alert">
+              {{ errores.notas }}
+            </span>
+            <span class="ml-auto text-[#4B5563]">{{ valores.notas.length }}/{{ MAX_NOTAS }}</span>
+          </p>
+        </div>
+      </TarjetaSeccion>
 
       <!-- Muestra errores que deben corregirse en el primer paso. -->
       <AlertMessage v-if="errorPaso1" tipo="error">
         <span v-for="m in mensajesPaso1" :key="m">{{ m }}</span>
 
         <!-- Permite regresar a corregir la ruta o el horario. -->
-        <RouterLink :to="{ name: 'publicar-1' }">
+        <RouterLink :to="{ name: 'publicar-1' }" class="font-bold underline">
           Corregir ruta y horario
         </RouterLink>
       </AlertMessage>
@@ -276,97 +254,42 @@ function guardar(publicar: boolean) {
         {{ mensajeDeError(errorGeneral) }}
       </AlertMessage>
 
-      <!-- Botón principal para publicar el viaje. -->
-      <BaseButton
-        type="submit"
-        variante="acento"
-        bloque
-        :cargando="enviando && accion === 'publicar'"
-        :disabled="enviando"
-      >
-        PUBLICAR RUTA EN CAMPUS UTTT
-      </BaseButton>
+      <div class="pt-2 space-y-2">
+        <!-- Botón principal para publicar el viaje. -->
+        <BaseButton
+          type="submit"
+          bloque
+          class="!font-bold"
+          :cargando="enviando && accion === 'publicar'"
+          :disabled="enviando"
+        >
+          <Check v-if="!(enviando && accion === 'publicar')" class="w-4 h-4" aria-hidden="true" />
+          <span>Publicar Ruta en Campus UTTT</span>
+        </BaseButton>
 
-      <!-- Permite guardar los datos sin publicar todavía el viaje. -->
-      <BaseButton
-        variante="secundario"
-        bloque
-        :cargando="enviando && accion === 'borrador'"
-        :disabled="enviando"
-        @click="guardar(false)"
-      >
-        Cancelar y guardar borrador
-      </BaseButton>
+        <!-- Permite guardar los datos sin publicar todavía el viaje. -->
+        <button
+          type="button"
+          class="w-full py-2 rounded-xl text-xs font-semibold text-[#4B5563] hover:text-[#1D2D44] disabled:opacity-55 flex items-center justify-center gap-2"
+          :disabled="enviando"
+          @click="guardar(false)"
+        >
+          <span
+            v-if="enviando && accion === 'borrador'"
+            class="w-3.5 h-3.5 border-2 border-current border-r-transparent rounded-full animate-spin"
+            aria-hidden="true"
+          />
+          Cancelar y Guardar Borrador
+        </button>
 
-      <!-- Enlace para regresar al primer paso sin enviar el formulario. -->
-      <RouterLink :to="{ name: 'publicar-1' }" class="centrado">
-        Volver al paso 1
-      </RouterLink>
+        <!-- Enlace para regresar al primer paso sin enviar el formulario. -->
+        <RouterLink
+          :to="{ name: 'publicar-1' }"
+          class="block text-center text-xs text-[#3E5C76] hover:underline"
+        >
+          Volver al paso 1
+        </RouterLink>
+      </div>
     </form>
   </main>
 </template>
-
-<style scoped>
-/* Organiza verticalmente las opciones de vehículos. */
-.vehiculos {
-  display: flex;
-  flex-direction: column;
-  gap: var(--espacio-2);
-  margin: 0;
-  padding: 0;
-  border: 0;
-}
-
-/* Define el aspecto de cada opción de vehículo. */
-.vehiculos__opcion {
-  padding: var(--espacio-3);
-  border: 2px solid var(--color-borde);
-  border-radius: var(--radio-md);
-  cursor: pointer;
-}
-
-/* Resalta visualmente el vehículo seleccionado. */
-.vehiculos__opcion--activa {
-  border-color: var(--color-acento);
-  background: var(--color-acento-claro);
-}
-
-/* Muestra un contorno cuando una opción recibe el foco del teclado. */
-.vehiculos__opcion:has(input:focus-visible) {
-  outline: 3px solid var(--color-acento);
-  outline-offset: 2px;
-}
-
-/* Organiza los elementos del apartado de notas en una columna. */
-.notas {
-  display: flex;
-  flex-direction: column;
-  gap: var(--espacio-2);
-}
-
-/* Da estilo al campo de texto de las notas. */
-.notas textarea {
-  width: 100%;
-  padding: var(--espacio-3);
-  border: 1px solid var(--color-borde);
-  border-radius: var(--radio-sm);
-  resize: vertical;
-}
-
-/* Distribuye el mensaje de validación y el contador de caracteres. */
-.notas__pie {
-  display: flex;
-  justify-content: space-between;
-  gap: var(--espacio-2);
-}
-
-/* Resalta los mensajes de error del campo de notas. */
-.notas__error {
-  font-size: 0.8125rem;
-  color: var(--color-error);
-}
-
-.vehiculos__tarjeta {
-  display: block;
-}
-</style>

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, useId } from 'vue'
+import { Plus, Trash2 } from 'lucide-vue-next'
 import { MAX_PARADAS, paradaEsquema } from '../../domain/esquemas'
 
 defineProps<{ error?: string }>()
@@ -28,125 +29,49 @@ function quitar(indice: number) {
 </script>
 
 <template>
-  <div class="paradas">
-    <label :for="id" class="paradas__etiqueta">
-      Paradas intermedias (opcional, máximo {{ MAX_PARADAS }})
+  <div>
+    <label :for="id" class="block text-xs font-semibold text-[#3E5C76] mb-1">
+      Paradas Intermedias (Opcional, máximo {{ MAX_PARADAS }})
     </label>
-    <div class="paradas__agregar">
+    <div class="flex items-center gap-2 mb-2">
       <input
         :id="id"
         v-model="nueva"
-        class="paradas__input"
+        class="flex-1 min-w-0 p-2 text-xs rounded-xl border border-[#C9DCE8] bg-white outline-none focus:border-[#1D2D44] disabled:opacity-60"
         maxlength="100"
         :disabled="llena"
-        :placeholder="llena ? 'Llegaste al máximo de paradas' : 'Ej. Plaza Galerías'"
+        :placeholder="llena ? 'Llegaste al máximo de paradas' : 'Ej. Crucero de Tlahuelilpan'"
         @keydown.enter.prevent="agregar"
       />
       <button
         type="button"
-        class="paradas__mas"
+        class="px-3 py-2 bg-[#3E5C76] text-white rounded-xl text-xs font-bold hover:bg-[#1D2D44] disabled:opacity-50 disabled:cursor-not-allowed"
         aria-label="Agregar parada"
         :disabled="llena"
         @click="agregar"
       >
-        +
+        <Plus class="w-3.5 h-3.5" aria-hidden="true" />
       </button>
     </div>
-    <ul v-if="paradas.length" class="paradas__lista">
-      <li v-for="(p, i) in paradas" :key="`${i}-${p}`" class="chip">
-        <span>{{ p }}</span>
-        <button type="button" class="chip__quitar" :aria-label="`Quitar ${p}`" @click="quitar(i)">
-          ×
+    <ul v-if="paradas.length" class="flex flex-wrap gap-1.5">
+      <li
+        v-for="(p, i) in paradas"
+        :key="`${i}-${p}`"
+        class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#EAF2F8] border border-[#8AA9C4] text-[11px] font-medium text-[#1D2D44] max-w-full"
+      >
+        <span class="truncate">{{ p }}</span>
+        <button
+          type="button"
+          class="text-[#3E5C76] hover:text-red-600"
+          :aria-label="`Quitar ${p}`"
+          @click="quitar(i)"
+        >
+          <Trash2 class="w-3 h-3" aria-hidden="true" />
         </button>
       </li>
     </ul>
-    <p v-if="errorLocal || error" class="paradas__error" role="alert">{{ errorLocal || error }}</p>
+    <p v-if="errorLocal || error" class="text-[10px] font-semibold text-red-600 mt-1" role="alert">
+      {{ errorLocal || error }}
+    </p>
   </div>
 </template>
-
-<style scoped>
-.paradas {
-  display: flex;
-  flex-direction: column;
-  gap: var(--espacio-2);
-}
-
-.paradas__etiqueta {
-  font-size: 0.875rem;
-  font-weight: 600;
-}
-
-.paradas__agregar {
-  display: flex;
-  gap: var(--espacio-2);
-}
-
-.paradas__input {
-  flex: 1;
-  min-width: 0;
-  min-height: 48px;
-  padding: 0 var(--espacio-3);
-  border: 1px solid var(--color-borde);
-  border-radius: var(--radio-sm);
-  background: var(--color-superficie);
-}
-
-.paradas__mas {
-  width: 48px;
-  border: 0;
-  border-radius: var(--radio-sm);
-  background: var(--color-acento);
-  color: #fff;
-  font-size: 1.5rem;
-  cursor: pointer;
-}
-
-.paradas__mas:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.paradas__lista {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--espacio-2);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.chip {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--espacio-1);
-  max-width: 100%;
-  padding: var(--espacio-1) var(--espacio-1) var(--espacio-1) var(--espacio-3);
-  border-radius: var(--radio-pill);
-  background: var(--color-acento-claro);
-  color: var(--color-primario);
-  font-size: 0.875rem;
-  font-weight: 600;
-}
-
-.chip span {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.chip__quitar {
-  width: 28px;
-  height: 28px;
-  border: 0;
-  border-radius: 50%;
-  background: transparent;
-  color: inherit;
-  font-size: 1.125rem;
-  cursor: pointer;
-}
-
-.paradas__error {
-  font-size: 0.8125rem;
-  color: var(--color-error);
-}
-</style>

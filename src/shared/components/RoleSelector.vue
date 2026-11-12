@@ -1,100 +1,44 @@
 <script setup lang="ts">
+import { Car, User } from 'lucide-vue-next'
+
 type RolSeleccionable = 'Pasajero' | 'Conductor'
 
-defineProps<{ etiqueta?: string }>()
+defineProps<{
+  etiqueta?: string
+  /** Variante del registro: textos cortos (Pasajero / Conductor). */ corto?: boolean
+}>()
 const modelo = defineModel<RolSeleccionable>({ required: true })
 
-const opciones: { valor: RolSeleccionable; texto: string }[] = [
-  { valor: 'Pasajero', texto: 'Pasajero UTTT' },
-  { valor: 'Conductor', texto: 'Conductor UTTT' },
+const opciones = [
+  { valor: 'Pasajero' as const, texto: 'Pasajero UTTT', icono: User },
+  { valor: 'Conductor' as const, texto: 'Conductor UTTT', icono: Car },
 ]
 </script>
 
 <template>
-  <fieldset class="roles">
-    <legend v-if="etiqueta" class="roles__etiqueta">{{ etiqueta }}</legend>
-    <div class="roles__opciones">
+  <fieldset>
+    <legend
+      v-if="etiqueta"
+      class="block text-[11px] font-extrabold text-[#3E5C76] uppercase tracking-wider mb-1.5"
+    >
+      {{ etiqueta }}
+    </legend>
+    <div class="grid grid-cols-2 gap-2">
       <label
         v-for="o in opciones"
         :key="o.valor"
-        class="roles__opcion"
-        :class="{ 'roles__opcion--activa': modelo === o.valor }"
+        class="rounded-xl border text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[#0284C7]"
+        :class="[
+          corto ? 'p-2.5' : 'py-2.5 px-3',
+          modelo === o.valor
+            ? 'border-[#1D2D44] bg-[#1D2D44] text-white shadow-xs'
+            : 'border-[#EDEDED] text-[#4B5563] bg-white hover:border-[#8AA9C4]',
+        ]"
       >
         <input v-model="modelo" type="radio" name="rol" :value="o.valor" class="sr-only" />
-        <svg v-if="o.valor === 'Pasajero'" viewBox="0 0 24 24" aria-hidden="true">
-          <circle cx="12" cy="8" r="4" />
-          <path d="M4 21a8 8 0 0 1 16 0" />
-        </svg>
-        <svg v-else viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M5 11l1.5-4.5A2 2 0 0 1 8.4 5h7.2a2 2 0 0 1 1.9 1.5L19 11" />
-          <rect x="3" y="11" width="18" height="6" rx="2" />
-          <circle cx="7.5" cy="17" r="1.5" />
-          <circle cx="16.5" cy="17" r="1.5" />
-        </svg>
-        {{ o.texto }}
+        <component :is="o.icono" class="w-4 h-4" aria-hidden="true" />
+        <span>{{ corto ? o.valor : o.texto }}</span>
       </label>
     </div>
   </fieldset>
 </template>
-
-<style scoped>
-.roles {
-  display: flex;
-  flex-direction: column;
-  gap: var(--espacio-2);
-  margin: 0;
-  padding: 0;
-  border: 0;
-}
-
-.roles__etiqueta {
-  padding: 0;
-  font-size: 0.6875rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--color-texto-suave);
-}
-
-.roles__opciones {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--espacio-1);
-  padding: var(--espacio-1);
-  border-radius: var(--radio-pill);
-  background: #e6ebf2;
-}
-
-.roles__opcion {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--espacio-2);
-  min-height: 44px;
-  border-radius: var(--radio-pill);
-  font-weight: 600;
-  color: var(--color-texto-suave);
-  cursor: pointer;
-}
-
-.roles__opcion svg {
-  width: 18px;
-  height: 18px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.roles__opcion--activa {
-  background: var(--color-primario);
-  color: #fff;
-  box-shadow: var(--sombra-sm);
-}
-
-.roles__opcion:has(input:focus-visible) {
-  outline: 3px solid var(--color-acento);
-  outline-offset: 2px;
-}
-</style>
