@@ -1,9 +1,23 @@
-/* Tokens de diseño de KARider, alineados a los mockups de marca (AI Studio, nov. 2026) */
+/* Tokens de diseño de KARider, alineados a la paleta oficial de identidad (nov. 2026) */
 :root {
-  --color-primario: #152238;
-  --color-primario-claro: #1e3152;
-  --color-acento: #0284c7;
-  --color-acento-claro: #f0f9ff;
+  /* Azules institucionales */
+  --azul-hielo: #eaf2f8;
+  --azul-palido: #c9dce8;
+  --azul-acero: #8aa9c4;
+  --azul-pizarra: #3e5c76;
+  --azul-noche: #1d2d44;
+
+  /* Superficies y neutros */
+  --gris-100: #ededed;
+  --gris-400: #9ca3af;
+  --gris-600: #4b5563;
+  --pizarra-800: #1f2937;
+  --carbon-900: #111827;
+
+  --color-primario: var(--azul-noche);
+  --color-primario-claro: var(--azul-pizarra);
+  --color-acento: var(--azul-pizarra);
+  --color-acento-claro: var(--azul-palido);
   --color-exito: #047857;
   --color-exito-claro: #ecfdf5;
   --color-error: #b91c1c;
@@ -11,12 +25,14 @@
   --color-aviso: #b45309;
   --color-aviso-claro: #fffbeb;
 
-  --color-fondo: #f4f7fa;
+  --color-fondo: var(--azul-hielo);
   --color-superficie: #ffffff;
-  --color-borde: #e2e8f0;
-  --color-texto: #152238;
-  --color-texto-suave: #64748b;
-  --color-deshabilitado: #a7b1bf;
+  --color-oscuro: var(--carbon-900);
+  --color-borde: var(--azul-palido);
+  --color-borde-activo: var(--azul-acero);
+  --color-texto: var(--azul-noche);
+  --color-texto-suave: var(--gris-600);
+  --color-deshabilitado: var(--gris-400);
 
   --radio-sm: 12px;
   --radio-md: 16px;
@@ -30,8 +46,8 @@
   --espacio-5: 24px;
   --espacio-6: 32px;
 
-  --sombra-sm: 0 1px 2px rgb(21 34 56 / 8%);
-  --sombra-md: 0 4px 16px rgb(21 34 56 / 10%);
+  --sombra-sm: 0 1px 2px rgb(29 45 68 / 8%);
+  --sombra-md: 0 4px 16px rgb(29 45 68 / 10%);
 
   --fuente: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue',
     Arial, sans-serif;
