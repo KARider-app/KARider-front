@@ -53,7 +53,8 @@ function dibujar() {
         [origen.latitud, origen.longitud],
         [props.destino.latitud, props.destino.longitud],
       ],
-      { color: '#0284c7', weight: 4, opacity: 0.8, dashArray: '8 8' },
+      // Debe reflejar --color-acento (Leaflet no acepta variables CSS en sus opciones de estilo).
+      { color: '#3e5c76', weight: 4, opacity: 0.8, dashArray: '8 8' },
     ).addTo(capa)
   }
 
@@ -134,15 +135,15 @@ onBeforeUnmount(() => {
 }
 
 .kar-marcador__punto--encuentro {
-  background: #1d2d44;
+  background: var(--color-primario);
 }
 
 .kar-marcador__punto--destino {
-  background: #15803d;
+  background: var(--color-exito);
 }
 
 .kar-marcador__punto--conductor {
-  background: #0284c7;
+  background: var(--color-acento);
   font-size: 1rem;
 }
 </style>
