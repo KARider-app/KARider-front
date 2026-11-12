@@ -1,6 +1,15 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { fechaHora, mxn } from '@/core/utils/formato'
+import {
+  ArrowLeft,
+  Calendar,
+  Car,
+  CircleCheck,
+  GraduationCap,
+  ShieldCheck,
+  Star,
+} from 'lucide-vue-next'
+import { fechaCorta, fechaHora, horaCorta, mxn } from '@/core/utils/formato'
 import AlertMessage from '@/shared/components/AlertMessage.vue'
 import { mensajeDeError } from '@/shared/composables/useApiError'
 import { usePerfil } from '../../application/usePerfil'
@@ -80,476 +89,434 @@ onMounted(() => {
 </script>
 
 <template>
-  <main class="pantalla">
-    <header class="encabezado">
-      <RouterLink :to="{ name: 'inicio' }" class="encabezado__volver">← Volver</RouterLink>
-      <span v-if="perfil?.correoVerificado" class="insignia-verificado">✓ Verificado</span>
+  <main class="flex flex-col min-h-full flex-1 bg-[#F3F7FA] text-[#1D2D44] relative">
+    <header class="bg-[#1D2D44] text-white px-4 pt-4 pb-4 shadow-md shrink-0">
+      <div class="flex items-center justify-between mb-2">
+        <RouterLink
+          :to="{ name: 'inicio' }"
+          class="flex items-center gap-1 text-xs text-[#C9DCE8] hover:text-white transition-colors"
+        >
+          <ArrowLeft class="w-4 h-4" aria-hidden="true" />
+          <span>Volver</span>
+        </RouterLink>
+        <div
+          v-if="perfil?.correoVerificado"
+          class="flex items-center gap-1 bg-emerald-500/20 border border-emerald-400/30 px-2 py-0.5 rounded-full text-[10px] font-bold text-emerald-300"
+        >
+          <ShieldCheck class="w-3.5 h-3.5" aria-hidden="true" />
+          <span>UTTT Verificado</span>
+        </div>
+        <span class="text-[11px] font-mono text-[#8AA9C4]">{{ perfil?.rol }}</span>
+      </div>
+
+      <template v-if="perfil">
+        <div class="flex items-center gap-3 mt-1">
+          <div class="relative shrink-0">
+            <img
+              v-if="perfil.fotoUrl"
+              :src="perfil.fotoUrl"
+              :alt="perfil.nombreCompleto"
+              class="w-14 h-14 rounded-2xl object-cover border-2 border-[#8AA9C4] shadow-sm"
+            />
+            <div
+              v-else
+              class="w-14 h-14 rounded-2xl border-2 border-[#8AA9C4] shadow-sm bg-[#3E5C76] flex items-center justify-center text-lg font-black"
+              aria-hidden="true"
+            >
+              {{ iniciales }}
+            </div>
+            <div
+              v-if="perfil.correoVerificado"
+              class="absolute -bottom-1 -right-1 bg-emerald-500 rounded-full p-1 shadow-xs"
+            >
+              <CircleCheck class="w-3 h-3 text-white" aria-hidden="true" />
+            </div>
+          </div>
+          <div class="flex-1 min-w-0">
+            <h1 class="text-base font-extrabold text-white flex items-center gap-1.5 font-sans">
+              <span class="truncate">{{ perfil.nombreCompleto }}</span>
+            </h1>
+            <p class="text-[11px] text-[#C9DCE8]">
+              {{ perfil.carrera
+              }}<template v-if="perfil.cuatrimestre">
+                • {{ perfil.cuatrimestre }}° Cuatrimestre</template
+              >
+            </p>
+            <div class="flex items-center gap-2 mt-1 flex-wrap">
+              <span class="text-[10px] font-mono bg-white/10 px-2 py-0.5 rounded text-white">
+                Matrícula: {{ perfil.matricula }}
+              </span>
+              <span class="text-[10px] font-bold text-amber-300 flex items-center gap-0.5">
+                <Star class="w-3 h-3 fill-amber-300" aria-hidden="true" />
+                <span>{{ perfil.calificacion.toFixed(1) }} / 5.0</span>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <section
+          class="grid grid-cols-3 gap-2 mt-4 pt-3 border-t border-white/15 text-center"
+          aria-label="Estadísticas"
+        >
+          <div class="bg-white/5 rounded-xl p-1.5">
+            <span class="text-sm font-black text-white block">
+              {{ perfil.estadisticas.viajesRealizados }}
+            </span>
+            <span class="text-[9px] text-[#C9DCE8]">Viajes Hechos</span>
+          </div>
+          <div class="bg-white/5 rounded-xl p-1.5">
+            <span class="text-sm font-black text-emerald-300 block">
+              {{ mxn(perfil.estadisticas.ahorroCombustible) }}
+            </span>
+            <span class="text-[9px] text-[#C9DCE8]">Ahorro Gasolina</span>
+          </div>
+          <div class="bg-white/5 rounded-xl p-1.5">
+            <span class="text-sm font-black text-sky-300 block">
+              {{ perfil.estadisticas.co2EvitadoKg.toFixed(0) }} kg
+            </span>
+            <span class="text-[9px] text-[#C9DCE8]">CO₂ Evitado</span>
+          </div>
+        </section>
+      </template>
     </header>
 
-    <AlertMessage v-if="errorPerfil" tipo="error">{{ mensajeDeError(errorPerfil) }}</AlertMessage>
-    <p v-if="cargandoPerfil && !perfil" class="texto-suave centrado">Cargando tu perfil…</p>
-
-    <template v-if="perfil">
-      <section class="tarjeta identidad">
-        <span class="identidad__avatar" aria-hidden="true">
-          <img v-if="perfil.fotoUrl" :src="perfil.fotoUrl" alt="" />
-          <span v-else>{{ iniciales }}</span>
-        </span>
-        <strong class="identidad__nombre">{{ perfil.nombreCompleto }}</strong>
-        <span class="texto-suave">
-          {{ perfil.carrera }}<template v-if="perfil.cuatrimestre">
-            · {{ perfil.cuatrimestre }}.º cuatrimestre</template
-          >
-        </span>
-        <div class="identidad__fila">
-          <span class="chip-dato">Matrícula: {{ perfil.matricula }}</span>
-          <span class="identidad__estrellas">
-            ★ {{ perfil.calificacion.toFixed(2) }} / 5.0
-            <span class="texto-suave">({{ perfil.totalCalificaciones }})</span>
-          </span>
-        </div>
-      </section>
-
-      <section class="estadisticas" aria-label="Estadísticas">
-        <div class="tarjeta estadistica">
-          <strong class="estadistica__valor">{{ perfil.estadisticas.viajesRealizados }}</strong>
-          <span class="estadistica__etiqueta">Viajes Hechos</span>
-        </div>
-        <div class="tarjeta estadistica estadistica--exito">
-          <strong class="estadistica__valor">{{ mxn(perfil.estadisticas.ahorroCombustible) }}</strong>
-          <span class="estadistica__etiqueta">Ahorro Gasolina</span>
-        </div>
-        <div class="tarjeta estadistica estadistica--acento">
-          <strong class="estadistica__valor">{{ perfil.estadisticas.co2EvitadoKg.toFixed(0) }} kg</strong>
-          <span class="estadistica__etiqueta">CO2 Evitado</span>
-        </div>
-      </section>
-
-      <nav class="pestanas" aria-label="Secciones del perfil">
+    <div v-if="perfil" class="bg-white px-4 py-2 border-b border-[#C9DCE8] shrink-0">
+      <nav
+        class="grid grid-cols-3 gap-1 bg-[#F3F7FA] p-1 rounded-xl border border-[#C9DCE8]"
+        aria-label="Secciones del perfil"
+      >
         <button
           v-for="p in pestanas"
           :key="p.valor"
           type="button"
-          class="pestanas__opcion"
-          :class="{ 'pestanas__opcion--activa': pestana === p.valor }"
+          class="py-1.5 text-xs font-bold rounded-lg transition-all"
+          :class="
+            pestana === p.valor
+              ? 'bg-[#1D2D44] text-white shadow-xs'
+              : 'text-[#4B5563] hover:text-[#1D2D44]'
+          "
+          :aria-pressed="pestana === p.valor"
           @click="cambiarPestana(p.valor)"
         >
           {{ p.texto }}
         </button>
       </nav>
+    </div>
 
-      <!-- Historial Viajes -->
-      <template v-if="pestana === 'historial'">
-        <div class="filtro-rol" role="group" aria-label="Filtrar por rol">
-          <button
-            v-for="f in filtrosRol"
-            :key="f.valor"
-            type="button"
-            class="filtro-rol__opcion"
-            :class="{ 'filtro-rol__opcion--activa': filtroRol === f.valor }"
-            @click="cargarHistorial(f.valor)"
+    <div class="flex-1 p-4 space-y-3 pb-8">
+      <AlertMessage v-if="errorPerfil" tipo="error">{{ mensajeDeError(errorPerfil) }}</AlertMessage>
+      <p v-if="cargandoPerfil && !perfil" class="py-8 text-center text-xs text-[#4B5563]">
+        Cargando tu perfil…
+      </p>
+
+      <template v-if="perfil">
+        <!-- Historial Viajes -->
+        <div v-if="pestana === 'historial'" class="space-y-3">
+          <div class="flex items-center justify-between gap-2">
+            <h2 class="text-xs font-extrabold text-[#1D2D44] font-sans">
+              Registro Histórico de Viajes ({{ historial.length }})
+            </h2>
+            <div class="flex gap-1" role="group" aria-label="Filtrar por rol">
+              <button
+                v-for="f in filtrosRol"
+                :key="f.valor"
+                type="button"
+                class="px-2 py-0.5 rounded-md text-[10px] font-bold capitalize transition-colors"
+                :class="
+                  filtroRol === f.valor
+                    ? 'bg-[#1D2D44] text-white'
+                    : 'bg-white border border-[#C9DCE8] text-[#4B5563]'
+                "
+                :aria-pressed="filtroRol === f.valor"
+                @click="cargarHistorial(f.valor)"
+              >
+                {{ f.texto }}
+              </button>
+            </div>
+          </div>
+
+          <AlertMessage v-if="errorHistorial" tipo="error">
+            {{ mensajeDeError(errorHistorial) }}
+          </AlertMessage>
+          <p v-if="cargandoHistorial" class="py-6 text-center text-xs text-[#4B5563]">Cargando…</p>
+          <p
+            v-else-if="!errorHistorial && historial.length === 0"
+            class="py-6 text-center text-xs text-[#4B5563]"
           >
-            {{ f.texto }}
-          </button>
-        </div>
-
-        <h2 class="seccion-titulo">Registro histórico de viajes ({{ historial.length }})</h2>
-
-        <AlertMessage v-if="errorHistorial" tipo="error">
-          {{ mensajeDeError(errorHistorial) }}
-        </AlertMessage>
-        <p v-if="cargandoHistorial" class="texto-suave centrado">Cargando…</p>
-        <p v-else-if="!errorHistorial && historial.length === 0" class="texto-suave centrado">
-          No hay viajes en esta categoría todavía.
-        </p>
-
-        <ul class="lista">
-          <li v-for="h in historial" :key="h.viajeId" class="tarjeta viaje-historial">
-            <div class="viaje-historial__cabecera">
-              <span class="rol-badge" :class="`rol-badge--${h.rolEnViaje}`">
-                {{ textoRolEnViaje[h.rolEnViaje] }}
-              </span>
-              <strong>{{ mxn(h.monto) }}</strong>
-            </div>
-            <span class="texto-suave">📅 {{ fechaHora(h.fechaSalida) }}</span>
-            <span class="viaje-historial__ruta">
-              <span class="punto punto--origen" aria-hidden="true" /> {{ h.origen }}
-              <br />
-              <span class="punto punto--destino" aria-hidden="true" /> {{ h.destino }}
-            </span>
-
-            <span v-if="h.companero" class="texto-suave">
-              Con: {{ h.companero.nombreCompleto }}
-              <template v-if="h.companero.vehiculo">({{ h.companero.vehiculo }})</template>
-              ★{{ h.companero.calificacion.toFixed(1) }}
-            </span>
-
-            <span v-if="h.aportePagado" class="texto-exito">✓ Aporte de combustible liquidado</span>
-
-            <EvaluarCompanero
-              v-if="h.companero && pendientePara(h.viajeId)"
-              :viaje-id="h.viajeId"
-              :evaluado-id="pendientePara(h.viajeId)!.evaluadoId"
-              :evaluado-nombre="h.companero.nombreCompleto"
-              @calificado="cargarPendientes"
-            />
-          </li>
-        </ul>
-      </template>
-
-      <!-- Calificación Mutua -->
-      <template v-else-if="pestana === 'calificacion'">
-        <AlertMessage v-if="errorReputacion" tipo="error">
-          {{ mensajeDeError(errorReputacion) }}
-        </AlertMessage>
-        <p v-if="cargandoReputacion && !reputacion" class="texto-suave centrado">Cargando…</p>
-
-        <template v-if="reputacion">
-          <section class="tarjeta reputacion">
-            <span class="identidad__estrellas">
-              ★ {{ reputacion.promedio.toFixed(2) }} / 5.0
-              <span class="texto-suave">({{ reputacion.totalCalificaciones }} reseñas)</span>
-            </span>
-            <div v-if="reputacion.etiquetas.length" class="reputacion__etiquetas">
-              <span v-for="e in reputacion.etiquetas" :key="e.etiqueta" class="chip-dato">
-                {{ e.etiqueta }} × {{ e.total }}
-              </span>
-            </div>
-          </section>
-
-          <p v-if="reputacion.resenas.items.length === 0" class="texto-suave centrado">
-            Aún no tienes reseñas.
+            No hay viajes en esta categoría todavía.
           </p>
-          <ul class="lista">
-            <li v-for="r in reputacion.resenas.items" :key="r.id" class="tarjeta resena">
-              <div class="viaje-historial__cabecera">
-                <strong>{{ r.evaluadorNombre }}</strong>
-                <span>★{{ r.estrellas }}</span>
+
+          <ul class="space-y-3">
+            <li
+              v-for="h in historial"
+              :key="h.viajeId"
+              class="p-3.5 rounded-2xl bg-white border border-[#C9DCE8] shadow-xs space-y-2.5"
+            >
+              <div class="flex items-center justify-between gap-2 pb-2 border-b border-[#EDEDED]">
+                <div class="flex items-center gap-1.5 flex-wrap">
+                  <span
+                    class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded"
+                    :class="
+                      h.rolEnViaje === 'Conductor'
+                        ? 'bg-sky-100 text-sky-800'
+                        : 'bg-emerald-100 text-emerald-800'
+                    "
+                  >
+                    {{ textoRolEnViaje[h.rolEnViaje] }}
+                  </span>
+                  <span class="text-[11px] text-[#4B5563] flex items-center gap-1">
+                    <Calendar class="w-3 h-3 text-[#3E5C76]" aria-hidden="true" />
+                    {{ fechaCorta(h.fechaSalida) }} • {{ horaCorta(h.fechaSalida) }}
+                  </span>
+                </div>
+                <span class="text-xs font-black text-emerald-700 shrink-0">
+                  {{ mxn(h.monto) }} MXN
+                </span>
               </div>
-              <span class="texto-suave">{{ r.evaluadorCarrera }} · {{ fechaHora(r.creadoEn) }}</span>
-              <div v-if="r.etiquetas.length" class="reputacion__etiquetas">
-                <span v-for="e in r.etiquetas" :key="e" class="chip-dato">{{ e }}</span>
+              <div class="space-y-1 text-xs">
+                <div class="flex items-center gap-2">
+                  <div class="w-2 h-2 rounded-full bg-[#1D2D44] shrink-0" aria-hidden="true" />
+                  <span class="font-semibold text-[#1D2D44]">{{ h.origen }}</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <div class="w-2 h-2 rounded-full bg-emerald-600 shrink-0" aria-hidden="true" />
+                  <span class="font-semibold text-emerald-800">{{ h.destino }}</span>
+                </div>
               </div>
-              <p v-if="r.comentario">{{ r.comentario }}</p>
+              <div
+                v-if="h.companero"
+                class="text-[11px] text-[#4B5563] bg-[#F8FAFC] p-2 rounded-xl flex items-center justify-between gap-2"
+              >
+                <span>
+                  Con: <strong>{{ h.companero.nombreCompleto }}</strong>
+                  <template v-if="h.companero.vehiculo"> ({{ h.companero.vehiculo }})</template>
+                </span>
+                <span class="flex items-center gap-0.5 text-amber-600 font-bold shrink-0">
+                  <Star class="w-3 h-3 fill-amber-500" aria-hidden="true" />
+                  {{ h.companero.calificacion.toFixed(1) }}
+                </span>
+              </div>
+              <div
+                v-if="h.aportePagado || (h.companero && pendientePara(h.viajeId))"
+                class="pt-1 flex items-center justify-between gap-2"
+              >
+                <span
+                  v-if="h.aportePagado"
+                  class="text-[10px] text-emerald-700 font-semibold flex items-center gap-1"
+                >
+                  <CircleCheck class="w-3 h-3" aria-hidden="true" />
+                  Aporte de combustible liquidado
+                </span>
+                <span v-else />
+                <EvaluarCompanero
+                  v-if="h.companero && pendientePara(h.viajeId)"
+                  :viaje-id="h.viajeId"
+                  :evaluado-id="pendientePara(h.viajeId)!.evaluadoId"
+                  :evaluado-nombre="h.companero.nombreCompleto"
+                  @calificado="cargarPendientes"
+                />
+              </div>
             </li>
           </ul>
-        </template>
-      </template>
+        </div>
 
-      <!-- Credenciales UTTT -->
-      <template v-else>
-        <AlertMessage v-if="errorCredenciales" tipo="error">
-          {{ mensajeDeError(errorCredenciales) }}
-        </AlertMessage>
-        <p v-if="cargandoCredenciales && !credenciales" class="texto-suave centrado">Cargando…</p>
+        <!-- Calificación Mutua -->
+        <div v-else-if="pestana === 'calificacion'" class="space-y-3">
+          <AlertMessage v-if="errorReputacion" tipo="error">
+            {{ mensajeDeError(errorReputacion) }}
+          </AlertMessage>
+          <p
+            v-if="cargandoReputacion && !reputacion"
+            class="py-6 text-center text-xs text-[#4B5563]"
+          >
+            Cargando…
+          </p>
 
-        <template v-if="credenciales">
-          <dl class="datos tarjeta">
-            <div>
-              <dt>Correo institucional</dt>
-              <dd>
-                {{ credenciales.correoInstitucional }}
-                <span v-if="credenciales.correoVerificado" class="texto-exito">✓ Verificado</span>
-              </dd>
-            </div>
-            <div>
-              <dt>Matrícula</dt>
-              <dd>{{ credenciales.matricula }}</dd>
-            </div>
-            <div>
-              <dt>Carrera</dt>
-              <dd>{{ credenciales.carrera }}</dd>
-            </div>
-            <div>
-              <dt>Estatus</dt>
-              <dd>{{ credenciales.estatus }}</dd>
-            </div>
-          </dl>
-
-          <template v-if="credenciales.vehiculos.length">
-            <h2 class="seccion-titulo">Vehículos registrados</h2>
-            <ul class="lista">
-              <li v-for="v in credenciales.vehiculos" :key="v.id" class="tarjeta vehiculo-credencial">
-                <strong>{{ v.modelo }} {{ v.color }} · {{ v.anio }}</strong>
-                <span class="texto-suave">
-                  Placas {{ v.placas }} · {{ v.capacidad }} pasajeros
-                  <span v-if="v.verificado" class="texto-exito">· Verificado</span>
+          <template v-if="reputacion">
+            <section
+              class="p-4 rounded-2xl bg-gradient-to-br from-[#1D2D44] to-[#2A4365] text-white shadow-xs"
+            >
+              <span class="text-[10px] font-bold uppercase tracking-wider text-[#8AA9C4] block">
+                Reputación Institucional UTTT
+              </span>
+              <div class="flex items-baseline gap-2 mt-0.5">
+                <span class="text-3xl font-black text-white">
+                  {{ reputacion.promedio.toFixed(1) }}
                 </span>
+                <span class="text-xs text-amber-300 flex" aria-hidden="true">
+                  {{ '★'.repeat(Math.round(reputacion.promedio)) }}
+                </span>
+              </div>
+              <span class="text-[11px] text-[#C9DCE8] mt-1 block">
+                Basado en {{ reputacion.totalCalificaciones }} evaluaciones mutuas verificadas
+              </span>
+              <div
+                v-if="reputacion.etiquetas.length"
+                class="mt-3 pt-3 border-t border-white/20 flex flex-wrap gap-1.5"
+              >
+                <span
+                  v-for="e in reputacion.etiquetas"
+                  :key="e.etiqueta"
+                  class="px-2 py-0.5 rounded-full bg-white/10 text-[10px] font-medium"
+                >
+                  ✓ {{ e.etiqueta }} × {{ e.total }}
+                </span>
+              </div>
+            </section>
+
+            <h2 class="text-xs font-bold text-[#1D2D44] px-1 font-sans">
+              Comentarios y Reseñas Mutuas Recientes:
+            </h2>
+            <p
+              v-if="reputacion.resenas.items.length === 0"
+              class="py-6 text-center text-xs text-[#4B5563]"
+            >
+              Aún no tienes reseñas.
+            </p>
+            <ul class="space-y-3">
+              <li
+                v-for="r in reputacion.resenas.items"
+                :key="r.id"
+                class="p-3.5 rounded-2xl bg-white border border-[#C9DCE8] shadow-xs space-y-2"
+              >
+                <div class="flex items-start justify-between gap-2">
+                  <div>
+                    <div class="text-xs font-extrabold text-[#1D2D44]">{{ r.evaluadorNombre }}</div>
+                    <div class="text-[10px] text-[#4B5563]">
+                      {{ r.evaluadorCarrera }} •
+                      <span class="font-semibold text-[#0284C7]">{{ fechaHora(r.creadoEn) }}</span>
+                    </div>
+                  </div>
+                  <div
+                    class="flex items-center gap-0.5 text-amber-500 text-xs font-bold shrink-0"
+                    :aria-label="`${r.estrellas} de 5 estrellas`"
+                  >
+                    {{ '★'.repeat(r.estrellas) }}
+                  </div>
+                </div>
+                <p
+                  v-if="r.comentario"
+                  class="text-xs text-[#1D2D44] bg-[#F8FAFC] p-2.5 rounded-xl leading-relaxed italic"
+                >
+                  "{{ r.comentario }}"
+                </p>
+                <div v-if="r.etiquetas.length" class="flex flex-wrap gap-1 pt-1">
+                  <span
+                    v-for="e in r.etiquetas"
+                    :key="e"
+                    class="text-[9px] font-semibold bg-[#EAF2F8] text-[#1D2D44] px-2 py-0.5 rounded-full border border-[#C9DCE8]"
+                  >
+                    {{ e }}
+                  </span>
+                </div>
               </li>
             </ul>
           </template>
-        </template>
+        </div>
+
+        <!-- Credenciales UTTT -->
+        <div v-else class="space-y-3">
+          <AlertMessage v-if="errorCredenciales" tipo="error">
+            {{ mensajeDeError(errorCredenciales) }}
+          </AlertMessage>
+          <p
+            v-if="cargandoCredenciales && !credenciales"
+            class="py-6 text-center text-xs text-[#4B5563]"
+          >
+            Cargando…
+          </p>
+
+          <template v-if="credenciales">
+            <section class="p-4 rounded-2xl bg-white border border-[#C9DCE8] shadow-xs space-y-3">
+              <h2
+                class="flex items-center gap-2 text-xs font-bold text-[#1D2D44] pb-2 border-b border-[#EDEDED] font-sans"
+              >
+                <GraduationCap class="w-4 h-4 text-[#0284C7]" aria-hidden="true" />
+                <span>Ficha Institucional UTTT</span>
+              </h2>
+              <dl class="grid grid-cols-2 gap-2 text-xs">
+                <div class="p-2 rounded-xl bg-[#F8FAFC] min-w-0">
+                  <dt class="text-[10px] text-[#4B5563] block">Correo Oficial</dt>
+                  <dd class="font-bold text-[#1D2D44] truncate block">
+                    {{ credenciales.correoInstitucional }}
+                  </dd>
+                  <dd
+                    v-if="credenciales.correoVerificado"
+                    class="text-[10px] font-semibold text-emerald-700"
+                  >
+                    ✓ Verificado
+                  </dd>
+                </div>
+                <div class="p-2 rounded-xl bg-[#F8FAFC]">
+                  <dt class="text-[10px] text-[#4B5563] block">Matrícula</dt>
+                  <dd class="font-bold text-[#1D2D44]">{{ credenciales.matricula }}</dd>
+                </div>
+                <div class="p-2 rounded-xl bg-[#F8FAFC]">
+                  <dt class="text-[10px] text-[#4B5563] block">Carrera</dt>
+                  <dd class="font-bold text-[#1D2D44]">{{ credenciales.carrera }}</dd>
+                </div>
+                <div class="p-2 rounded-xl bg-[#F8FAFC]">
+                  <dt class="text-[10px] text-[#4B5563] block">Estatus</dt>
+                  <dd class="font-bold text-emerald-700">{{ credenciales.estatus }}</dd>
+                </div>
+              </dl>
+            </section>
+
+            <section
+              v-for="v in credenciales.vehiculos"
+              :key="v.id"
+              class="p-4 rounded-2xl bg-white border border-[#C9DCE8] shadow-xs space-y-3"
+            >
+              <div class="flex items-center justify-between pb-2 border-b border-[#EDEDED]">
+                <h2 class="flex items-center gap-2 text-xs font-bold text-[#1D2D44] font-sans">
+                  <Car class="w-4 h-4 text-[#0284C7]" aria-hidden="true" />
+                  <span>Vehículo para Carpooling</span>
+                </h2>
+                <span
+                  v-if="v.verificado"
+                  class="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded"
+                >
+                  Verificado
+                </span>
+              </div>
+              <dl class="text-xs space-y-1.5">
+                <div class="flex justify-between gap-2">
+                  <dt class="text-[#4B5563]">Auto:</dt>
+                  <dd class="font-bold text-[#1D2D44] text-right">
+                    {{ v.modelo }} ({{ v.color }})
+                  </dd>
+                </div>
+                <div class="flex justify-between gap-2">
+                  <dt class="text-[#4B5563]">Año:</dt>
+                  <dd class="font-semibold text-[#1D2D44]">{{ v.anio }}</dd>
+                </div>
+                <div class="flex justify-between gap-2">
+                  <dt class="text-[#4B5563]">Placas:</dt>
+                  <dd
+                    class="font-mono font-black text-[#1D2D44] bg-[#EAF2F8] px-2 py-0.5 rounded border border-[#C9DCE8]"
+                  >
+                    {{ v.placas }}
+                  </dd>
+                </div>
+                <div class="flex justify-between gap-2">
+                  <dt class="text-[#4B5563]">Capacidad Autorizada:</dt>
+                  <dd class="font-bold text-[#1D2D44]">{{ v.capacidad }} Pasajeros + Conductor</dd>
+                </div>
+              </dl>
+            </section>
+
+            <div
+              class="p-3 rounded-xl bg-[#EAF2F8] border border-[#C9DCE8] flex items-start gap-2.5 text-xs text-[#1D2D44]"
+            >
+              <ShieldCheck class="w-4 h-4 text-[#0284C7] shrink-0 mt-0.5" aria-hidden="true" />
+              <p class="text-[11px] leading-relaxed">
+                Toda la información vehicular y académica está respaldada por el sistema de
+                verificación institucional de la UTTT para garantizar viajes 100% seguros.
+              </p>
+            </div>
+          </template>
+        </div>
       </template>
-    </template>
+    </div>
   </main>
 </template>
-
-<style scoped>
-.encabezado {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.encabezado__volver {
-  color: var(--color-texto-suave);
-  font-size: 0.875rem;
-  font-weight: 600;
-  text-decoration: none;
-}
-
-.insignia-verificado {
-  padding: 2px var(--espacio-3);
-  border-radius: var(--radio-pill);
-  background: var(--color-exito-claro);
-  color: var(--color-exito);
-  font-size: 0.75rem;
-  font-weight: 700;
-}
-
-.identidad {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--espacio-1);
-  text-align: center;
-}
-
-.identidad__avatar {
-  display: grid;
-  place-items: center;
-  width: 72px;
-  height: 72px;
-  margin-bottom: var(--espacio-2);
-  border-radius: 50%;
-  background: var(--color-acento-claro);
-  color: var(--color-primario);
-  font-size: 1.25rem;
-  font-weight: 800;
-  overflow: hidden;
-}
-
-.identidad__avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.identidad__nombre {
-  font-size: 1.125rem;
-}
-
-.identidad__fila {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  gap: var(--espacio-2);
-  margin-top: var(--espacio-2);
-}
-
-.chip-dato {
-  padding: 2px var(--espacio-3);
-  border-radius: var(--radio-pill);
-  background: #e6ebf2;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--color-texto-suave);
-}
-
-.identidad__estrellas {
-  font-weight: 700;
-  color: var(--color-aviso);
-}
-
-.estadisticas {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--espacio-2);
-}
-
-.estadistica {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  text-align: center;
-}
-
-.estadistica__valor {
-  font-size: 1.25rem;
-  color: var(--color-primario);
-}
-
-.estadistica--exito .estadistica__valor {
-  color: var(--color-exito);
-}
-
-.estadistica--acento .estadistica__valor {
-  color: var(--color-acento);
-}
-
-.estadistica__etiqueta {
-  font-size: 0.6875rem;
-  font-weight: 700;
-  letter-spacing: 0.03em;
-  text-transform: uppercase;
-  color: var(--color-texto-suave);
-}
-
-.pestanas {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--espacio-1);
-  padding: var(--espacio-1);
-  border-radius: var(--radio-pill);
-  background: #e6ebf2;
-}
-
-.pestanas__opcion {
-  min-height: 40px;
-  padding: 0 var(--espacio-1);
-  border: 0;
-  border-radius: var(--radio-pill);
-  background: transparent;
-  color: var(--color-texto-suave);
-  font-size: 0.75rem;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.pestanas__opcion--activa {
-  background: var(--color-primario);
-  color: #fff;
-  box-shadow: var(--sombra-sm);
-}
-
-.filtro-rol {
-  display: flex;
-  gap: var(--espacio-2);
-}
-
-.filtro-rol__opcion {
-  padding: var(--espacio-1) var(--espacio-3);
-  border: 1px solid var(--color-borde);
-  border-radius: var(--radio-pill);
-  background: var(--color-superficie);
-  color: var(--color-texto-suave);
-  font-size: 0.8125rem;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.filtro-rol__opcion--activa {
-  border-color: var(--color-primario);
-  background: var(--color-primario);
-  color: #fff;
-}
-
-.seccion-titulo {
-  font-size: 0.9375rem;
-  font-weight: 700;
-}
-
-.lista {
-  display: flex;
-  flex-direction: column;
-  gap: var(--espacio-3);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.viaje-historial,
-.resena,
-.vehiculo-credencial {
-  display: flex;
-  flex-direction: column;
-  gap: var(--espacio-1);
-}
-
-.viaje-historial__cabecera {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--espacio-2);
-}
-
-.rol-badge {
-  padding: 2px var(--espacio-3);
-  border-radius: var(--radio-pill);
-  font-size: 0.6875rem;
-  font-weight: 700;
-  text-transform: uppercase;
-}
-
-.rol-badge--Pasajero {
-  background: var(--color-exito-claro);
-  color: var(--color-exito);
-}
-
-.rol-badge--Conductor {
-  background: var(--color-acento-claro);
-  color: var(--color-acento);
-}
-
-.viaje-historial__ruta {
-  font-size: 0.875rem;
-  line-height: 1.8;
-}
-
-.punto {
-  display: inline-block;
-  width: 8px;
-  height: 8px;
-  margin-right: var(--espacio-1);
-  border-radius: 50%;
-}
-
-.punto--origen {
-  background: var(--color-primario);
-}
-
-.punto--destino {
-  background: var(--color-exito);
-}
-
-.texto-exito {
-  color: var(--color-exito);
-  font-size: 0.8125rem;
-  font-weight: 600;
-}
-
-.reputacion {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--espacio-2);
-  text-align: center;
-}
-
-.reputacion__etiquetas {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: var(--espacio-1);
-}
-
-.datos {
-  display: flex;
-  flex-direction: column;
-  gap: var(--espacio-3);
-  margin: 0;
-}
-
-.datos dt {
-  font-size: 0.8125rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  color: var(--color-texto-suave);
-}
-
-.datos dd {
-  margin: 0;
-}
-</style>

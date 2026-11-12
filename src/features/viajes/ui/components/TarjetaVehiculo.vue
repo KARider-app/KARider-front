@@ -12,61 +12,26 @@ defineProps<{
 </script>
 
 <template>
-  <div class="vehiculo">
-    <svg class="vehiculo__icono" viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M5 17h14M5 17a2 2 0 104 0M15 17a2 2 0 104 0M3 13l2-6h14l2 6v4H3v-4zM3 13h18" />
-    </svg>
-    <div class="vehiculo__datos">
-      <strong
-        >{{ modelo }}<template v-if="anio"> {{ anio }}</template></strong
+  <div
+    class="p-2.5 rounded-xl bg-[#F8FAFC] border border-[#EDEDED] flex items-center justify-between gap-2 text-xs"
+  >
+    <div class="min-w-0">
+      <span class="font-bold text-[#1D2D44] block truncate"
+        >{{ modelo }}<template v-if="anio"> {{ anio }}</template></span
       >
-      <span class="texto-suave">{{ color }} · {{ placas }}</span>
+      <span class="text-[10px] text-[#4B5563]">Color {{ color }} • Placas: {{ placas }}</span>
     </div>
-    <span v-if="verificado" class="insignia">Verificado</span>
-    <span v-else class="insignia insignia--pendiente">Sin verificar</span>
+    <span
+      v-if="verificado"
+      class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 shrink-0"
+    >
+      Verificado
+    </span>
+    <span
+      v-else
+      class="text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200 shrink-0"
+    >
+      Sin verificar
+    </span>
   </div>
 </template>
-
-<style scoped>
-.vehiculo {
-  display: flex;
-  align-items: center;
-  gap: var(--espacio-3);
-}
-
-.vehiculo__icono {
-  flex: none;
-  width: 40px;
-  height: 40px;
-  padding: var(--espacio-2);
-  border-radius: var(--radio-md);
-  background: var(--color-acento-claro);
-  fill: none;
-  stroke: var(--color-primario);
-  stroke-width: 1.8;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.vehiculo__datos {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-}
-
-.insignia {
-  flex: none;
-  padding: 2px var(--espacio-2);
-  border-radius: var(--radio-pill);
-  background: var(--color-exito-claro);
-  color: var(--color-exito);
-  font-size: 0.75rem;
-  font-weight: 700;
-}
-
-.insignia--pendiente {
-  background: var(--color-aviso-claro);
-  color: var(--color-aviso);
-}
-</style>

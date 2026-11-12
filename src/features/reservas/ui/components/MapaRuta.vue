@@ -76,7 +76,9 @@ function dibujar() {
 
 onMounted(() => {
   if (!contenedor.value) return
-  mapa = L.map(contenedor.value, { zoomControl: true, attributionControl: true })
+  mapa = L.map(contenedor.value, { zoomControl: false, attributionControl: true })
+  // Zoom a la derecha, como en el mockup del mapa
+  L.control.zoom({ position: 'topright' }).addTo(mapa)
   L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
@@ -97,22 +99,11 @@ onBeforeUnmount(() => {
 <template>
   <div
     ref="contenedor"
-    class="mapa"
+    class="relative w-full h-[290px] bg-[#DDE5EE] overflow-hidden z-0"
     role="img"
     aria-label="Mapa con el punto de encuentro, el destino y la ubicación del conductor"
   />
 </template>
-
-<style scoped>
-.mapa {
-  width: 100%;
-  height: 320px;
-  border: 1px solid var(--color-borde);
-  border-radius: var(--radio-md);
-  overflow: hidden;
-  background: #e6ebf2;
-}
-</style>
 
 <!-- Estilos globales: Leaflet inserta estos nodos fuera del alcance de Vue. -->
 <style>
@@ -128,22 +119,56 @@ onBeforeUnmount(() => {
   height: 32px;
   border: 3px solid #fff;
   border-radius: 50%;
-  box-shadow: 0 2px 6px rgb(29 45 68 / 35%);
+  box-shadow:
+    0 0 0 6px rgb(2 132 199 / 25%),
+    0 2px 6px rgb(29 45 68 / 35%);
   color: #fff;
   font-size: 0.8125rem;
   font-weight: 700;
 }
 
 .kar-marcador__punto--encuentro {
-  background: var(--color-primario);
+  background: #0284c7;
 }
 
 .kar-marcador__punto--destino {
-  background: var(--color-exito);
+  background: #059669;
 }
 
 .kar-marcador__punto--conductor {
-  background: var(--color-acento);
+  background: #1d2d44;
   font-size: 1rem;
+}
+</style>
+
+<!-- Controles de zoom con el estilo de los mockups (botones blancos redondeados). -->
+<style>
+.leaflet-touch .leaflet-bar.leaflet-control-zoom,
+.leaflet-bar.leaflet-control-zoom {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  border: 0;
+  box-shadow: none;
+}
+
+.leaflet-bar.leaflet-control-zoom a,
+.leaflet-touch .leaflet-bar.leaflet-control-zoom a {
+  width: 32px;
+  height: 32px;
+  line-height: 30px;
+  border: 1px solid #c9dce8;
+  border-radius: 12px;
+  background: rgb(255 255 255 / 95%);
+  color: #1d2d44;
+  font-size: 14px;
+  font-weight: 900;
+  box-shadow:
+    0 4px 6px -1px rgb(0 0 0 / 10%),
+    0 2px 4px -2px rgb(0 0 0 / 10%);
+}
+
+.leaflet-bar.leaflet-control-zoom a:hover {
+  background: #eaf2f8;
 }
 </style>
