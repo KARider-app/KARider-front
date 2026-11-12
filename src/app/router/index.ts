@@ -76,6 +76,12 @@ const router = createRouter({
       meta: { requiereSesion: true },
       component: () => import('@/features/reservas/ui/views/MapaReservaView.vue'),
     },
+    {
+      path: '/perfil',
+      name: 'perfil',
+      meta: { requiereSesion: true },
+      component: () => import('@/features/perfil/ui/views/PerfilView.vue'),
+    },
     { path: '/:ruta(.*)*', redirect: { name: 'inicio' } },
     {
       path: '/viajes/:id/editar',

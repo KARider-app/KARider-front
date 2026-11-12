@@ -47,7 +47,11 @@ const opciones = computed<Opcion[]>(() => [
     descripcion: 'Sigue a tu conductor desde tu reserva confirmada',
     destino: { name: 'mis-reservas' },
   },
-  { titulo: 'Mi perfil', descripcion: 'Próximamente' },
+  {
+    titulo: 'Mi perfil',
+    descripcion: 'Estadísticas, historial de viajes y calificaciones',
+    destino: auth.autenticado ? { name: 'perfil' } : { name: 'login' },
+  },
 ])
 </script>
 

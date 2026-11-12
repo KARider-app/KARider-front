@@ -40,7 +40,7 @@ const items = computed<Item[]>(() => [
     : []),
   { clave: 'consultar', texto: 'Consultar', icono: iconos.consultar, destino: { name: 'buscar' } },
   { clave: 'mapa', texto: 'Mapa Ruta', icono: iconos.mapa, destino: { name: 'mis-reservas' } },
-  { clave: 'perfil', texto: 'Perfil', icono: iconos.perfil, proximamente: true },
+  { clave: 'perfil', texto: 'Perfil', icono: iconos.perfil, destino: { name: 'perfil' } },
 ])
 </script>
 
