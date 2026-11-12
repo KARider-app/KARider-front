@@ -3,18 +3,26 @@ withDefaults(defineProps<{ tamano?: 'sm' | 'lg'; etiqueta?: boolean }>(), {
   tamano: 'sm',
   etiqueta: false,
 })
+
+// Binding dinámico: una ruta estática aquí haría que el compilador de Vue la trate
+// como un asset a resolver en build, y falla en Windows por ser absoluta a public/.
+const logoSrc = '/logo-karider.png'
 </script>
 
 <template>
   <div class="logo" :class="`logo--${tamano}`">
-    <span class="logo__icono" aria-hidden="true">
-      <svg viewBox="0 0 24 24">
-        <path d="M5 17h14M5 17a2 2 0 104 0M15 17a2 2 0 104 0M3 13l2-6h14l2 6v4H3v-4zM3 13h18" />
-      </svg>
-      <span class="logo__punto"></span>
-    </span>
+    <img class="logo__icono" :src="logoSrc" alt="" aria-hidden="true" width="48" height="48" />
     <span class="logo__texto">
-      <strong class="logo__marca">KAR<span class="logo__acento">i</span>der</strong>
+      <strong class="logo__marca" aria-label="KARider">
+        KAR<span class="logo__i">
+          <svg class="logo__pin" viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              d="M12 2c-3.3 0-6 2.7-6 6 0 4.5 6 12 6 12s6-7.5 6-12c0-3.3-2.7-6-6-6z"
+            />
+          </svg>
+          ı</span
+        >der
+      </strong>
       <span v-if="etiqueta" class="logo__etiqueta">Carpooling UTTT</span>
     </span>
   </div>
@@ -34,47 +42,15 @@ withDefaults(defineProps<{ tamano?: 'sm' | 'lg'; etiqueta?: boolean }>(), {
 }
 
 .logo__icono {
-  position: relative;
-  display: grid;
-  place-items: center;
   flex: none;
   width: 32px;
   height: 32px;
-  border: 2px solid var(--color-primario);
-  border-radius: var(--radio-sm);
-  color: var(--color-primario);
+  object-fit: contain;
 }
 
 .logo--lg .logo__icono {
-  width: 48px;
-  height: 48px;
-  border-radius: var(--radio-md);
-}
-
-.logo__icono svg {
-  width: 18px;
-  height: 18px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.logo--lg .logo__icono svg {
-  width: 26px;
-  height: 26px;
-}
-
-.logo__punto {
-  position: absolute;
-  bottom: -3px;
-  right: -3px;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: var(--color-acento);
-  border: 2px solid var(--color-superficie);
+  width: 56px;
+  height: 56px;
 }
 
 .logo__texto {
@@ -99,8 +75,19 @@ withDefaults(defineProps<{ tamano?: 'sm' | 'lg'; etiqueta?: boolean }>(), {
   font-size: 1.5rem;
 }
 
-.logo__acento {
-  color: var(--color-acento);
+.logo__i {
+  position: relative;
+  display: inline-block;
+}
+
+.logo__pin {
+  position: absolute;
+  left: 50%;
+  bottom: 100%;
+  width: 0.5em;
+  height: 0.5em;
+  transform: translateX(-50%);
+  fill: var(--color-acento);
 }
 
 .logo__etiqueta {
