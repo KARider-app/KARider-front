@@ -17,7 +17,7 @@ const calificacion = computed(() =>
 <template>
   <RouterLink
     :to="{ name: 'viaje', params: { id: viaje.id } }"
-    class="block p-4 rounded-2xl bg-white border border-[#C9DCE8] shadow-xs hover:border-[#3E5C76] hover:shadow-md transition-all cursor-pointer group"
+    class="block h-full p-4 rounded-2xl bg-white border border-[#C9DCE8] shadow-xs hover:border-[#3E5C76] hover:shadow-md transition-all cursor-pointer group"
   >
     <div class="flex items-start justify-between gap-2 pb-2.5 border-b border-[#EDEDED]">
       <div class="flex items-center gap-2.5 min-w-0">

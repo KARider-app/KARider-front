@@ -59,32 +59,38 @@ const estiloViaje: Record<EstadoViaje, string> = {
 
 <template>
   <main class="flex flex-col min-h-full flex-1 bg-[#F3F7FA] text-[#1D2D44]">
-    <header class="bg-[#1D2D44] text-white px-5 pt-4 pb-4 rounded-b-2xl shadow-sm">
-      <div class="flex items-center justify-between mb-2">
-        <RouterLink
-          :to="{ name: 'inicio' }"
-          class="flex items-center gap-1.5 text-xs text-[#C9DCE8] hover:text-white"
+    <header
+      class="bg-[#1D2D44] text-white px-5 pt-4 pb-4 rounded-b-2xl md:rounded-none md:px-8 md:py-6 shadow-sm"
+    >
+      <div class="md:max-w-6xl md:mx-auto">
+        <div class="flex items-center justify-between mb-2">
+          <RouterLink
+            :to="{ name: 'inicio' }"
+            class="flex items-center gap-1.5 text-xs text-[#C9DCE8] hover:text-white"
+          >
+            <ArrowLeft class="w-4 h-4" aria-hidden="true" />
+            <span>Volver</span>
+          </RouterLink>
+          <span class="text-xs font-bold uppercase tracking-wider">Mapa Ruta</span>
+          <span class="w-12" />
+        </div>
+        <h1
+          class="text-sm md:text-xl font-extrabold text-white flex items-center gap-1.5 font-sans"
         >
-          <ArrowLeft class="w-4 h-4" aria-hidden="true" />
-          <span>Volver</span>
-        </RouterLink>
-        <span class="text-xs font-bold uppercase tracking-wider">Mapa Ruta</span>
-        <span class="w-12" />
+          <Navigation class="w-4 h-4 text-[#0284C7]" aria-hidden="true" />
+          <span>{{ auth.esConductor ? 'Mapa de mis rutas' : 'Mis reservas' }}</span>
+        </h1>
+        <p class="text-xs text-[#C9DCE8] mt-0.5">
+          {{
+            auth.esConductor
+              ? 'Entra a una ruta programada o en curso para compartir tu ubicación.'
+              : 'Entra a una reserva confirmada para ver el mapa de tu viaje.'
+          }}
+        </p>
       </div>
-      <h1 class="text-sm font-extrabold text-white flex items-center gap-1.5 font-sans">
-        <Navigation class="w-4 h-4 text-[#0284C7]" aria-hidden="true" />
-        <span>{{ auth.esConductor ? 'Mapa de mis rutas' : 'Mis reservas' }}</span>
-      </h1>
-      <p class="text-xs text-[#C9DCE8] mt-0.5">
-        {{
-          auth.esConductor
-            ? 'Entra a una ruta programada o en curso para compartir tu ubicación.'
-            : 'Entra a una reserva confirmada para ver el mapa de tu viaje.'
-        }}
-      </p>
     </header>
 
-    <div class="p-5 space-y-3 flex-1">
+    <div class="p-5 space-y-3 flex-1 md:px-8 md:py-8 md:max-w-[76rem] md:mx-auto md:w-full">
       <template v-if="auth.esConductor">
         <AlertMessage v-if="errorRutas" tipo="error">{{ mensajeDeError(errorRutas) }}</AlertMessage>
         <p v-if="cargandoRutas" class="py-8 text-center text-xs text-[#4B5563]">Cargando…</p>
@@ -102,11 +108,11 @@ const estiloViaje: Record<EstadoViaje, string> = {
           </RouterLink>
         </section>
 
-        <ul class="space-y-3">
+        <ul class="space-y-3 md:space-y-0 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-4">
           <li v-for="v in rutas" :key="v.id">
             <RouterLink
               :to="{ name: 'viaje', params: { id: v.id } }"
-              class="block p-4 rounded-2xl bg-white border border-[#C9DCE8] shadow-xs hover:border-[#3E5C76] hover:shadow-md transition-all group"
+              class="block h-full p-4 rounded-2xl bg-white border border-[#C9DCE8] shadow-xs hover:border-[#3E5C76] hover:shadow-md transition-all group"
             >
               <div class="flex items-start justify-between gap-2">
                 <div class="space-y-1 min-w-0">
@@ -159,11 +165,11 @@ const estiloViaje: Record<EstadoViaje, string> = {
           </RouterLink>
         </section>
 
-        <ul class="space-y-3">
+        <ul class="space-y-3 md:space-y-0 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-4">
           <li v-for="r in reservas" :key="r.id">
             <RouterLink
               :to="{ name: 'mapa-reserva', params: { id: r.id } }"
-              class="block p-4 rounded-2xl bg-white border border-[#C9DCE8] shadow-xs hover:border-[#3E5C76] hover:shadow-md transition-all group"
+              class="block h-full p-4 rounded-2xl bg-white border border-[#C9DCE8] shadow-xs hover:border-[#3E5C76] hover:shadow-md transition-all group"
             >
               <div class="flex items-start justify-between gap-2">
                 <div class="space-y-1 min-w-0">

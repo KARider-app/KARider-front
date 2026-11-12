@@ -90,99 +90,108 @@ onMounted(() => {
 
 <template>
   <main class="flex flex-col min-h-full flex-1 bg-[#F3F7FA] text-[#1D2D44] relative">
-    <header class="bg-[#1D2D44] text-white px-4 pt-4 pb-4 shadow-md shrink-0">
-      <div class="flex items-center justify-between mb-2">
-        <RouterLink
-          :to="{ name: 'inicio' }"
-          class="flex items-center gap-1 text-xs text-[#C9DCE8] hover:text-white transition-colors"
-        >
-          <ArrowLeft class="w-4 h-4" aria-hidden="true" />
-          <span>Volver</span>
-        </RouterLink>
-        <div
-          v-if="perfil?.correoVerificado"
-          class="flex items-center gap-1 bg-emerald-500/20 border border-emerald-400/30 px-2 py-0.5 rounded-full text-[10px] font-bold text-emerald-300"
-        >
-          <ShieldCheck class="w-3.5 h-3.5" aria-hidden="true" />
-          <span>UTTT Verificado</span>
+    <header class="bg-[#1D2D44] text-white px-4 pt-4 pb-4 md:px-8 md:py-6 shadow-md shrink-0">
+      <div class="md:max-w-6xl md:mx-auto">
+        <div class="flex items-center justify-between mb-2">
+          <RouterLink
+            :to="{ name: 'inicio' }"
+            class="flex items-center gap-1 text-xs text-[#C9DCE8] hover:text-white transition-colors"
+          >
+            <ArrowLeft class="w-4 h-4" aria-hidden="true" />
+            <span>Volver</span>
+          </RouterLink>
+          <div
+            v-if="perfil?.correoVerificado"
+            class="flex items-center gap-1 bg-emerald-500/20 border border-emerald-400/30 px-2 py-0.5 rounded-full text-[10px] font-bold text-emerald-300"
+          >
+            <ShieldCheck class="w-3.5 h-3.5" aria-hidden="true" />
+            <span>UTTT Verificado</span>
+          </div>
+          <span class="text-[11px] font-mono text-[#8AA9C4]">{{ perfil?.rol }}</span>
         </div>
-        <span class="text-[11px] font-mono text-[#8AA9C4]">{{ perfil?.rol }}</span>
+
+        <template v-if="perfil">
+          <div class="md:flex md:items-center md:gap-8">
+            <div class="flex items-center gap-3 mt-1 md:flex-1">
+              <div class="relative shrink-0">
+                <img
+                  v-if="perfil.fotoUrl"
+                  :src="perfil.fotoUrl"
+                  :alt="perfil.nombreCompleto"
+                  class="w-14 h-14 md:w-20 md:h-20 rounded-2xl object-cover border-2 border-[#8AA9C4] shadow-sm"
+                />
+                <div
+                  v-else
+                  class="w-14 h-14 md:w-20 md:h-20 rounded-2xl border-2 border-[#8AA9C4] shadow-sm bg-[#3E5C76] flex items-center justify-center text-lg md:text-2xl font-black"
+                  aria-hidden="true"
+                >
+                  {{ iniciales }}
+                </div>
+                <div
+                  v-if="perfil.correoVerificado"
+                  class="absolute -bottom-1 -right-1 bg-emerald-500 rounded-full p-1 shadow-xs"
+                >
+                  <CircleCheck class="w-3 h-3 text-white" aria-hidden="true" />
+                </div>
+              </div>
+              <div class="flex-1 min-w-0">
+                <h1
+                  class="text-base md:text-2xl font-extrabold text-white flex items-center gap-1.5 font-sans"
+                >
+                  <span class="truncate">{{ perfil.nombreCompleto }}</span>
+                </h1>
+                <p class="text-[11px] text-[#C9DCE8]">
+                  {{ perfil.carrera
+                  }}<template v-if="perfil.cuatrimestre">
+                    • {{ perfil.cuatrimestre }}° Cuatrimestre</template
+                  >
+                </p>
+                <div class="flex items-center gap-2 mt-1 flex-wrap">
+                  <span class="text-[10px] font-mono bg-white/10 px-2 py-0.5 rounded text-white">
+                    Matrícula: {{ perfil.matricula }}
+                  </span>
+                  <span class="text-[10px] font-bold text-amber-300 flex items-center gap-0.5">
+                    <Star class="w-3 h-3 fill-amber-300" aria-hidden="true" />
+                    <span>{{ perfil.calificacion.toFixed(1) }} / 5.0</span>
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <section
+              class="grid grid-cols-3 gap-2 mt-4 pt-3 border-t border-white/15 text-center md:mt-0 md:pt-0 md:border-t-0 md:w-[420px] md:shrink-0"
+              aria-label="Estadísticas"
+            >
+              <div class="bg-white/5 rounded-xl p-1.5">
+                <span class="text-sm md:text-xl font-black text-white block">
+                  {{ perfil.estadisticas.viajesRealizados }}
+                </span>
+                <span class="text-[9px] text-[#C9DCE8]">Viajes Hechos</span>
+              </div>
+              <div class="bg-white/5 rounded-xl p-1.5">
+                <span class="text-sm md:text-xl font-black text-emerald-300 block">
+                  {{ mxn(perfil.estadisticas.ahorroCombustible) }}
+                </span>
+                <span class="text-[9px] text-[#C9DCE8]">Ahorro Gasolina</span>
+              </div>
+              <div class="bg-white/5 rounded-xl p-1.5">
+                <span class="text-sm md:text-xl font-black text-sky-300 block">
+                  {{ perfil.estadisticas.co2EvitadoKg.toFixed(0) }} kg
+                </span>
+                <span class="text-[9px] text-[#C9DCE8]">CO₂ Evitado</span>
+              </div>
+            </section>
+          </div>
+        </template>
       </div>
-
-      <template v-if="perfil">
-        <div class="flex items-center gap-3 mt-1">
-          <div class="relative shrink-0">
-            <img
-              v-if="perfil.fotoUrl"
-              :src="perfil.fotoUrl"
-              :alt="perfil.nombreCompleto"
-              class="w-14 h-14 rounded-2xl object-cover border-2 border-[#8AA9C4] shadow-sm"
-            />
-            <div
-              v-else
-              class="w-14 h-14 rounded-2xl border-2 border-[#8AA9C4] shadow-sm bg-[#3E5C76] flex items-center justify-center text-lg font-black"
-              aria-hidden="true"
-            >
-              {{ iniciales }}
-            </div>
-            <div
-              v-if="perfil.correoVerificado"
-              class="absolute -bottom-1 -right-1 bg-emerald-500 rounded-full p-1 shadow-xs"
-            >
-              <CircleCheck class="w-3 h-3 text-white" aria-hidden="true" />
-            </div>
-          </div>
-          <div class="flex-1 min-w-0">
-            <h1 class="text-base font-extrabold text-white flex items-center gap-1.5 font-sans">
-              <span class="truncate">{{ perfil.nombreCompleto }}</span>
-            </h1>
-            <p class="text-[11px] text-[#C9DCE8]">
-              {{ perfil.carrera
-              }}<template v-if="perfil.cuatrimestre">
-                • {{ perfil.cuatrimestre }}° Cuatrimestre</template
-              >
-            </p>
-            <div class="flex items-center gap-2 mt-1 flex-wrap">
-              <span class="text-[10px] font-mono bg-white/10 px-2 py-0.5 rounded text-white">
-                Matrícula: {{ perfil.matricula }}
-              </span>
-              <span class="text-[10px] font-bold text-amber-300 flex items-center gap-0.5">
-                <Star class="w-3 h-3 fill-amber-300" aria-hidden="true" />
-                <span>{{ perfil.calificacion.toFixed(1) }} / 5.0</span>
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <section
-          class="grid grid-cols-3 gap-2 mt-4 pt-3 border-t border-white/15 text-center"
-          aria-label="Estadísticas"
-        >
-          <div class="bg-white/5 rounded-xl p-1.5">
-            <span class="text-sm font-black text-white block">
-              {{ perfil.estadisticas.viajesRealizados }}
-            </span>
-            <span class="text-[9px] text-[#C9DCE8]">Viajes Hechos</span>
-          </div>
-          <div class="bg-white/5 rounded-xl p-1.5">
-            <span class="text-sm font-black text-emerald-300 block">
-              {{ mxn(perfil.estadisticas.ahorroCombustible) }}
-            </span>
-            <span class="text-[9px] text-[#C9DCE8]">Ahorro Gasolina</span>
-          </div>
-          <div class="bg-white/5 rounded-xl p-1.5">
-            <span class="text-sm font-black text-sky-300 block">
-              {{ perfil.estadisticas.co2EvitadoKg.toFixed(0) }} kg
-            </span>
-            <span class="text-[9px] text-[#C9DCE8]">CO₂ Evitado</span>
-          </div>
-        </section>
-      </template>
     </header>
 
-    <div v-if="perfil" class="bg-white px-4 py-2 border-b border-[#C9DCE8] shrink-0">
+    <div
+      v-if="perfil"
+      class="bg-white px-4 py-2 md:px-8 md:py-3 border-b border-[#C9DCE8] shrink-0"
+    >
       <nav
-        class="grid grid-cols-3 gap-1 bg-[#F3F7FA] p-1 rounded-xl border border-[#C9DCE8]"
+        class="grid grid-cols-3 gap-1 bg-[#F3F7FA] p-1 rounded-xl border border-[#C9DCE8] md:max-w-2xl md:mx-auto"
         aria-label="Secciones del perfil"
       >
         <button
@@ -203,7 +212,7 @@ onMounted(() => {
       </nav>
     </div>
 
-    <div class="flex-1 p-4 space-y-3 pb-8">
+    <div class="flex-1 p-4 space-y-3 pb-8 md:px-8 md:py-8 md:max-w-[76rem] md:mx-auto md:w-full">
       <AlertMessage v-if="errorPerfil" tipo="error">{{ mensajeDeError(errorPerfil) }}</AlertMessage>
       <p v-if="cargandoPerfil && !perfil" class="py-8 text-center text-xs text-[#4B5563]">
         Cargando tu perfil…
@@ -246,7 +255,7 @@ onMounted(() => {
             No hay viajes en esta categoría todavía.
           </p>
 
-          <ul class="space-y-3">
+          <ul class="space-y-3 md:space-y-0 md:grid md:grid-cols-2 md:gap-4">
             <li
               v-for="h in historial"
               :key="h.viajeId"
@@ -373,7 +382,7 @@ onMounted(() => {
             >
               Aún no tienes reseñas.
             </p>
-            <ul class="space-y-3">
+            <ul class="space-y-3 md:space-y-0 md:grid md:grid-cols-2 md:gap-4">
               <li
                 v-for="r in reputacion.resenas.items"
                 :key="r.id"

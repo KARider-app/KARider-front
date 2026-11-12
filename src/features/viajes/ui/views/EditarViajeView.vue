@@ -74,7 +74,7 @@ async function guardarCambios() {
       </p>
     </EncabezadoPantalla>
 
-    <div class="p-5 space-y-4 flex-1">
+    <div class="p-5 space-y-4 flex-1 md:px-8 md:py-8 md:max-w-[76rem] md:mx-auto md:w-full">
       <p v-if="cargando && !viaje" class="py-8 text-center text-xs text-[#4B5563]">
         Cargando viaje…
       </p>
@@ -88,15 +88,21 @@ async function guardarCambios() {
         </RouterLink>
       </AlertMessage>
 
-      <form v-if="viaje && editable" class="space-y-4" novalidate @submit.prevent="guardarCambios">
+      <form
+        v-if="viaje && editable"
+        class="space-y-4 md:grid md:grid-cols-2 md:gap-6 md:space-y-0 md:items-start"
+        novalidate
+        @submit.prevent="guardarCambios"
+      >
         <!-- Aviso clave de la HU-09: los cambios importantes se notifican a los pasajeros. -->
-        <AlertMessage v-if="reservados > 0 && cambiosRelevantes" tipo="aviso">
+        <AlertMessage v-if="reservados > 0 && cambiosRelevantes" tipo="aviso" class="md:col-span-2">
           Este viaje ya tiene {{ reservados }}
           {{ reservados === 1 ? 'asiento reservado' : 'asientos reservados' }}. Al guardar, los
           pasajeros serán notificados de los cambios.
         </AlertMessage>
 
         <TarjetaSeccion
+          class="md:row-span-2"
           titulo="Punto de Encuentro y Horario"
           :icono="MapPin"
           color-icono="text-[#0284C7]"
@@ -181,11 +187,11 @@ async function guardarCambios() {
           </div>
         </TarjetaSeccion>
 
-        <AlertMessage v-if="errorGeneral" tipo="error">
+        <AlertMessage v-if="errorGeneral" tipo="error" class="md:col-span-2">
           {{ mensajeDeError(errorGeneral) }}
         </AlertMessage>
 
-        <div class="pt-2 space-y-2">
+        <div class="pt-2 space-y-2 md:col-span-2 md:max-w-md md:mx-auto md:w-full">
           <BaseButton
             type="submit"
             bloque

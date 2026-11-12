@@ -100,19 +100,23 @@ function continuar() {
     </EncabezadoPantalla>
 
     <!-- Evita que el formulario recargue la página al enviarse. -->
-    <form class="p-5 space-y-4 flex-1" novalidate @submit.prevent="continuar">
+    <form
+      class="p-5 space-y-4 flex-1 md:px-8 md:py-8 md:max-w-[76rem] md:mx-auto md:w-full md:grid md:grid-cols-2 md:gap-6 md:space-y-0 md:items-start md:content-start"
+      novalidate
+      @submit.prevent="continuar"
+    >
       <!-- Informa al usuario cuando no tiene vehículos disponibles. -->
-      <AlertMessage v-if="sinVehiculo" tipo="aviso">
+      <AlertMessage class="md:col-span-2" v-if="sinVehiculo" tipo="aviso">
         Aún no tienes un vehículo registrado. Necesitas uno activo para publicar viajes.
       </AlertMessage>
 
       <!-- Muestra los errores relacionados con la carga de vehículos. -->
-      <AlertMessage v-if="store.errorVehiculos" tipo="error">
+      <AlertMessage class="md:col-span-2" v-if="store.errorVehiculos" tipo="error">
         {{ mensajeDeError(store.errorVehiculos) }}
       </AlertMessage>
 
       <!-- Informa si ocurrió un problema al cargar los puntos de encuentro. -->
-      <AlertMessage v-if="catalogos.error" tipo="error">
+      <AlertMessage class="md:col-span-2" v-if="catalogos.error" tipo="error">
         No pudimos cargar los puntos de encuentro.
         {{ mensajeDeError(catalogos.error) }}
       </AlertMessage>
@@ -181,7 +185,7 @@ function continuar() {
       </TarjetaSeccion>
 
       <!-- Envía al paso 2; se desactiva si no hay vehículos disponibles. -->
-      <div class="pt-2 space-y-2">
+      <div class="pt-2 space-y-2 md:col-span-2 md:max-w-md md:mx-auto md:w-full">
         <BaseButton type="submit" bloque :disabled="sinVehiculo" class="!font-bold">
           <span>Continuar</span>
           <ArrowRight class="w-4 h-4" aria-hidden="true" />

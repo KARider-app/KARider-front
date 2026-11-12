@@ -23,7 +23,7 @@ onMounted(cargar)
       </p>
     </EncabezadoPantalla>
 
-    <div class="p-5 space-y-3 flex-1">
+    <div class="p-5 space-y-3 flex-1 md:px-8 md:py-8 md:max-w-[76rem] md:mx-auto md:w-full">
       <AlertMessage v-if="guardado" tipo="exito">Tu viaje se guardó como borrador.</AlertMessage>
       <AlertMessage v-if="error" tipo="error">{{ mensajeDeError(error) }}</AlertMessage>
       <p v-if="cargando" class="py-8 text-center text-xs text-[#4B5563]">Cargando…</p>
@@ -36,11 +36,11 @@ onMounted(cargar)
         <h2 class="text-sm font-bold text-[#1D2D44] font-sans">No tienes borradores guardados</h2>
       </section>
 
-      <ul class="space-y-3">
+      <ul class="space-y-3 md:space-y-0 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-4">
         <li v-for="v in borradores" :key="v.id">
           <RouterLink
             :to="{ name: 'viaje', params: { id: v.id } }"
-            class="block p-4 rounded-2xl bg-white border border-[#C9DCE8] shadow-xs hover:border-[#3E5C76] hover:shadow-md transition-all group"
+            class="block h-full p-4 rounded-2xl bg-white border border-[#C9DCE8] shadow-xs hover:border-[#3E5C76] hover:shadow-md transition-all group"
           >
             <div class="flex items-start justify-between gap-2">
               <div class="space-y-1 min-w-0">
@@ -75,7 +75,7 @@ onMounted(cargar)
 
       <RouterLink
         :to="{ name: 'publicar-1' }"
-        class="w-full py-2.5 px-4 rounded-xl border-2 border-[#1D2D44] text-[#1D2D44] font-bold text-xs hover:bg-[#EAF2F8] transition-all flex items-center justify-center gap-2"
+        class="w-full md:max-w-xs md:mx-auto md:mt-4 py-2.5 px-4 rounded-xl border-2 border-[#1D2D44] text-[#1D2D44] font-bold text-xs hover:bg-[#EAF2F8] transition-all flex items-center justify-center gap-2"
       >
         <CirclePlus class="w-4 h-4" aria-hidden="true" />
         <span>Publicar una ruta nueva</span>
