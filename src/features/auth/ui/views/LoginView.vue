@@ -5,7 +5,6 @@ import { env } from '@/core/config/env'
 import AlertMessage from '@/shared/components/AlertMessage.vue'
 import BaseButton from '@/shared/components/BaseButton.vue'
 import BaseInput from '@/shared/components/BaseInput.vue'
-import LogoKarider from '@/shared/components/LogoKarider.vue'
 import PasswordInput from '@/shared/components/PasswordInput.vue'
 import RoleSelector from '@/shared/components/RoleSelector.vue'
 import { mensajeDeError } from '@/shared/composables/useApiError'
@@ -35,6 +34,10 @@ const { valores, errores, errorGeneral, enviando, validarCampo, enviar } = useFo
 )
 
 const codigoError = computed(() => errorGeneral.value?.code)
+
+// Binding dinámico: una ruta estática aquí haría que el compilador de Vue la trate
+// como un asset a resolver en build, y falla en Windows por ser absoluta a public/.
+const wordmarkSrc = '/logo-karider-texto.png'
 
 /** Solo rutas internas: evita redirecciones abiertas con ?volver=https://… */
 function destinoSeguro(): string {
@@ -75,10 +78,11 @@ function entrarComoPasajero() {
 <template>
   <main class="pantalla">
     <header class="encabezado">
-      <LogoKarider tamano="lg" />
-      <h1 class="pantalla__titulo">Iniciar sesión</h1>
+      <img class="encabezado__wordmark" :src="wordmarkSrc" alt="KARider" />
+      <h1 class="pantalla__titulo">Iniciar Sesión</h1>
       <p class="pantalla__subtitulo">Accede con tu cuenta {{ env.appNombre }} de la UTTT</p>
     </header>
+    <hr class="separador" />
 
     <AlertMessage v-if="verificado" tipo="exito">
       Tu correo quedó verificado. Ya puedes iniciar sesión.
@@ -163,6 +167,19 @@ function entrarComoPasajero() {
   gap: var(--espacio-2);
   padding: var(--espacio-5) 0 var(--espacio-2);
   text-align: center;
+}
+
+.encabezado__wordmark {
+  height: 28px;
+  width: auto;
+  object-fit: contain;
+}
+
+.separador {
+  height: 1px;
+  margin: 0 calc(-1 * var(--espacio-4));
+  border: 0;
+  background: var(--color-borde);
 }
 
 .opciones-login {

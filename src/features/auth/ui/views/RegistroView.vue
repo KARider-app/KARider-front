@@ -79,6 +79,7 @@ function registrar() {
       <h1 class="pantalla__titulo">Registro</h1>
       <p class="pantalla__subtitulo">Crea tu cuenta</p>
     </header>
+    <hr class="separador" />
 
     <form class="formulario" novalidate @submit.prevent="registrar">
       <RoleSelector v-model="valores.rol" etiqueta="¿Cómo usarás KARider principalmente?" />
@@ -143,5 +144,12 @@ function registrar() {
   width: 64px;
   height: 64px;
   object-fit: contain;
+}
+
+.separador {
+  height: 1px;
+  margin: 0 calc(-1 * var(--espacio-4));
+  border: 0;
+  background: var(--color-borde);
 }
 </style>
