@@ -19,6 +19,16 @@ export const viajesApi = {
     apiClient
       .patch<ViajeDetalle>(`/viajes/${encodeURIComponent(id)}/estado`, { estado: 'Programado' })
       .then((r) => r.data),
+  /** HU-11: el conductor marca que ya salió al recorrido. */
+  iniciar: (id: string) =>
+    apiClient
+      .patch<ViajeDetalle>(`/viajes/${encodeURIComponent(id)}/estado`, { estado: 'EnCurso' })
+      .then((r) => r.data),
+  /** HU-11: el conductor marca el viaje como concluido; desbloquea la calificación mutua. */
+  finalizar: (id: string) =>
+    apiClient
+      .patch<ViajeDetalle>(`/viajes/${encodeURIComponent(id)}/estado`, { estado: 'Completado' })
+      .then((r) => r.data),
   misPublicados: (estado?: EstadoViaje, pagina = 1) =>
     apiClient
       .get<PagedResult<ViajeResumen>>('/viajes/publicados', { params: { estado, pagina } })
