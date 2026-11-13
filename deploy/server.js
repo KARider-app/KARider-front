@@ -29,7 +29,8 @@ const CABECERAS = {
     "script-src 'self'",
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: https:",
-    `connect-src 'self' ${API}`,
+    // tile.openstreetmap.org: el service worker descarga los mosaicos del mapa (HU-08)
+    `connect-src 'self' ${API} https://tile.openstreetmap.org`,
     "worker-src 'self'",
     "manifest-src 'self'",
     "frame-ancestors 'none'",
