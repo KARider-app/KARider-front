@@ -117,6 +117,36 @@ export interface BuscarViajesParams {
 }
 
 /** Última posición que compartió el conductor (P8). */
+/** HU-08: punto con nombre de la ruta del viaje. */
+export interface PuntoRuta {
+  latitud: number
+  longitud: number
+  nombre: string
+}
+
+/**
+ * HU-08: ruta real del viaje. `trazo` son pares [latitud, longitud]; si `porCalles` es false, el servicio de
+ * rutas no respondió y el trazo es una línea recta de respaldo.
+ */
+export interface RutaViaje {
+  origen: PuntoRuta
+  destino: PuntoRuta | null
+  paradas: PuntoRuta[]
+  trazo: [number, number][]
+  distanciaKm: number | null
+  duracionMinutos: number | null
+  porCalles: boolean
+}
+
+/** HU-08: llegada estimada del conductor (al punto de encuentro o, si ya va en curso, al destino). */
+export interface LlegadaConductor {
+  objetivo: 'PuntoEncuentro' | 'Destino'
+  trazo: [number, number][]
+  distanciaKm: number
+  duracionMinutos: number
+  porCalles: boolean
+}
+
 export interface UbicacionConductor {
   latitud: number
   longitud: number
