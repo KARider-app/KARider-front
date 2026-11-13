@@ -1,7 +1,11 @@
 import { computed, onBeforeUnmount, ref } from 'vue'
 import { comoApiError, type ApiError } from '@/core/http/apiError'
 import { viajesApi } from '@/features/viajes/api/viajesApi'
-import type { UbicacionConductor } from '@/features/viajes/domain/tipos'
+import type {
+  LlegadaConductor,
+  RutaViaje,
+  UbicacionConductor,
+} from '@/features/viajes/domain/tipos'
 import { reservasApi } from '../api/reservasApi'
 import { distanciaKm, minutosEstimados, type Coordenada } from '../domain/geo'
 import type { Reserva } from '../domain/tipos'
@@ -32,8 +36,15 @@ function guardarCache(viajeId: string, u: UbicacionConductor) {
 export function useMapaReserva() {
   const reserva = ref<Reserva | null>(null)
   const ubicacion = ref<UbicacionConductor | null>(null)
-  /** Coordenadas del destino (si el conductor las capturó al publicar). */
-  const destino = ref<(Coordenada & { nombre: string }) | null>(null)
+  /** Ruta real por calles del viaje (punto de encuentro → paradas → destino). */
+  const ruta = ref<RutaViaje | null>(null)
+  /** La consulta de la ruta ya terminó (con o sin éxito). */
+  const rutaConsultada = ref(false)
+  /** Llegada del conductor calculada por calles (si el servicio de rutas respondió). */
+  const llegada = ref<LlegadaConductor | null>(null)
+  const destino = computed<(Coordenada & { nombre: string }) | null>(
+    () => ruta.value?.destino ?? null,
+  )
   const cargando = ref(false)
   const error = ref<ApiError | null>(null)
   /** El conductor aún no comparte su ubicación (404 VIAJE_UBICACION_NO_DISPONIBLE). */
@@ -51,14 +62,20 @@ export function useMapaReserva() {
     return estado === 'Programado' || estado === 'EnCurso'
   })
 
+  /** Criterio 1: distancia restante por calles; en línea recta solo si el servicio de rutas no respondió. */
   const distancia = computed(() => {
     if (!reserva.value || !ubicacion.value) return null
+    if (llegada.value) return llegada.value.distanciaKm
     return distanciaKm(ubicacion.value, reserva.value.viaje.puntoEncuentro)
   })
 
-  const minutos = computed(() =>
-    distancia.value === null ? null : minutosEstimados(distancia.value),
-  )
+  const minutos = computed(() => {
+    if (llegada.value) return Math.round(llegada.value.duracionMinutos)
+    return distancia.value === null ? null : minutosEstimados(distancia.value)
+  })
+
+  /** La estimación es real (por calles) o de respaldo (línea recta a velocidad urbana). */
+  const estimacionPorCalles = computed(() => llegada.value?.porCalles ?? false)
 
   async function consultarUbicacion() {
     const actual = reserva.value
@@ -70,6 +87,7 @@ export function useMapaReserva() {
       esperandoConductor.value = false
       sinConexion.value = false
       error.value = null
+      await consultarLlegada(actual.viaje.id)
     } catch (e) {
       const err = comoApiError(e)
       if (err.code === 'VIAJE_UBICACION_NO_DISPONIBLE') {
@@ -99,19 +117,23 @@ export function useMapaReserva() {
     temporizador = null
   }
 
-  /** El destino viene en el detalle del viaje; si falla, el mapa se dibuja sin él. */
-  async function cargarDestino(viajeId: string) {
+  /** Si el cálculo por calles falla, se conserva el anterior o se usa la línea recta. */
+  async function consultarLlegada(viajeId: string) {
     try {
-      const d = await viajesApi.detalle(viajeId)
-      if (typeof d.destinoLatitud === 'number' && typeof d.destinoLongitud === 'number') {
-        destino.value = {
-          latitud: d.destinoLatitud,
-          longitud: d.destinoLongitud,
-          nombre: d.destino,
-        }
-      }
+      llegada.value = await viajesApi.llegada(viajeId)
+    } catch {
+      /* respaldo: distancia en línea recta */
+    }
+  }
+
+  /** La ruta se dibuja aparte: si falla, el mapa sigue mostrando el punto de encuentro. */
+  async function cargarRuta(viajeId: string) {
+    try {
+      ruta.value = await viajesApi.ruta(viajeId)
     } catch {
       /* opcional: no bloquea la pantalla */
+    } finally {
+      rutaConsultada.value = true
     }
   }
 
@@ -120,7 +142,7 @@ export function useMapaReserva() {
     error.value = null
     try {
       reserva.value = await reservasApi.obtener(reservaId)
-      void cargarDestino(reserva.value.viaje.id)
+      void cargarRuta(reserva.value.viaje.id)
       if (confirmada.value && viajeActivo.value) {
         await consultarUbicacion()
         programar()
@@ -140,7 +162,11 @@ export function useMapaReserva() {
   return {
     reserva,
     ubicacion,
+    ruta,
+    rutaConsultada,
+    llegada,
     destino,
+    estimacionPorCalles,
     cargando,
     error,
     esperandoConductor,

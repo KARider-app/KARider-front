@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useId } from 'vue'
+import { useId, type Component } from 'vue'
 
 defineOptions({ inheritAttrs: false })
 
@@ -9,6 +9,10 @@ defineProps<{
   placeholder?: string
   error?: string
   ayuda?: string
+  /** Ícono (lucide) dentro del campo, a la izquierda. */
+  icono?: Component
+  /** Etiqueta en azul pizarra y fondo gris claro (formularios de publicar/editar). */
+  suave?: boolean
 }>()
 
 const modelo = defineModel<string | number>({ default: '' })
@@ -16,62 +20,49 @@ const id = useId()
 </script>
 
 <template>
-  <div class="campo" :class="{ 'campo--error': error }">
-    <label class="campo__etiqueta" :for="id">{{ etiqueta }}</label>
-    <select
-      :id="id"
-      v-model="modelo"
-      class="campo__select"
-      :aria-invalid="!!error"
-      :aria-describedby="error || ayuda ? `${id}-msg` : undefined"
-      v-bind="$attrs"
+  <div>
+    <label
+      class="campo__etiqueta block text-xs mb-1"
+      :class="suave ? 'font-semibold text-[#3E5C76]' : 'font-bold text-[#1D2D44]'"
+      :for="id"
+      >{{ etiqueta }}</label
     >
-      <option v-if="placeholder" value="" disabled>{{ placeholder }}</option>
-      <option v-for="o in opciones" :key="o.valor" :value="o.valor">{{ o.texto }}</option>
-    </select>
-    <p v-if="error" :id="`${id}-msg`" class="campo__error" role="alert">{{ error }}</p>
-    <p v-else-if="ayuda" :id="`${id}-msg`" class="campo__ayuda">{{ ayuda }}</p>
+    <div class="relative">
+      <component
+        :is="icono"
+        v-if="icono"
+        class="w-4 h-4 text-[#8AA9C4] absolute left-3 top-3 pointer-events-none"
+        aria-hidden="true"
+      />
+      <select
+        :id="id"
+        v-model="modelo"
+        class="w-full pr-3 py-2.5 text-xs rounded-xl border focus:ring-1 outline-none transition-all"
+        :class="[
+          suave ? 'bg-[#F8FAFC] font-medium' : 'bg-white',
+          icono ? 'pl-9' : 'pl-3',
+          error
+            ? 'border-red-300 focus:border-red-500 focus:ring-red-500'
+            : 'border-[#C9DCE8] focus:border-[#1D2D44] focus:ring-[#1D2D44]',
+        ]"
+        :aria-invalid="!!error"
+        :aria-describedby="error || ayuda ? `${id}-msg` : undefined"
+        v-bind="$attrs"
+      >
+        <option v-if="placeholder" value="" disabled>{{ placeholder }}</option>
+        <option v-for="o in opciones" :key="o.valor" :value="o.valor">{{ o.texto }}</option>
+      </select>
+    </div>
+    <p
+      v-if="error"
+      :id="`${id}-msg`"
+      class="text-[10px] font-semibold text-red-600 mt-1 block"
+      role="alert"
+    >
+      {{ error }}
+    </p>
+    <p v-else-if="ayuda" :id="`${id}-msg`" class="text-[10px] text-[#4B5563] mt-1 block">
+      {{ ayuda }}
+    </p>
   </div>
 </template>
-
-<style scoped>
-.campo {
-  display: flex;
-  flex-direction: column;
-  gap: var(--espacio-1);
-}
-
-.campo__etiqueta {
-  font-size: 0.875rem;
-  font-weight: 600;
-}
-
-.campo__select {
-  width: 100%;
-  min-height: 48px;
-  padding: 0 var(--espacio-3);
-  border: 1px solid var(--color-borde);
-  border-radius: var(--radio-sm);
-  background: var(--color-superficie);
-}
-
-.campo__select:focus {
-  border-color: var(--color-acento);
-  outline: none;
-  box-shadow: 0 0 0 3px var(--color-acento-claro);
-}
-
-.campo--error .campo__select {
-  border-color: var(--color-error);
-}
-
-.campo__error {
-  font-size: 0.8125rem;
-  color: var(--color-error);
-}
-
-.campo__ayuda {
-  font-size: 0.8125rem;
-  color: var(--color-texto-suave);
-}
-</style>

@@ -89,13 +89,16 @@ export function usePerfil() {
     }
   }
 
-  function pendientePara(viajeId: string): CalificacionPendiente | undefined {
-    return pendientes.value.find((p) => p.viajeId === viajeId)
+  /** Compañeros de ese viaje que el usuario aún no califica (un conductor puede tener varios). */
+  function pendientesDe(viajeId: string): CalificacionPendiente[] {
+    return pendientes.value.filter((p) => p.viajeId === viajeId)
   }
 
   async function calificar(request: CalificarRequest) {
     await perfilApi.calificar(request)
-    pendientes.value = pendientes.value.filter((p) => p.viajeId !== request.viajeId)
+    pendientes.value = pendientes.value.filter(
+      (p) => p.viajeId !== request.viajeId || p.evaluadoId !== request.evaluadoId,
+    )
   }
 
   return {
@@ -118,7 +121,7 @@ export function usePerfil() {
     cargarCredenciales,
     pendientes,
     cargarPendientes,
-    pendientePara,
+    pendientesDe,
     calificar,
   }
 }

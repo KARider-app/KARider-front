@@ -41,3 +41,32 @@ export function textoTiempo(minutos: number): string {
   const m = minutos % 60
   return m === 0 ? `${h} h` : `${h} h ${m} min`
 }
+
+const coordenadaTexto = (c: Coordenada) => `${c.latitud.toFixed(6)},${c.longitud.toFixed(6)}`
+
+/**
+ * HU-08: abre la ruta completa del viaje en Google Maps (navegación real), pasando por las paradas.
+ * Sin destino, abre el punto de encuentro.
+ */
+export function enlaceGoogleMaps(
+  origen: Coordenada,
+  destino?: Coordenada | null,
+  paradas: Coordenada[] = [],
+): string {
+  const url = new URL('https://www.google.com/maps/dir/')
+  url.searchParams.set('api', '1')
+  if (destino) {
+    url.searchParams.set('origin', coordenadaTexto(origen))
+    url.searchParams.set('destination', coordenadaTexto(destino))
+    if (paradas.length) url.searchParams.set('waypoints', paradas.map(coordenadaTexto).join('|'))
+  } else {
+    url.searchParams.set('destination', coordenadaTexto(origen))
+  }
+  url.searchParams.set('travelmode', 'driving')
+  return url.toString()
+}
+
+/** HU-08: navega con Waze hasta un punto (Waze no admite paradas intermedias en el enlace). */
+export function enlaceWaze(punto: Coordenada): string {
+  return `https://waze.com/ul?ll=${coordenadaTexto(punto)}&navigate=yes`
+}

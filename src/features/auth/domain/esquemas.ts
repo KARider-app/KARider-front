@@ -31,7 +31,12 @@ export const codigoEsquema = z
   .regex(/^\d{6}$/, 'El código tiene 6 dígitos')
 
 export const vehiculoEsquema = z.object({
-  modelo: z.string().trim().min(1, 'Captura el modelo (ej. Nissan Versa)').max(80),
+  modelo: z
+    .string()
+    .trim()
+    .min(1, 'Captura el modelo (ej. Nissan Versa)')
+    .max(20, 'Máximo 20 caracteres')
+    .regex(/^[\p{L}\s]+$/u, 'Solo letras (sin números)'),
   color: z.string().trim().min(1, 'Captura el color').max(30),
   anio: z.coerce
     .number<unknown>()
@@ -41,7 +46,7 @@ export const vehiculoEsquema = z.object({
   placas: z
     .string()
     .trim()
-    .regex(/^[A-Za-z0-9-]{5,10}$/, 'Entre 5 y 10 letras, números o guiones (ej. HNX-421-C)'),
+    .regex(/^[A-Za-z0-9]{9}$/, 'Exactamente 9 caracteres alfanuméricos (ej. HNX421BCD)'),
   capacidad: z.coerce.number<unknown>().int().min(1, 'Entre 1 y 4').max(4, 'Entre 1 y 4'),
 })
 
@@ -51,21 +56,16 @@ export const registroEsquema = z
     nombreCompleto: z
       .string()
       .trim()
-      .min(3, 'Captura tu nombre completo')
-      .max(120, 'Máximo 120 caracteres')
-      .regex(/^[\p{L}\s.'-]+$/u, 'Solo letras, como en tu credencial'),
+      .length(40, 'Debe tener exactamente 40 letras')
+      .regex(/^[\p{L}\s]+$/u, 'Solo letras, como en tu credencial'),
     matricula: z
       .string()
       .trim()
-      .regex(/^\d{8,10}$/, 'Entre 8 y 10 dígitos'),
+      .regex(/^\d{8}$/, 'Exactamente 8 dígitos'),
     telefono: z
       .string()
       .trim()
-      .regex(/^\+?[0-9\s-]{10,18}$/, 'Número de 10 dígitos')
-      .refine((t) => {
-        const digitos = t.replace(/\D/g, '').length
-        return digitos >= 10 && digitos <= 13
-      }, 'Entre 10 y 13 dígitos'),
+      .regex(/^\d{10}$/, 'Exactamente 10 dígitos, sin letras'),
     carreraId: z.coerce.number<unknown>().int().positive('Selecciona tu carrera'),
     cuatrimestre: z.preprocess(
       vacioComoIndefinido,

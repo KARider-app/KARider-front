@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { Navigation } from 'lucide-vue-next'
 import { mxn } from '@/core/utils/formato'
 import AlertMessage from '@/shared/components/AlertMessage.vue'
 import BaseButton from '@/shared/components/BaseButton.vue'
@@ -9,7 +10,11 @@ import { useReservar } from '../../application/useReservar'
 import { MAX_ASIENTOS_POR_RESERVA, maximoReservable, montoEstimado } from '../../domain/asientos'
 import type { Reserva } from '../../domain/tipos'
 
-const props = defineProps<{ viaje: ViajeDetalle }>()
+const props = defineProps<{
+  viaje: ViajeDetalle
+  /** En PC se muestra como tarjeta en la columna lateral (no fijo abajo). */
+  lateral?: boolean
+}>()
 const emit = defineEmits<{
   reservada: [reserva: Reserva]
   /** El cupo cambió mientras el pasajero decidía: hay que volver a pedir el viaje. */
@@ -39,27 +44,43 @@ async function apartar() {
 </script>
 
 <template>
-  <section class="tarjeta panel" aria-label="Reserva">
+  <section
+    class="p-4 bg-white"
+    :class="
+      lateral
+        ? 'rounded-2xl border border-[#C9DCE8] shadow-md'
+        : 'sticky bottom-(--alto-nav) md:bottom-0 z-10 border-t border-[#C9DCE8] shadow-lg md:px-8 md:[&>*]:max-w-3xl md:[&>*]:mx-auto'
+    "
+    aria-label="Reserva"
+  >
     <!-- Ya tiene una reserva activa en este viaje -->
-    <template v-if="reservaActiva">
-      <h2 class="seccion-titulo">Tu reserva</h2>
-      <p class="folio">{{ reservaActiva.folio }}</p>
-      <p>
-        {{ reservaActiva.asientos }}
-        {{ reservaActiva.asientos === 1 ? 'asiento' : 'asientos' }} ·
-        {{ mxn(reservaActiva.montoAporte) }}
-      </p>
+    <div v-if="reservaActiva" class="space-y-3">
+      <div class="flex items-center justify-between gap-2">
+        <div class="text-xs">
+          <span class="text-[#4B5563] block text-[10px]">Tu reserva</span>
+          <span class="font-mono font-black text-sm text-[#1D2D44]">{{ reservaActiva.folio }}</span>
+        </div>
+        <div class="text-right text-xs">
+          <span class="text-[#4B5563] block text-[10px]">
+            {{ reservaActiva.asientos }} {{ reservaActiva.asientos === 1 ? 'asiento' : 'asientos' }}
+          </span>
+          <span class="text-lg font-black text-[#1D2D44]">
+            {{ mxn(reservaActiva.montoAporte) }} MXN
+          </span>
+        </div>
+      </div>
       <AlertMessage v-if="reservaActiva.estado === 'Pendiente'" tipo="info">
         Tu solicitud está pendiente: el conductor debe aceptarla. Te avisaremos cuando responda.
       </AlertMessage>
       <RouterLink
         v-else
         :to="{ name: 'mapa-reserva', params: { id: reservaActiva.id } }"
-        class="enlace-boton"
+        class="w-full py-3 rounded-xl bg-[#1D2D44] text-white text-xs font-bold uppercase tracking-wider hover:bg-[#3E5C76] transition-all shadow-md shadow-[#1D2D44]/20 flex items-center justify-center gap-2"
       >
-        VER MAPA Y RUTA
+        <Navigation class="w-4 h-4 text-[#8AA9C4]" aria-hidden="true" />
+        <span>Ver Mapa y Ruta</span>
       </RouterLink>
-    </template>
+    </div>
 
     <!-- Viaje que ya no recibe reservas -->
     <AlertMessage v-else-if="!acepta" tipo="aviso">
@@ -70,18 +91,24 @@ async function apartar() {
     >
 
     <!-- Apartar asientos -->
-    <form v-else class="formulario" @submit.prevent="apartar">
-      <fieldset class="selector">
-        <legend class="seccion-titulo">¿Cuántos asientos?</legend>
-        <div class="selector__opciones">
+    <form v-else @submit.prevent="apartar">
+      <div class="flex items-center justify-between mb-3">
+        <div class="text-xs" aria-live="polite">
+          <span class="text-[#4B5563] block text-[10px]">Total de aporte solidario:</span>
+          <span class="text-lg font-black text-[#1D2D44]">{{ mxn(total) }} MXN</span>
+        </div>
+        <fieldset class="flex items-center gap-1">
+          <legend class="text-xs font-semibold text-[#3E5C76] mr-1 float-left">Asientos:</legend>
           <label
             v-for="n in MAX_ASIENTOS_POR_RESERVA"
             :key="n"
-            class="selector__opcion"
-            :class="{
-              'selector__opcion--activa': asientos === n,
-              'selector__opcion--inactiva': n > maximo,
-            }"
+            class="w-7 h-7 rounded-lg text-xs font-bold border flex items-center justify-center has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[#0284C7]"
+            :class="[
+              asientos === n
+                ? 'bg-[#1D2D44] text-white border-[#1D2D44]'
+                : 'bg-[#F8FAFC] text-[#4B5563] border-[#C9DCE8]',
+              n > maximo ? 'opacity-30 cursor-not-allowed' : 'cursor-pointer',
+            ]"
           >
             <input
               v-model="asientos"
@@ -93,91 +120,18 @@ async function apartar() {
             />
             {{ n }}
           </label>
-        </div>
-      </fieldset>
+        </fieldset>
+      </div>
 
-      <p class="total">
-        Aporte total estimado: <strong>{{ mxn(total) }}</strong>
-      </p>
+      <AlertMessage v-if="error" tipo="error" class="mb-3">{{
+        mensajeDeError(error)
+      }}</AlertMessage>
 
-      <AlertMessage v-if="error" tipo="error">{{ mensajeDeError(error) }}</AlertMessage>
-
-      <BaseButton type="submit" variante="acento" bloque :cargando="reservando">
-        APARTAR ASIENTO
+      <BaseButton type="submit" bloque class="!font-bold" :cargando="reservando">
+        <span>Apartar Asiento ({{ asientos }})</span>
+        <span aria-hidden="true">•</span>
+        <span>{{ mxn(total) }} MXN</span>
       </BaseButton>
     </form>
   </section>
 </template>
-
-<style scoped>
-.panel {
-  display: flex;
-  flex-direction: column;
-  gap: var(--espacio-3);
-}
-
-.folio {
-  font-size: 1.25rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-}
-
-.selector {
-  display: flex;
-  flex-direction: column;
-  gap: var(--espacio-2);
-  margin: 0;
-  padding: 0;
-  border: 0;
-}
-
-.selector__opciones {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--espacio-2);
-}
-
-.selector__opcion {
-  display: grid;
-  place-items: center;
-  min-height: 52px;
-  border: 2px solid var(--color-borde);
-  border-radius: var(--radio-md);
-  background: var(--color-superficie);
-  font-size: 1.25rem;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.selector__opcion--activa {
-  border-color: var(--color-primario);
-  background: var(--color-primario);
-  color: #fff;
-}
-
-.selector__opcion--inactiva {
-  cursor: not-allowed;
-  opacity: 0.35;
-}
-
-.selector__opcion:has(input:focus-visible) {
-  outline: 3px solid var(--color-acento);
-  outline-offset: 2px;
-}
-
-.total {
-  text-align: center;
-}
-
-.enlace-boton {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 48px;
-  border-radius: var(--radio-md);
-  background: var(--color-acento);
-  color: #fff;
-  font-weight: 700;
-  text-decoration: none;
-}
-</style>

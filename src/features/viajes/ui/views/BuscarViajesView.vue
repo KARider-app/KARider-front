@@ -5,8 +5,7 @@ import { useAuthStore } from '@/features/auth/application/useAuthStore'
 import { useCatalogosStore } from '@/features/catalogos/application/useCatalogosStore'
 import AlertMessage from '@/shared/components/AlertMessage.vue'
 import BaseButton from '@/shared/components/BaseButton.vue'
-import BaseInput from '@/shared/components/BaseInput.vue'
-import BaseSelect from '@/shared/components/BaseSelect.vue'
+import { ArrowLeft, Car, Search, SlidersHorizontal, X } from 'lucide-vue-next'
 import { mensajeDeError } from '@/shared/composables/useApiError'
 import { useBuscarViajes, type FiltrosViajes } from '../../application/useBuscarViajes'
 import type { OrdenViajes } from '../../domain/tipos'
@@ -30,8 +29,8 @@ const filtros = reactive<{
 
 const ordenes: { valor: OrdenViajes; texto: string }[] = [
   { valor: 'Horario', texto: 'Horario' },
-  { valor: 'MenorAporte', texto: 'Menor aporte' },
-  { valor: 'Calificacion', texto: 'Calificación' },
+  { valor: 'MenorAporte', texto: 'Menor Aporte' },
+  { valor: 'Calificacion', texto: '★ Estrellas' },
 ]
 
 // Catálogo controlado de puntos de encuentro (regla 4): no es texto libre.
@@ -64,225 +63,171 @@ const textoContador = computed(
 const sinResultados = computed(
   () => buscado.value && !cargando.value && !error.value && viajes.value.length === 0,
 )
+
+function limpiarDestino() {
+  filtros.destino = ''
+  void ejecutar()
+}
 </script>
 
 <template>
-  <main class="pantalla">
-    <form class="formulario" role="search" @submit.prevent="ejecutar">
-      <header class="encabezado">
-        <div class="encabezado__fila">
-          <RouterLink :to="{ name: 'inicio' }" class="encabezado__volver">← Volver</RouterLink>
-          <span class="encabezado__titulo">Viajes universitarios</span>
-          <span class="encabezado__contador">{{ total }} disponibles</span>
+  <main class="flex flex-col min-h-full flex-1 bg-[#F3F7FA] text-[#1D2D44]">
+    <form
+      class="bg-[#1D2D44] text-white px-5 pt-4 pb-4 rounded-b-2xl md:rounded-none md:px-8 md:py-6 shadow-sm"
+      role="search"
+      @submit.prevent="ejecutar"
+    >
+      <div class="md:max-w-6xl md:mx-auto">
+        <div class="flex items-center justify-between mb-3">
+          <RouterLink
+            :to="{ name: 'inicio' }"
+            class="flex items-center gap-1.5 text-xs text-[#C9DCE8] hover:text-white"
+          >
+            <ArrowLeft class="w-4 h-4" aria-hidden="true" />
+            <span>Volver</span>
+          </RouterLink>
+          <h1 class="text-xs md:text-base font-bold tracking-wide font-sans">
+            Viajes Universitarios
+          </h1>
+          <span
+            class="text-[11px] font-semibold bg-white/10 px-2.5 py-0.5 rounded-full text-[#C9DCE8]"
+            role="status"
+            aria-live="polite"
+          >
+            {{ total }} disponibles
+          </span>
         </div>
-        <BaseInput
-          v-model="filtros.destino"
-          etiqueta="Destino"
-          class="encabezado__buscador"
-          type="search"
-          placeholder="Buscar destino (Pachuca, Tula, Tepeji, Actopan)…"
-          autocomplete="off"
-          maxlength="100"
-        />
-      </header>
 
-      <div class="formulario tarjeta">
-        <BaseSelect
-          v-model="filtros.puntoEncuentroId"
-          etiqueta="Punto de encuentro"
-          :opciones="opcionesPuntos"
-        />
+        <div class="relative">
+          <label for="buscar-destino" class="sr-only">Destino</label>
+          <Search class="w-4 h-4 text-[#8AA9C4] absolute left-3 top-3" aria-hidden="true" />
+          <input
+            id="buscar-destino"
+            v-model="filtros.destino"
+            type="search"
+            placeholder="Buscar destino (Pachuca, Tula, Tepeji, Actopan)..."
+            autocomplete="off"
+            maxlength="100"
+            class="w-full pl-9 pr-9 py-2 md:py-3 text-xs md:text-sm rounded-xl bg-white text-[#1D2D44] placeholder-[#4B5563] outline-none shadow-inner [&::-webkit-search-cancel-button]:hidden"
+          />
+          <button
+            v-if="filtros.destino"
+            type="button"
+            class="absolute right-3 top-2.5 text-[#4B5563] hover:text-[#1D2D44]"
+            aria-label="Limpiar búsqueda"
+            @click="limpiarDestino"
+          >
+            <X class="w-4 h-4" aria-hidden="true" />
+          </button>
+        </div>
 
-        <fieldset class="orden">
-          <legend class="orden__etiqueta">Ordenar por</legend>
-          <div class="orden__opciones">
-            <label
-              v-for="o in ordenes"
-              :key="o.valor"
-              class="orden__opcion"
-              :class="{ 'orden__opcion--activa': filtros.orden === o.valor }"
-            >
-              <input
-                v-model="filtros.orden"
-                type="radio"
-                name="orden"
-                :value="o.valor"
-                class="sr-only"
-              />
-              {{ o.texto }}
-            </label>
-          </div>
-        </fieldset>
-
-        <BaseButton type="submit" variante="acento" bloque :cargando="cargando">BUSCAR</BaseButton>
+        <!-- Catálogo controlado de puntos de encuentro (regla 4) -->
+        <div
+          class="flex items-center gap-1.5 overflow-x-auto pt-3 pb-1 text-xs [scrollbar-width:none]"
+          role="group"
+          aria-label="Punto de encuentro"
+        >
+          <button
+            v-for="o in opcionesPuntos"
+            :key="o.valor"
+            type="button"
+            class="px-2.5 py-1 rounded-lg font-medium whitespace-nowrap text-[11px] transition-all"
+            :class="
+              Number(filtros.puntoEncuentroId) === o.valor
+                ? 'bg-[#0284C7] text-white font-bold shadow-xs'
+                : 'bg-white/10 text-[#C9DCE8] hover:bg-white/20'
+            "
+            :aria-pressed="Number(filtros.puntoEncuentroId) === o.valor"
+            @click="filtros.puntoEncuentroId = o.valor"
+          >
+            {{ o.texto }}
+          </button>
+        </div>
       </div>
     </form>
 
-    <AlertMessage v-if="error" tipo="error">{{ mensajeDeError(error) }}</AlertMessage>
-
-    <template v-if="buscado && !error">
-      <p v-if="!sinResultados" class="contador" role="status" aria-live="polite">
-        {{ textoContador }}
-      </p>
-
-      <!-- P6: estado vacío -->
-      <section v-if="sinResultados" class="vacio tarjeta" aria-live="polite">
-        <h2>No se encontraron viajes</h2>
-        <p class="texto-suave">
-          Ningún viaje programado coincide con tu búsqueda. Prueba con otro destino o punto de
-          encuentro.
-        </p>
-        <BaseButton
-          v-if="auth.esConductor"
-          variante="secundario"
-          @click="router.push({ name: 'publicar-1' })"
+    <div
+      class="px-5 py-2.5 md:px-8 md:pt-6 md:pb-2 flex items-center justify-between text-xs text-[#3E5C76] md:max-w-[76rem] md:mx-auto md:w-full"
+    >
+      <div class="flex items-center gap-1.5">
+        <SlidersHorizontal class="w-3.5 h-3.5 text-[#8AA9C4]" aria-hidden="true" />
+        <span class="font-semibold text-[11px]">Ordenar por:</span>
+      </div>
+      <div class="flex items-center gap-1" role="group" aria-label="Ordenar por">
+        <button
+          v-for="o in ordenes"
+          :key="o.valor"
+          type="button"
+          class="px-2 py-0.5 rounded text-[10px] font-bold"
+          :class="
+            filtros.orden === o.valor
+              ? 'bg-[#3E5C76] text-white'
+              : 'text-[#4B5563] hover:text-[#1D2D44]'
+          "
+          :aria-pressed="filtros.orden === o.valor"
+          @click="filtros.orden = o.valor"
         >
-          Publicar Ruta
+          {{ o.texto }}
+        </button>
+      </div>
+    </div>
+
+    <div class="p-5 pt-1 space-y-3 flex-1 md:px-8 md:pb-8 md:max-w-[76rem] md:mx-auto md:w-full">
+      <AlertMessage v-if="error" tipo="error">{{ mensajeDeError(error) }}</AlertMessage>
+
+      <template v-if="buscado && !error">
+        <!-- P6: estado vacío -->
+        <section
+          v-if="sinResultados"
+          class="py-12 px-4 text-center rounded-2xl bg-white border border-[#C9DCE8] mt-2"
+          aria-live="polite"
+        >
+          <Car class="w-10 h-10 text-[#8AA9C4] mx-auto mb-2" aria-hidden="true" />
+          <h2 class="text-sm font-bold text-[#1D2D44] font-sans">No se encontraron viajes</h2>
+          <p class="text-xs text-[#4B5563] mt-1 max-w-xs mx-auto">
+            <template v-if="filtros.destino">
+              No hay viajes que coincidan con tu búsqueda hacia "{{ filtros.destino }}".
+            </template>
+            <template v-else>Ningún viaje programado coincide con tu búsqueda.</template>
+            <template v-if="auth.esConductor">
+              ¿Te gustaría publicar esta ruta como conductor?</template
+            >
+            <template v-else>
+              ¿Tienes vehículo? Con una cuenta de conductor puedes publicar tu propia ruta.
+            </template>
+          </p>
+          <button
+            v-if="auth.esConductor"
+            type="button"
+            class="mt-4 px-4 py-2 rounded-xl bg-[#1D2D44] text-white text-xs font-bold hover:bg-[#3E5C76]"
+            @click="router.push({ name: 'publicar-1' })"
+          >
+            Publicar Ruta
+          </button>
+        </section>
+
+        <template v-else>
+          <p class="sr-only" role="status">{{ textoContador }}</p>
+          <ul class="space-y-3 md:space-y-0 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-4">
+            <li v-for="v in viajes" :key="v.id">
+              <TarjetaViaje :viaje="v" />
+            </li>
+          </ul>
+        </template>
+
+        <BaseButton
+          class="md:max-w-xs md:mx-auto md:flex"
+          v-if="tieneSiguiente"
+          variante="secundario"
+          bloque
+          :cargando="cargandoMas"
+          @click="cargarMas(filtrosActuales())"
+        >
+          Ver más viajes
         </BaseButton>
-        <p v-else class="texto-suave">
-          ¿Tienes vehículo? Con una cuenta de conductor puedes publicar tu propia ruta.
-        </p>
-      </section>
+      </template>
 
-      <ul v-else class="lista">
-        <li v-for="v in viajes" :key="v.id">
-          <TarjetaViaje :viaje="v" />
-        </li>
-      </ul>
-
-      <BaseButton
-        v-if="tieneSiguiente"
-        variante="secundario"
-        bloque
-        :cargando="cargandoMas"
-        @click="cargarMas(filtrosActuales())"
-      >
-        Ver más viajes
-      </BaseButton>
-    </template>
-
-    <p v-else-if="cargando" class="texto-suave centrado">Buscando viajes…</p>
+      <p v-else-if="cargando" class="py-8 text-center text-xs text-[#4B5563]">Buscando viajes…</p>
+    </div>
   </main>
 </template>
-
-<style scoped>
-.encabezado {
-  padding: var(--espacio-4) var(--espacio-4) var(--espacio-5);
-  border-radius: var(--radio-lg);
-  background: var(--color-primario);
-  color: #fff;
-  display: flex;
-  flex-direction: column;
-  gap: var(--espacio-3);
-}
-
-.encabezado__fila {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--espacio-2);
-}
-
-.encabezado__volver {
-  color: #c6d2e3;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  text-decoration: none;
-}
-
-.encabezado__titulo {
-  font-size: 0.9375rem;
-  font-weight: 800;
-}
-
-.encabezado__contador {
-  padding: 2px var(--espacio-2);
-  border-radius: var(--radio-pill);
-  background: rgb(255 255 255 / 15%);
-  color: #fff;
-  font-size: 0.6875rem;
-  font-weight: 700;
-  white-space: nowrap;
-}
-
-.encabezado__buscador :deep(.campo__etiqueta) {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-}
-
-.encabezado__buscador :deep(.campo__input) {
-  background: #fff;
-  border-color: transparent;
-}
-
-.orden {
-  display: flex;
-  flex-direction: column;
-  gap: var(--espacio-2);
-  margin: 0;
-  padding: 0;
-  border: 0;
-}
-
-.orden__etiqueta {
-  margin-bottom: var(--espacio-2);
-  padding: 0;
-  font-size: 0.875rem;
-  font-weight: 600;
-}
-
-.orden__opciones {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--espacio-2);
-}
-
-.orden__opcion {
-  display: grid;
-  place-items: center;
-  min-height: 44px;
-  padding: 0 var(--espacio-2);
-  border: 2px solid var(--color-borde);
-  border-radius: var(--radio-md);
-  background: var(--color-superficie);
-  font-size: 0.875rem;
-  font-weight: 600;
-  text-align: center;
-  cursor: pointer;
-}
-
-.orden__opcion--activa {
-  border-color: var(--color-primario);
-  background: var(--color-primario);
-  color: #fff;
-}
-
-.orden__opcion:has(input:focus-visible) {
-  outline: 3px solid var(--color-acento);
-  outline-offset: 2px;
-}
-
-.contador {
-  font-weight: 700;
-}
-
-.lista {
-  display: flex;
-  flex-direction: column;
-  gap: var(--espacio-3);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.vacio {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--espacio-3);
-  text-align: center;
-}
-</style>

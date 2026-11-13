@@ -9,87 +9,32 @@ withDefaults(
   }>(),
   { variante: 'primario', type: 'button', cargando: false, disabled: false, bloque: false },
 )
+
+// Estilos de botón de los mockups
+const variantes = {
+  primario:
+    'py-3 px-4 rounded-xl bg-[#1D2D44] text-white font-extrabold text-xs uppercase tracking-wider hover:bg-[#3E5C76] shadow-md shadow-[#1D2D44]/20',
+  secundario:
+    'py-2.5 px-4 rounded-xl border-2 border-[#1D2D44] text-[#1D2D44] bg-white font-bold text-xs hover:bg-[#EAF2F8]',
+  acento:
+    'py-3 px-4 rounded-xl bg-[#0284C7] text-white font-extrabold text-xs uppercase tracking-wider hover:bg-sky-700 shadow-md shadow-sky-600/20',
+  texto: 'py-1.5 px-2 text-[11px] font-semibold text-[#0284C7] hover:underline',
+} as const
 </script>
 
 <template>
   <button
     :type="type"
-    class="boton"
-    :class="[`boton--${variante}`, { 'boton--bloque': bloque }]"
+    class="inline-flex items-center justify-center gap-2 transition-all disabled:opacity-55 disabled:cursor-not-allowed"
+    :class="[variantes[variante], { 'w-full': bloque }]"
     :disabled="disabled || cargando"
     :aria-busy="cargando"
   >
-    <span v-if="cargando" class="boton__spinner" aria-hidden="true" />
+    <span
+      v-if="cargando"
+      class="w-4 h-4 border-2 border-current border-r-transparent rounded-full animate-spin"
+      aria-hidden="true"
+    />
     <slot />
   </button>
 </template>
-
-<style scoped>
-.boton {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--espacio-2);
-  min-height: 48px;
-  padding: 0 var(--espacio-5);
-  border: 2px solid transparent;
-  border-radius: var(--radio-md);
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  cursor: pointer;
-  transition:
-    background-color 0.15s,
-    opacity 0.15s;
-}
-
-.boton:disabled {
-  cursor: not-allowed;
-  opacity: 0.55;
-}
-
-.boton--bloque {
-  width: 100%;
-}
-
-.boton--primario {
-  background: var(--color-primario);
-  color: #fff;
-}
-
-.boton--primario:not(:disabled):hover {
-  background: var(--color-primario-claro);
-}
-
-.boton--acento {
-  background: var(--color-acento);
-  color: #fff;
-}
-
-.boton--secundario {
-  background: var(--color-superficie);
-  border-color: var(--color-primario);
-  color: var(--color-primario);
-}
-
-.boton--texto {
-  min-height: 40px;
-  padding: 0 var(--espacio-2);
-  background: transparent;
-  color: var(--color-acento);
-}
-
-.boton__spinner {
-  width: 18px;
-  height: 18px;
-  border: 2px solid currentColor;
-  border-right-color: transparent;
-  border-radius: 50%;
-  animation: girar 0.8s linear infinite;
-}
-
-@keyframes girar {
-  to {
-    transform: rotate(360deg);
-  }
-}
-</style>
