@@ -74,9 +74,7 @@ async function montar() {
 }
 
 function campoPor(wrapper: ReturnType<typeof mount>, etiqueta: string) {
-  const label = wrapper
-    .findAll('label.campo__etiqueta')
-    .find((l) => l.text() === etiqueta)
+  const label = wrapper.findAll('label.campo__etiqueta').find((l) => l.text() === etiqueta)
   const id = label!.attributes('for')
   return wrapper.get(`#${id}`)
 }

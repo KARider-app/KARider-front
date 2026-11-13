@@ -6,8 +6,9 @@
 name: Calidad de código (SonarQube Cloud)
 
 on:
+  # Solo develop (rama principal del proyecto en SonarCloud), igual que en KARider-back.
   push:
-    branches: [main, develop]
+    branches: [develop]
   pull_request:
     types: [opened, synchronize, reopened]
   workflow_dispatch:
