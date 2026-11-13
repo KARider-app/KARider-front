@@ -9,10 +9,14 @@ vi.mock('../../../api/viajesApi', () => ({
   viajesApi: {
     detalle: vi.fn<(id: string) => Promise<ViajeDetalle>>(),
     publicarBorrador: vi.fn<(id: string) => Promise<ViajeDetalle>>(),
+    iniciar: vi.fn<(id: string) => Promise<ViajeDetalle>>(),
+    finalizar: vi.fn<(id: string) => Promise<ViajeDetalle>>(),
   },
 }))
 
 const detalle = vi.mocked(viajesApi.detalle)
+const iniciar = vi.mocked(viajesApi.iniciar)
+const finalizar = vi.mocked(viajesApi.finalizar)
 
 const Vacia = { template: '<div />' }
 
@@ -102,5 +106,55 @@ describe('DetalleViajeView (HU-09: entrada a edición)', () => {
     const { wrapper } = await montar('?editado=1')
 
     expect(wrapper.text()).toContain('Cambios guardados.')
+  })
+})
+
+describe('DetalleViajeView (HU-11: iniciar y finalizar viaje)', () => {
+  beforeEach(() => {
+    detalle.mockReset()
+    iniciar.mockReset()
+    finalizar.mockReset()
+  })
+
+  it('el dueño ve Iniciar viaje en un viaje programado y lo pasa a En curso', async () => {
+    detalle.mockResolvedValue(viaje({ estado: 'Programado' }))
+    iniciar.mockResolvedValue(viaje({ estado: 'EnCurso' }))
+    const { wrapper } = await montar()
+
+    const boton = wrapper.findAll('button').find((b) => b.text() === 'Iniciar viaje')
+    expect(boton).toBeTruthy()
+
+    await boton!.trigger('click')
+    await flushPromises()
+    expect(iniciar).toHaveBeenCalledWith('v1')
+    expect(wrapper.text()).toContain('En curso')
+  })
+
+  it('no muestra Iniciar viaje a quien no es el dueño', async () => {
+    detalle.mockResolvedValue(viaje({ estado: 'Programado', esPropietario: false }))
+    const { wrapper } = await montar()
+
+    expect(wrapper.findAll('button').find((b) => b.text() === 'Iniciar viaje')).toBeUndefined()
+  })
+
+  it('el dueño ve Finalizar viaje en un viaje en curso y lo marca como completado', async () => {
+    detalle.mockResolvedValue(viaje({ estado: 'EnCurso' }))
+    finalizar.mockResolvedValue(viaje({ estado: 'Completado' }))
+    const { wrapper } = await montar()
+
+    const boton = wrapper.findAll('button').find((b) => b.text() === 'Finalizar viaje')
+    expect(boton).toBeTruthy()
+
+    await boton!.trigger('click')
+    await flushPromises()
+    expect(finalizar).toHaveBeenCalledWith('v1')
+    expect(wrapper.text()).toContain('Completado')
+  })
+
+  it('no muestra Finalizar viaje en un viaje programado', async () => {
+    detalle.mockResolvedValue(viaje({ estado: 'Programado' }))
+    const { wrapper } = await montar()
+
+    expect(wrapper.findAll('button').find((b) => b.text() === 'Finalizar viaje')).toBeUndefined()
   })
 })

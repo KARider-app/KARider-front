@@ -17,7 +17,18 @@ import type { EstadoViaje } from '../../domain/tipos'
 
 const route = useRoute()
 const router = useRouter()
-const { viaje, cargando, error, publicando, cargar, publicarBorrador } = useDetalleViaje()
+const {
+  viaje,
+  cargando,
+  error,
+  publicando,
+  iniciando,
+  finalizando,
+  cargar,
+  publicarBorrador,
+  iniciarViaje,
+  finalizarViaje,
+} = useDetalleViaje()
 /** En PC el panel de reserva va en la columna lateral; en celular/tablet, fijo abajo. */
 const esEscritorio = useEsEscritorio()
 
@@ -300,7 +311,12 @@ const reservaConMapa = computed(() =>
           <CompartirUbicacion v-if="puedeCompartirUbicacion" :viaje-id="viaje.id" />
 
           <div
-            v-if="(viaje.estado === 'Borrador' && viaje.esPropietario) || editable"
+            v-if="
+              (viaje.estado === 'Borrador' && viaje.esPropietario) ||
+              (viaje.estado === 'Programado' && viaje.esPropietario) ||
+              (viaje.estado === 'EnCurso' && viaje.esPropietario) ||
+              editable
+            "
             class="space-y-2"
           >
             <BaseButton
@@ -311,6 +327,24 @@ const reservaConMapa = computed(() =>
               @click="publicarBorrador"
             >
               Publicar ahora
+            </BaseButton>
+            <BaseButton
+              v-if="viaje.estado === 'Programado' && viaje.esPropietario"
+              variante="acento"
+              bloque
+              :cargando="iniciando"
+              @click="iniciarViaje"
+            >
+              Iniciar viaje
+            </BaseButton>
+            <BaseButton
+              v-if="viaje.estado === 'EnCurso' && viaje.esPropietario"
+              variante="acento"
+              bloque
+              :cargando="finalizando"
+              @click="finalizarViaje"
+            >
+              Finalizar viaje
             </BaseButton>
             <BaseButton
               v-if="editable"
