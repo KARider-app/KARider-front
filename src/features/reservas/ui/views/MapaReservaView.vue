@@ -9,9 +9,11 @@ import {
   CircleCheck,
   Copy,
   MapPin,
+  ExternalLink,
   MessageSquare,
   Navigation,
   Phone,
+  Route,
 } from 'lucide-vue-next'
 import { enlaceLlamada, enlaceWhatsApp } from '@/core/utils/contacto'
 import { fechaHora, horaCorta, mxn } from '@/core/utils/formato'
@@ -19,14 +21,24 @@ import AlertMessage from '@/shared/components/AlertMessage.vue'
 import AvatarUsuario from '@/shared/components/AvatarUsuario.vue'
 import { mensajeDeError } from '@/shared/composables/useApiError'
 import { useMapaReserva } from '../../application/useMapaReserva'
-import { textoDistancia, textoTiempo, type PuntoMapa } from '../../domain/geo'
+import {
+  enlaceGoogleMaps,
+  enlaceWaze,
+  textoDistancia,
+  textoTiempo,
+  type PuntoMapa,
+} from '../../domain/geo'
 import MapaRuta from '../components/MapaRuta.vue'
 
 const route = useRoute()
 const {
   reserva,
   ubicacion,
+  ruta,
+  rutaConsultada,
+  llegada,
   destino,
+  estimacionPorCalles,
   cargando,
   error,
   esperandoConductor,
@@ -70,6 +82,32 @@ const puntoConductor = computed<PuntoMapa | null>(() =>
       }
     : null,
 )
+
+/** Paradas del itinerario ubicadas en el mapa (HU-04). */
+const puntosParadas = computed<PuntoMapa[]>(
+  () =>
+    ruta.value?.paradas.map((p) => ({
+      latitud: p.latitud,
+      longitud: p.longitud,
+      etiqueta: p.nombre,
+    })) ?? [],
+)
+
+/** Camino por calles del conductor; solo mientras el viaje está activo (regla 1). */
+const trazoConductor = computed(() =>
+  viajeActivo.value && ubicacion.value ? (llegada.value?.trazo ?? []) : [],
+)
+
+const textoObjetivo = computed(() =>
+  llegada.value?.objetivo === 'Destino' ? 'Llega al destino en' : 'Llega al punto en',
+)
+
+const urlGoogleMaps = computed(() =>
+  puntoEncuentro.value
+    ? enlaceGoogleMaps(puntoEncuentro.value, puntoDestino.value, puntosParadas.value)
+    : null,
+)
+const urlWaze = computed(() => (puntoEncuentro.value ? enlaceWaze(puntoEncuentro.value) : null))
 
 const textoEstadoReserva = computed(() => {
   switch (reserva.value?.estado) {
@@ -197,7 +235,10 @@ const gpsEnVivo = computed(() => confirmada.value && viajeActivo.value && !!ubic
         <MapaRuta
           :punto-encuentro="puntoEncuentro"
           :destino="puntoDestino"
+          :paradas="puntosParadas"
+          :trazo="ruta?.trazo ?? []"
           :conductor="viajeActivo ? puntoConductor : null"
+          :trazo-conductor="trazoConductor"
         />
         <div
           v-if="viajeActivo && ubicacion"
@@ -212,7 +253,7 @@ const gpsEnVivo = computed(() => confirmada.value && viajeActivo.value && !!ubic
               <div class="leading-tight">
                 <span class="text-[10px] text-[#C9DCE8] block">Conductor en camino:</span>
                 <span class="text-xs font-bold text-white">
-                  Llega en {{ minutos === null ? '—' : `~${textoTiempo(minutos)}` }}
+                  {{ textoObjetivo }} {{ minutos === null ? '—' : `~${textoTiempo(minutos)}` }}
                   <template v-if="distancia !== null">({{ textoDistancia(distancia) }})</template>
                 </span>
               </div>
@@ -323,6 +364,68 @@ const gpsEnVivo = computed(() => confirmada.value && viajeActivo.value && !!ubic
           </div>
         </section>
 
+        <!-- Ruta real del viaje (HU-08) -->
+        <section
+          v-if="confirmada && urlGoogleMaps"
+          class="p-3.5 rounded-2xl bg-white border border-[#C9DCE8] shadow-xs space-y-2.5"
+          aria-label="Ruta del viaje"
+        >
+          <div class="flex items-center justify-between gap-2">
+            <h2
+              class="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-[#0284C7] font-sans"
+            >
+              <Route class="w-3.5 h-3.5" aria-hidden="true" />
+              <span>Ruta del viaje</span>
+            </h2>
+            <span
+              v-if="ruta?.distanciaKm != null && ruta?.duracionMinutos != null"
+              class="text-[11px] font-bold text-[#1D2D44]"
+            >
+              {{ textoDistancia(ruta.distanciaKm) }} · ~{{ textoTiempo(ruta.duracionMinutos) }}
+            </span>
+          </div>
+          <p class="text-[11px] text-[#4B5563] leading-relaxed">
+            <template v-if="ruta && !ruta.destino">
+              No pudimos ubicar «{{ reserva.viaje.destino }}» en el mapa; se muestra el punto de
+              encuentro.
+            </template>
+            <template v-else-if="ruta?.porCalles">
+              Ruta por calles hasta {{ reserva.viaje.destino }}
+              <template v-if="ruta.paradas.length">
+                pasando por {{ ruta.paradas.map((p) => p.nombre).join(', ') }}</template
+              >.
+            </template>
+            <template v-else-if="ruta">
+              El servicio de rutas no respondió; se muestra una línea recta de referencia.
+            </template>
+            <template v-else-if="rutaConsultada">
+              No pudimos cargar la ruta en este momento; puedes abrirla en Google Maps.
+            </template>
+            <template v-else>Cargando la ruta…</template>
+          </p>
+          <div class="grid grid-cols-2 gap-2 text-xs">
+            <a
+              :href="urlGoogleMaps"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="py-1.5 px-3 rounded-xl bg-[#EAF2F8] text-[#1D2D44] font-semibold flex items-center justify-center gap-1.5 hover:bg-[#C9DCE8] transition-colors"
+            >
+              <ExternalLink class="w-3.5 h-3.5 text-[#0284C7]" aria-hidden="true" />
+              <span>Abrir en Google Maps</span>
+            </a>
+            <a
+              v-if="urlWaze"
+              :href="urlWaze"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="py-1.5 px-3 rounded-xl bg-[#EAF2F8] text-[#1D2D44] font-semibold flex items-center justify-center gap-1.5 hover:bg-[#C9DCE8] transition-colors"
+            >
+              <Navigation class="w-3.5 h-3.5 text-[#3E5C76]" aria-hidden="true" />
+              <span>Ir al punto con Waze</span>
+            </a>
+          </div>
+        </section>
+
         <!-- Conductor -->
         <section class="p-3.5 rounded-2xl bg-white border border-[#C9DCE8] shadow-xs">
           <div class="flex items-center justify-between gap-2 pb-3 border-b border-[#EDEDED]">
@@ -377,7 +480,12 @@ const gpsEnVivo = computed(() => confirmada.value && viajeActivo.value && !!ubic
         </section>
 
         <p v-if="viajeActivo && ubicacion" class="text-[10px] text-[#4B5563] text-center">
-          Estimación en línea recta a velocidad urbana. Actualizado
+          {{
+            estimacionPorCalles
+              ? 'Tiempo y distancia calculados por calles (OpenStreetMap).'
+              : 'Estimación en línea recta a velocidad urbana.'
+          }}
+          Actualizado
           {{ fechaHora(ubicacion.actualizadaEn) }}.
         </p>
 
