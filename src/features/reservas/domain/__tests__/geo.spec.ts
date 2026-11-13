@@ -59,7 +59,7 @@ describe('geo (HU-08)', () => {
 
   it('arma el enlace de navegación de Waze', () => {
     expect(enlaceWaze({ latitud: 20.0875, longitud: -99.348 })).toBe(
-      'https://waze.com/ul?ll=20.087500%2C-99.348000&navigate=yes',
+      'https://waze.com/ul?ll=20.087500,-99.348000&navigate=yes',
     )
   })
 })
