@@ -14,6 +14,7 @@ import { useEsEscritorio } from '@/shared/composables/useMediaQuery'
 import { useDetalleViaje } from '../../application/useDetalleViaje'
 import { esEditable } from '../../domain/aporte'
 import type { EstadoViaje } from '../../domain/tipos'
+import MapaRutaViaje from '../components/MapaRutaViaje.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -170,6 +171,9 @@ const reservaConMapa = computed(() =>
           <AlertMessage v-if="folioNuevo && viaje.miReserva" tipo="exito">
             Solicitud enviada. Tu folio es {{ folioNuevo }}.
           </AlertMessage>
+
+          <!-- HU-08: ruta real por calles -->
+          <MapaRutaViaje :viaje-id="viaje.id" />
 
           <!-- Itinerario -->
           <section class="p-4 rounded-2xl bg-white border border-[#C9DCE8] shadow-xs">
