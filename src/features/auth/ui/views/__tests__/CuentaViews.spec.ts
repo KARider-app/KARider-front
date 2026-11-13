@@ -26,11 +26,11 @@ describe('RegistroView (HU-01)', () => {
     expect(wrapper.text()).toContain('Registro y Validación Institucional')
     expect(wrapper.text()).toContain('Datos del Auto del Conductor:')
     expect(wrapper.text()).toContain('Ing. en Software')
-    await escribir(wrapper, 'Placas', 'hnx-421-c')
+    await escribir(wrapper, 'Placas', 'hnx421bcd')
     expect(
-      (wrapper.get('input[placeholder="Placas (ej. HNX-421-C)"]').element as HTMLInputElement)
+      (wrapper.get('input[placeholder="Placas (ej. HNX421BCD)"]').element as HTMLInputElement)
         .value,
-    ).toBe('HNX-421-C')
+    ).toBe('HNX421BCD')
   })
 
   it('valida, avisa del correo duplicado y del fallo de carreras', async () => {

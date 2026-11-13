@@ -50,7 +50,7 @@ const opcionesCuatrimestre = Array.from({ length: 11 }, (_, i) => ({
       :icono="CreditCard"
       class="font-mono"
       inputmode="numeric"
-      maxlength="10"
+      maxlength="8"
       placeholder="22300630"
       @blur="emit('validar', 'matricula')"
     />
@@ -60,9 +60,10 @@ const opcionesCuatrimestre = Array.from({ length: 11 }, (_, i) => ({
       :error="errores.telefono"
       :icono="Phone"
       type="tel"
-      inputmode="tel"
+      inputmode="numeric"
       autocomplete="tel"
-      placeholder="773 123 4567"
+      maxlength="10"
+      placeholder="7731234567"
       @blur="emit('validar', 'telefono')"
     />
   </div>

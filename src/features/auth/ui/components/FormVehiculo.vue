@@ -36,6 +36,7 @@ const opcionesCapacidad = [1, 2, 3, 4].map((n) => ({
         v-model="vehiculo.modelo"
         etiqueta="Modelo"
         :error="errores['vehiculo.modelo']"
+        maxlength="20"
         placeholder="Modelo (ej. Nissan Versa)"
         @blur="emit('validar', 'vehiculo.modelo')"
       />
@@ -46,8 +47,8 @@ const opcionesCapacidad = [1, 2, 3, 4].map((n) => ({
         class="font-mono"
         mayusculas
         autocapitalize="characters"
-        maxlength="10"
-        placeholder="Placas (ej. HNX-421-C)"
+        maxlength="9"
+        placeholder="Placas (ej. HNX421BCD)"
         @blur="emit('validar', 'vehiculo.placas')"
       />
       <BaseInput
