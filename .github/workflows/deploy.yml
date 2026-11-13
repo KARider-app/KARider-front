@@ -40,7 +40,7 @@ jobs:
           VITE_ZONA_HORARIA: America/Mexico_City
 
       - name: Agregar el servidor de la SPA
-        run: cp deploy/server.js deploy/package.json dist/
+        run: cp deploy/server.js deploy/manejador.js deploy/package.json dist/
 
       - uses: azure/webapps-deploy@02a81bead70021f5284939794bcec79c271ab383 # v3.0.8
         with:
