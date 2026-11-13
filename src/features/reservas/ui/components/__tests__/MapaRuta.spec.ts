@@ -7,6 +7,7 @@ const dibujo = vi.hoisted(() => ({
   lineas: [] as { puntos: unknown; opciones: Record<string, unknown> }[],
   marcadores: [] as { titulo: string; html: string }[],
   vistas: [] as unknown[],
+  mosaicos: [] as { url: string; opciones: Record<string, unknown> }[],
   encuadres: 0,
   invalidaciones: 0,
   eliminado: false,
@@ -23,7 +24,10 @@ vi.mock('leaflet', () => {
       remove: () => (dibujo.eliminado = true),
     }),
     control: { zoom: () => conAddTo({}) },
-    tileLayer: () => conAddTo({}),
+    tileLayer: (url: string, opciones: Record<string, unknown>) => {
+      dibujo.mosaicos.push({ url, opciones })
+      return conAddTo({})
+    },
     layerGroup: () => capa,
     divIcon: (o: { html: string }) => o,
     latLngBounds: (p: unknown) => p,
@@ -52,6 +56,7 @@ function reiniciar() {
   dibujo.lineas = []
   dibujo.marcadores = []
   dibujo.vistas = []
+  dibujo.mosaicos = []
   dibujo.encuadres = 0
   dibujo.invalidaciones = 0
   dibujo.eliminado = false
@@ -104,6 +109,15 @@ describe('MapaRuta (HU-08)', () => {
     ])
     expect(dibujo.marcadores[0]!.html).toContain('kar-marcador__punto--parada')
     expect(dibujo.encuadres).toBe(1)
+  })
+
+  it('pide los mosaicos de OpenStreetMap con origen y CORS (si no, OSM los bloquea y el mapa sale gris)', () => {
+    mount(MapaRuta, { props: { puntoEncuentro: encuentro } })
+
+    const mosaico = dibujo.mosaicos[0]!
+    expect(mosaico.url).toBe('https://tile.openstreetmap.org/{z}/{x}/{y}.png')
+    expect(mosaico.opciones.referrerPolicy).toBe('strict-origin-when-cross-origin')
+    expect(mosaico.opciones.crossOrigin).toBe('anonymous')
   })
 
   it('sin ruta por calles traza una línea punteada de referencia', () => {

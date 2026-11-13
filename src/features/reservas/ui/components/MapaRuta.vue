@@ -128,6 +128,11 @@ onMounted(() => {
   L.control.zoom({ position: 'topright' }).addTo(mapa)
   L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
+    // OpenStreetMap bloquea (403 "Access blocked") los mosaicos pedidos sin Referer, y el sitio usa
+    // Referrer-Policy: no-referrer. Solo los mosaicos envían el origen del sitio (sin la ruta de la página).
+    referrerPolicy: 'strict-origin-when-cross-origin',
+    // Petición CORS: así el service worker ve el estado real y nunca guarda en caché un mosaico con error.
+    crossOrigin: 'anonymous',
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
   }).addTo(mapa)
   capa = L.layerGroup().addTo(mapa)
