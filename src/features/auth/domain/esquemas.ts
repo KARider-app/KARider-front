@@ -56,8 +56,7 @@ export const registroEsquema = z
     nombreCompleto: z
       .string()
       .trim()
-      .min(40, 'Mínimo 40 letras')
-      .max(120, 'Máximo 120 caracteres')
+      .length(40, 'Debe tener exactamente 40 letras')
       .regex(/^[\p{L}\s]+$/u, 'Solo letras, como en tu credencial'),
     matricula: z
       .string()
