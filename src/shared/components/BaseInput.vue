@@ -9,6 +9,8 @@ const props = defineProps<{
   ayuda?: string
   /** Convierte a mayúsculas mientras se escribe (ej. placas). */
   mayusculas?: boolean
+  /** Bloquea caracteres no permitidos mientras se escribe (no solo al validar). */
+  filtro?: 'letras' | 'numeros' | 'alfanumerico'
   /** Ícono (lucide) dentro del campo, a la izquierda. */
   icono?: Component
   /** Etiqueta en azul pizarra (formularios de publicar/editar). */
@@ -18,9 +20,20 @@ const props = defineProps<{
 const modelo = defineModel<string | number>({ default: '' })
 const id = useId()
 
+const filtros: Record<NonNullable<typeof props.filtro>, RegExp> = {
+  letras: /[^\p{L}\s]/gu,
+  numeros: /\D/g,
+  alfanumerico: /[^A-Za-z0-9]/g,
+}
+
 function alEscribir(evento: Event) {
-  const valor = (evento.target as HTMLInputElement).value
-  modelo.value = props.mayusculas ? valor.toUpperCase() : valor
+  const input = evento.target as HTMLInputElement
+  let valor = input.value
+  if (props.filtro) valor = valor.replace(filtros[props.filtro], '')
+  if (props.mayusculas) valor = valor.toUpperCase()
+  modelo.value = valor
+  // Si se removieron caracteres, el input nativo queda desincronizado del v-model; se corrige aquí.
+  if (input.value !== valor) input.value = valor
 }
 </script>
 
