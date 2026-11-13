@@ -68,5 +68,5 @@ export function enlaceGoogleMaps(
 
 /** HU-08: navega con Waze hasta un punto (Waze no admite paradas intermedias en el enlace). */
 export function enlaceWaze(punto: Coordenada): string {
-  return `https://waze.com/ul?ll=${encodeURIComponent(coordenadaTexto(punto))}&navigate=yes`
+  return `https://waze.com/ul?ll=${coordenadaTexto(punto)}&navigate=yes`
 }
