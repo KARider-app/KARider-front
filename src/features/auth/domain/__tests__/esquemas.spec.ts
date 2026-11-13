@@ -93,7 +93,11 @@ describe('registroEsquema (HU-01 / HU-02)', () => {
 
   it('rechaza un modelo de vehículo con números o más de 20 caracteres', () => {
     expect(
-      erroresDe({ ...pasajero, rol: 'Conductor', vehiculo: { ...vehiculo, modelo: 'Nissan Versa 2024' } }),
+      erroresDe({
+        ...pasajero,
+        rol: 'Conductor',
+        vehiculo: { ...vehiculo, modelo: 'Nissan Versa 2024' },
+      }),
     ).toContain('vehiculo.modelo')
     expect(
       erroresDe({

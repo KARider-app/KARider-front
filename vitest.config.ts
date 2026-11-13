@@ -14,7 +14,8 @@ export default mergeConfig(
       coverage: {
         provider: 'v8',
         reporter: ['text-summary', 'lcov'],
-        include: ['src/**/*.{ts,vue}'],
+        // deploy/: el servidor de producción también se mide (Sonar lo analiza como código fuente).
+        include: ['src/**/*.{ts,vue}', 'deploy/**/*.js'],
         exclude: ['src/**/__tests__/**'],
       },
       env: {

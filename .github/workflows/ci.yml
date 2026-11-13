@@ -5,6 +5,15 @@ on:
     branches: [develop, main]
   push:
     branches: [develop]
+  workflow_dispatch:
+
+# Mínimo privilegio para GITHUB_TOKEN (solo leer el código).
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   calidad:
@@ -17,9 +26,19 @@ jobs:
           cache: npm
       # --ignore-scripts: no ejecuta scripts de instalación de terceros (cadena de suministro)
       - run: npm ci --ignore-scripts
-      - run: npm run lint
+      # Dependencias que llegan al navegador sin vulnerabilidades altas o críticas.
+      - name: Auditoría de dependencias de producción
+        run: npm audit --omit=dev --audit-level=high
+      # Lint sin --fix: en CI se verifica, no se corrige (npm run lint usa --fix para uso local).
+      # Scripts de package.json: solo usan las herramientas ya instaladas por npm ci (sin npx).
+      - name: Lint (oxlint + eslint)
+        run: npm run lint:check
+      - name: Formato (prettier)
+        run: npm run format:check
+      - name: Tipos (vue-tsc)
+        run: npm run type-check
       - run: npm run test:ci
       - run: npm run build
         env:
-          # Solo para compilar en CI; producción la define el workflow de Azure Static Web Apps
+          # Solo para compilar en CI; el valor de producción lo define .github/workflows/deploy.yml
           VITE_API_BASE_URL: https://localhost

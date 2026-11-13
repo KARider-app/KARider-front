@@ -3,9 +3,11 @@
 # del App Service. Azure arranca deploy/server.js con `npm start` (deploy/package.json) para servir la SPA.
 name: Deploy Azure
 
+# GitFlow (docs/flujo-ramas.md): producción se publica únicamente desde main, igual que KARider-back.
+# Antes se publicaba desde la rama release; ver AUDIT_REPORT.md › C para la transición.
 on:
   push:
-    branches: [release]
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -17,6 +19,14 @@ concurrency:
 
 jobs:
   deploy:
+    name: Desplegar a producción
+    # Un "Run workflow" manual sobre otra rama no publica en producción.
+    if: github.ref == 'refs/heads/main'
+    # Environment de GitHub: permite exigir aprobación antes de publicar y limitar el despliegue a main
+    # (Settings › Environments › production; ver AUDIT_REPORT.md › H).
+    environment:
+      name: production
+      url: https://karider-front-eqg4hnbpcrejc5ap.northcentralus-01.azurewebsites.net
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -29,6 +39,9 @@ jobs:
       # --ignore-scripts: no ejecuta scripts de instalación de terceros (cadena de suministro)
       - run: npm ci --ignore-scripts
 
+      - name: Auditoría de dependencias de producción
+        run: npm audit --omit=dev --audit-level=high
+
       - run: npm run test:ci
 
       - name: Compilar
@@ -40,7 +53,7 @@ jobs:
           VITE_ZONA_HORARIA: America/Mexico_City
 
       - name: Agregar el servidor de la SPA
-        run: cp deploy/server.js deploy/package.json dist/
+        run: cp deploy/server.js deploy/manejador.js deploy/package.json dist/
 
       - uses: azure/webapps-deploy@02a81bead70021f5284939794bcec79c271ab383 # v3.0.8
         with:
