@@ -10,7 +10,7 @@ describe('BaseInput: filtrado de caracteres mientras se escribe', () => {
     await input.setValue('José Pérez123!')
 
     expect(input.element.value).toBe('José Pérez')
-    expect(wrapper.emitted('update:modelValue')?.at(-1)).toEqual(['José Pérez'])
+    expect(wrapper.emitted('update:modelValue')?.[0]).toEqual(['José Pérez'])
   })
 
   it('filtro="numeros" bloquea letras y símbolos', async () => {
