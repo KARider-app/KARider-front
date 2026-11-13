@@ -20,12 +20,9 @@ export const perfilApi = {
       .get<PagedResult<HistorialItem>>('/perfil/historial', { params: { rol, pagina } })
       .then((r) => r.data),
   calificaciones: (pagina = 1) =>
-    apiClient
-      .get<Reputacion>('/perfil/calificaciones', { params: { pagina } })
-      .then((r) => r.data),
+    apiClient.get<Reputacion>('/perfil/calificaciones', { params: { pagina } }).then((r) => r.data),
   credenciales: () => apiClient.get<Credenciales>('/perfil/credenciales').then((r) => r.data),
   pendientes: () =>
     apiClient.get<CalificacionPendiente[]>('/calificaciones/pendientes').then((r) => r.data),
-  calificar: (p: CalificarRequest) =>
-    apiClient.post('/calificaciones', p).then(() => undefined),
+  calificar: (p: CalificarRequest) => apiClient.post('/calificaciones', p).then(() => undefined),
 }
