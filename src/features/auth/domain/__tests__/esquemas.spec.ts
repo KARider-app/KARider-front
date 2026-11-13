@@ -69,8 +69,11 @@ describe('registroEsquema (HU-01 / HU-02)', () => {
     expect(erroresDe({ ...pasajero, cuatrimestre: 12 })).toContain('cuatrimestre')
   })
 
-  it('rechaza un nombre completo con menos de 40 letras o con números/símbolos', () => {
+  it('rechaza un nombre completo que no sea exactamente 40 letras, o con números/símbolos', () => {
     expect(erroresDe({ ...pasajero, nombreCompleto: 'Ana López' })).toContain('nombreCompleto')
+    expect(
+      erroresDe({ ...pasajero, nombreCompleto: 'Kazumi Alejandra Barrera Avila Hernández Gómez' }),
+    ).toContain('nombreCompleto')
     expect(
       erroresDe({ ...pasajero, nombreCompleto: 'Kazumi Alejandra Barrera Avila #2026' }),
     ).toContain('nombreCompleto')
