@@ -63,10 +63,95 @@ describe('PerfilView (P13-P15)', () => {
     expect(wrapper.text()).toContain('Registro Histórico de Viajes (1)')
   })
 
-  it('muestra el estado vacío del historial', async () => {
+  it('HU-10 criterio 3: sin viajes muestra el estado vacío y las estadísticas en cero', async () => {
+    const sinViajes = {
+      ...perfil('Conductor'),
+      estadisticas: {
+        viajesRealizados: 0,
+        viajesComoConductor: 0,
+        viajesComoPasajero: 0,
+        ahorroCombustible: 0,
+        co2EvitadoKg: 0,
+      },
+    }
+    instalarApiFalsa(
+      base([
+        ['/perfil', sinViajes],
+        ['/perfil/historial', pagina([])],
+      ]),
+    )
+    const { wrapper } = await abrir()
+    const texto = wrapper.text()
+    expect(texto).toContain('Aún no tienes viajes registrados')
+    expect(texto).toContain('Registro Histórico de Viajes (0)')
+    const estadisticas = wrapper.get('[aria-label="Estadísticas"]').text()
+    expect(estadisticas).toContain('0Viajes Hechos')
+    expect(estadisticas).toContain('$0')
+    expect(estadisticas).toContain('0 kg')
+  })
+
+  it('HU-10 criterio 2: el vacío de un filtro concreto nombra el rol', async () => {
     instalarApiFalsa(base([['/perfil/historial', pagina([])]]))
     const { wrapper } = await abrir()
-    expect(wrapper.text()).toContain('No hay viajes en esta categoría todavía.')
+    await pestana(wrapper, 'Pasajero')
+    expect(wrapper.text()).toContain('Aún no tienes viajes como pasajero')
+  })
+
+  it('HU-10 criterio 1: las tarjetas muestran rol, fecha, monto, origen, destino y compañeros', async () => {
+    instalarApiFalsa(base())
+    const { wrapper } = await abrir()
+    const [pasajero, conductor] = wrapper.findAll('li')
+    expect(pasajero!.text()).toContain('Como pasajero')
+    expect(pasajero!.text()).toContain('$45 MXN')
+    expect(pasajero!.text()).toContain('Campus UTTT (Puerta 1)')
+    expect(pasajero!.text()).toContain('Pachuca de Soto (Galerías)')
+    expect(pasajero!.text()).toContain('Con: Valeria Gómez R. (Nissan Versa Azul)')
+    expect(conductor!.text()).toContain('Como conductor')
+    expect(conductor!.text()).toContain('Con: Marco Morales S., Ana Ruiz T.')
+  })
+
+  it('HU-10 regla 1: etiqueta los viajes cancelados y en curso sin ocultarlos', async () => {
+    instalarApiFalsa(
+      base([
+        [
+          '/perfil/historial',
+          pagina([
+            {
+              ...historial[0],
+              viajeId: 'x1',
+              estadoViaje: 'Cancelado',
+              estadoReserva: 'Cancelada',
+            },
+            { ...historial[1], viajeId: 'x2', estadoViaje: 'EnCurso' },
+            { ...historial[1], viajeId: 'x3', nombresPasajeros: null, pasajeros: 1 },
+            { ...historial[1], viajeId: 'x4', nombresPasajeros: [], pasajeros: 0 },
+          ]),
+        ],
+      ]),
+    )
+    const { wrapper } = await abrir()
+    const tarjetas = wrapper.findAll('li')
+    expect(tarjetas).toHaveLength(4)
+    expect(tarjetas[0]!.text()).toContain('Cancelado')
+    expect(tarjetas[0]!.classes()).toContain('opacity-75')
+    expect(tarjetas[0]!.find('.line-through').exists()).toBe(true)
+    expect(tarjetas[1]!.text()).toContain('En curso')
+    expect(tarjetas[1]!.classes()).not.toContain('opacity-75')
+    expect(tarjetas[2]!.text()).toContain('Con: 1 pasajero')
+    expect(tarjetas[3]!.text()).toContain('Con: Sin pasajeros')
+  })
+
+  it('HU-10 criterio 4: el conductor puede evaluar a cada pasajero pendiente', async () => {
+    const dos = [
+      { ...pendientes[0], viajeId: 'h2', evaluadoId: 'p1', evaluadoNombre: 'Marco Morales S.' },
+      { ...pendientes[0], viajeId: 'h2', evaluadoId: 'p2', evaluadoNombre: 'Ana Ruiz T.' },
+    ]
+    instalarApiFalsa(base([['/calificaciones/pendientes', dos]]))
+    const { wrapper } = await abrir()
+    const botones = wrapper.findAll('button').map((b) => b.text())
+    expect(botones).toContain('Evaluar a Marco Morales S.')
+    expect(botones).toContain('Evaluar a Ana Ruiz T.')
+    expect(botones).not.toContain('Evaluar compañero')
   })
 
   it('muestra la reputación y las reseñas en «Calificación Mutua»', async () => {

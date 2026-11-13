@@ -1,5 +1,10 @@
 import type { Rol } from '@/features/auth/domain/tipos'
-import type { EstadoReserva, EstadoViaje, PagedResult, Vehiculo } from '@/features/viajes/domain/tipos'
+import type {
+  EstadoReserva,
+  EstadoViaje,
+  PagedResult,
+  Vehiculo,
+} from '@/features/viajes/domain/tipos'
 
 export type FiltroRolHistorial = 'Todos' | 'Pasajero' | 'Conductor'
 
@@ -53,6 +58,8 @@ export interface HistorialItem {
   aportePagado: boolean | null
   pasajeros: number | null
   companero: CompaneroHistorial | null
+  /** Solo en viajes como conductor: pasajeros que llevó (reservas confirmadas o completadas). */
+  nombresPasajeros?: string[] | null
 }
 
 export interface Credenciales {

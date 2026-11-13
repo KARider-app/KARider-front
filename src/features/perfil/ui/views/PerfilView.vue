@@ -8,12 +8,13 @@ import {
   GraduationCap,
   ShieldCheck,
   Star,
+  Users,
 } from 'lucide-vue-next'
 import { fechaCorta, fechaHora, horaCorta, mxn } from '@/core/utils/formato'
 import AlertMessage from '@/shared/components/AlertMessage.vue'
 import { mensajeDeError } from '@/shared/composables/useApiError'
 import { usePerfil } from '../../application/usePerfil'
-import type { FiltroRolHistorial } from '../../domain/tipos'
+import type { FiltroRolHistorial, HistorialItem } from '../../domain/tipos'
 import EvaluarCompanero from '../components/EvaluarCompanero.vue'
 
 const {
@@ -35,7 +36,7 @@ const {
   errorCredenciales,
   cargarCredenciales,
   cargarPendientes,
-  pendientePara,
+  pendientesDe,
 } = usePerfil()
 
 type Pestana = 'historial' | 'calificacion' | 'credenciales'
@@ -79,6 +80,33 @@ const iniciales = computed(() => {
 const textoRolEnViaje: Record<string, string> = {
   Pasajero: 'Como pasajero',
   Conductor: 'Como conductor',
+}
+
+/** HU-10, criterio 3: el vacío general es distinto al vacío de un filtro concreto. */
+const mensajeHistorialVacio = computed(() =>
+  filtroRol.value === 'Todos'
+    ? 'Aún no tienes viajes registrados'
+    : `Aún no tienes viajes como ${filtroRol.value.toLowerCase()}`,
+)
+
+/** HU-10, regla 1: los cancelados se distinguen visualmente (no se ocultan); los en curso también. */
+function etiquetaEstado(h: HistorialItem): { texto: string; clase: string } | null {
+  if (h.estadoViaje === 'Cancelado' || h.estadoReserva === 'Cancelada') {
+    return { texto: 'Cancelado', clase: 'bg-red-100 text-red-700' }
+  }
+  if (h.estadoViaje === 'EnCurso') {
+    return { texto: 'En curso', clase: 'bg-amber-100 text-amber-800' }
+  }
+  return null
+}
+
+const esCancelado = (h: HistorialItem) => etiquetaEstado(h)?.texto === 'Cancelado'
+
+/** Texto del bloque "Con:" para los viajes donde el usuario fue conductor. */
+function textoPasajeros(h: HistorialItem): string {
+  const nombres = h.nombresPasajeros ?? []
+  if (nombres.length > 0) return nombres.join(', ')
+  return h.pasajeros ? `${h.pasajeros} pasajero${h.pasajeros === 1 ? '' : 's'}` : 'Sin pasajeros'
 }
 
 onMounted(() => {
@@ -252,7 +280,7 @@ onMounted(() => {
             v-else-if="!errorHistorial && historial.length === 0"
             class="py-6 text-center text-xs text-[#4B5563]"
           >
-            No hay viajes en esta categoría todavía.
+            {{ mensajeHistorialVacio }}
           </p>
 
           <ul class="space-y-3 md:space-y-0 md:grid md:grid-cols-2 md:gap-4">
@@ -260,6 +288,7 @@ onMounted(() => {
               v-for="h in historial"
               :key="h.viajeId"
               class="p-3.5 rounded-2xl bg-white border border-[#C9DCE8] shadow-xs space-y-2.5"
+              :class="{ 'opacity-75': esCancelado(h) }"
             >
               <div class="flex items-center justify-between gap-2 pb-2 border-b border-[#EDEDED]">
                 <div class="flex items-center gap-1.5 flex-wrap">
@@ -273,12 +302,22 @@ onMounted(() => {
                   >
                     {{ textoRolEnViaje[h.rolEnViaje] }}
                   </span>
+                  <span
+                    v-if="etiquetaEstado(h)"
+                    class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded"
+                    :class="etiquetaEstado(h)!.clase"
+                  >
+                    {{ etiquetaEstado(h)!.texto }}
+                  </span>
                   <span class="text-[11px] text-[#4B5563] flex items-center gap-1">
                     <Calendar class="w-3 h-3 text-[#3E5C76]" aria-hidden="true" />
                     {{ fechaCorta(h.fechaSalida) }} • {{ horaCorta(h.fechaSalida) }}
                   </span>
                 </div>
-                <span class="text-xs font-black text-emerald-700 shrink-0">
+                <span
+                  class="text-xs font-black shrink-0"
+                  :class="esCancelado(h) ? 'text-[#4B5563] line-through' : 'text-emerald-700'"
+                >
                   {{ mxn(h.monto) }} MXN
                 </span>
               </div>
@@ -306,8 +345,17 @@ onMounted(() => {
                 </span>
               </div>
               <div
-                v-if="h.aportePagado || (h.companero && pendientePara(h.viajeId))"
-                class="pt-1 flex items-center justify-between gap-2"
+                v-else-if="h.rolEnViaje === 'Conductor'"
+                class="text-[11px] text-[#4B5563] bg-[#F8FAFC] p-2 rounded-xl flex items-center gap-1.5"
+              >
+                <Users class="w-3.5 h-3.5 text-[#3E5C76] shrink-0" aria-hidden="true" />
+                <span>
+                  Con: <strong>{{ textoPasajeros(h) }}</strong>
+                </span>
+              </div>
+              <div
+                v-if="h.aportePagado || pendientesDe(h.viajeId).length"
+                class="pt-1 flex items-start justify-between gap-2"
               >
                 <span
                   v-if="h.aportePagado"
@@ -317,13 +365,17 @@ onMounted(() => {
                   Aporte de combustible liquidado
                 </span>
                 <span v-else />
-                <EvaluarCompanero
-                  v-if="h.companero && pendientePara(h.viajeId)"
-                  :viaje-id="h.viajeId"
-                  :evaluado-id="pendientePara(h.viajeId)!.evaluadoId"
-                  :evaluado-nombre="h.companero.nombreCompleto"
-                  @calificado="cargarPendientes"
-                />
+                <div class="flex flex-col items-end gap-1">
+                  <EvaluarCompanero
+                    v-for="p in pendientesDe(h.viajeId)"
+                    :key="p.evaluadoId"
+                    :viaje-id="h.viajeId"
+                    :evaluado-id="p.evaluadoId"
+                    :evaluado-nombre="p.evaluadoNombre"
+                    :mostrar-nombre="pendientesDe(h.viajeId).length > 1"
+                    @calificado="cargarPendientes"
+                  />
+                </div>
               </div>
             </li>
           </ul>
