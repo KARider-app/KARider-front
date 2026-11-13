@@ -3,8 +3,10 @@ import type {
   BuscarViajesParams,
   EditarViajeRequest,
   EstadoViaje,
+  LlegadaConductor,
   PagedResult,
   PublicarViajeRequest,
+  RutaViaje,
   UbicacionConductor,
   Vehiculo,
   ViajeDetalle,
@@ -55,6 +57,14 @@ export const viajesApi = {
   ubicacion: (id: string) =>
     apiClient
       .get<UbicacionConductor>(`/viajes/${encodeURIComponent(id)}/ubicacion`)
+      .then((r) => r.data),
+  /** HU-08: ruta real por calles del viaje (punto de encuentro → paradas → destino). */
+  ruta: (id: string) =>
+    apiClient.get<RutaViaje>(`/viajes/${encodeURIComponent(id)}/ruta`).then((r) => r.data),
+  /** HU-08: tiempo estimado de llegada y distancia restante del conductor, por calles. */
+  llegada: (id: string) =>
+    apiClient
+      .get<LlegadaConductor>(`/viajes/${encodeURIComponent(id)}/llegada`)
       .then((r) => r.data),
   /** HU-08 (conductor): comparte su posición actual. */
   compartirUbicacion: (id: string, latitud: number, longitud: number) =>
