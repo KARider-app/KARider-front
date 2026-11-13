@@ -154,8 +154,9 @@ export const historial = [
     estadoViaje: 'Completado',
     estadoReserva: null,
     aportePagado: false,
-    pasajeros: 3,
-    companero: { id: 'p3', nombreCompleto: 'Marco Morales S.', vehiculo: null, calificacion: 4.9 },
+    pasajeros: 2,
+    companero: null,
+    nombresPasajeros: ['Marco Morales S.', 'Ana Ruiz T.'],
   },
 ]
 

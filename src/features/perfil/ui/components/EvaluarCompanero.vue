@@ -7,7 +7,13 @@ import { comoApiError, type ApiError } from '@/core/http/apiError'
 import { perfilApi } from '../../api/perfilApi'
 import { ETIQUETAS_CALIFICACION } from '../../domain/tipos'
 
-const props = defineProps<{ viajeId: string; evaluadoId: string; evaluadoNombre: string }>()
+const props = defineProps<{
+  viajeId: string
+  evaluadoId: string
+  evaluadoNombre: string
+  /** Cuando un viaje tiene varios compañeros por evaluar, el botón dice a quién. */
+  mostrarNombre?: boolean
+}>()
 const emit = defineEmits<{ calificado: [] }>()
 
 const abierto = ref(false)
@@ -51,7 +57,7 @@ async function enviar() {
     @click="abierto = true"
   >
     <MessageSquare class="w-3 h-3" aria-hidden="true" />
-    <span>Evaluar compañero</span>
+    <span>{{ mostrarNombre ? `Evaluar a ${evaluadoNombre}` : 'Evaluar compañero' }}</span>
   </button>
 
   <Teleport to="body">
