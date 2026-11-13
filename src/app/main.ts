@@ -6,6 +6,7 @@ import { createPinia } from 'pinia'
 import App from './App.vue'
 import router from './router'
 import { useAuthStore } from '@/features/auth/application/useAuthStore'
+import { limpiarCachesObsoletas } from '@/core/pwa/limpiarCaches'
 
 async function iniciar() {
   const app = createApp(App)
@@ -19,3 +20,4 @@ async function iniciar() {
 }
 
 void iniciar()
+void limpiarCachesObsoletas()
