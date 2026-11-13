@@ -10,6 +10,7 @@ import {
   pendientes,
   perfil,
   reputacion,
+  vehiculo,
   type MapaApi,
 } from '@/__tests__/apoyo/montaje'
 import PerfilView from '../PerfilView.vue'
@@ -182,6 +183,75 @@ describe('PerfilView (P13-P15)', () => {
     expect(texto).toContain('Vehículo para Carpooling')
     expect(texto).toContain('HNX-421-C')
     expect(texto).toContain('4 Pasajeros + Conductor')
+  })
+
+  describe('HU-12 · Credenciales UTTT', () => {
+    async function abrirCredenciales(extra: MapaApi) {
+      instalarApiFalsa(base(extra))
+      const { wrapper } = await abrir()
+      await pestana(wrapper, 'Credenciales UTTT')
+      return wrapper
+    }
+
+    it('criterio 1: el pasajero solo ve su ficha institucional, sin bloque de vehículo', async () => {
+      // Aunque llegara un vehículo, la regla 1 dice que solo se muestra a conductores.
+      const wrapper = await abrirCredenciales([
+        ['/perfil', perfil('Pasajero')],
+        ['/perfil/credenciales', credenciales(true)],
+      ])
+      const texto = wrapper.text()
+      expect(texto).toContain('carlos.mendoza@uttt.edu.mx')
+      expect(texto).toContain('22300630')
+      expect(texto).toContain('Ing. en Desarrollo y Gestión de Software')
+      expect(texto).toContain('Alumno Regular Activo')
+      expect(texto).not.toContain('Vehículo para Carpooling')
+      expect(texto).not.toContain('Aún no tienes un vehículo registrado')
+    })
+
+    it('criterio 2: el conductor ve el vehículo con la insignia Verificado', async () => {
+      const wrapper = await abrirCredenciales([])
+      const texto = wrapper.text()
+      expect(texto).toContain('Vehículo para Carpooling')
+      expect(texto).toContain('Nissan Versa Sense (Azul Acero)')
+      expect(texto).toContain('4 Pasajeros + Conductor')
+      expect(texto).toContain('Verificado')
+      expect(texto).not.toContain('Pendiente')
+    })
+
+    it('criterio 3: un vehículo pendiente muestra «Pendiente» sin ocultar sus datos', async () => {
+      const wrapper = await abrirCredenciales([
+        [
+          '/perfil/credenciales',
+          { ...credenciales(), vehiculos: [{ ...vehiculo, verificado: false }] },
+        ],
+      ])
+      const bloque = wrapper.findAll('section').find((s) => s.text().includes('Vehículo'))!
+      expect(bloque.text()).toContain('Pendiente')
+      expect(bloque.text()).not.toContain('Verificado')
+      expect(bloque.text()).toContain('HNX-421-C')
+      expect(bloque.text()).toContain('2022')
+    })
+
+    it('avisa al conductor que aún no registra vehículo', async () => {
+      const wrapper = await abrirCredenciales([['/perfil/credenciales', credenciales(false)]])
+      expect(wrapper.text()).toContain('Aún no tienes un vehículo registrado para carpooling.')
+    })
+
+    it('regla 2: el estatus refleja un correo aún no verificado', async () => {
+      const wrapper = await abrirCredenciales([
+        [
+          '/perfil/credenciales',
+          {
+            ...credenciales(),
+            estatus: 'Pendiente de verificación',
+            correoVerificado: false,
+          },
+        ],
+      ])
+      const ficha = wrapper.findAll('section').find((s) => s.text().includes('Ficha'))!
+      expect(ficha.text()).toContain('Pendiente de verificación')
+      expect(ficha.text()).not.toContain('✓ Verificado')
+    })
   })
 
   it('muestra los errores de cada sección', async () => {

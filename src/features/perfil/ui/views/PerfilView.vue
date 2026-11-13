@@ -77,6 +77,9 @@ const iniciales = computed(() => {
     .join('')
 })
 
+/** HU-12, regla 1: el bloque de vehículo solo se muestra a conductores. */
+const esConductor = computed(() => perfil.value?.rol === 'Conductor')
+
 const textoRolEnViaje: Record<string, string> = {
   Pasajero: 'Como pasajero',
   Conductor: 'Como conductor',
@@ -507,6 +510,7 @@ onMounted(() => {
                   >
                     ✓ Verificado
                   </dd>
+                  <dd v-else class="text-[10px] font-semibold text-amber-700">Pendiente</dd>
                 </div>
                 <div class="p-2 rounded-xl bg-[#F8FAFC]">
                   <dt class="text-[10px] text-[#4B5563] block">Matrícula</dt>
@@ -518,13 +522,24 @@ onMounted(() => {
                 </div>
                 <div class="p-2 rounded-xl bg-[#F8FAFC]">
                   <dt class="text-[10px] text-[#4B5563] block">Estatus</dt>
-                  <dd class="font-bold text-emerald-700">{{ credenciales.estatus }}</dd>
+                  <dd
+                    class="font-bold"
+                    :class="credenciales.correoVerificado ? 'text-emerald-700' : 'text-amber-700'"
+                  >
+                    {{ credenciales.estatus }}
+                  </dd>
                 </div>
               </dl>
             </section>
 
+            <p
+              v-if="esConductor && credenciales.vehiculos.length === 0"
+              class="p-4 rounded-2xl bg-white border border-dashed border-[#C9DCE8] text-center text-xs text-[#4B5563]"
+            >
+              Aún no tienes un vehículo registrado para carpooling.
+            </p>
             <section
-              v-for="v in credenciales.vehiculos"
+              v-for="v in esConductor ? credenciales.vehiculos : []"
               :key="v.id"
               class="p-4 rounded-2xl bg-white border border-[#C9DCE8] shadow-xs space-y-3"
             >
@@ -534,10 +549,12 @@ onMounted(() => {
                   <span>Vehículo para Carpooling</span>
                 </h2>
                 <span
-                  v-if="v.verificado"
-                  class="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded"
+                  class="text-[10px] font-bold px-2 py-0.5 rounded"
+                  :class="
+                    v.verificado ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+                  "
                 >
-                  Verificado
+                  {{ v.verificado ? 'Verificado' : 'Pendiente' }}
                 </span>
               </div>
               <dl class="text-xs space-y-1.5">
