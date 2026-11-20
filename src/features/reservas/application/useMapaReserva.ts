@@ -32,6 +32,26 @@ function guardarCache(viajeId: string, u: UbicacionConductor) {
   }
 }
 
+/** HU-15: folio, punto de encuentro, hora y contacto, disponibles sin conexión. */
+const claveCacheReserva = (reservaId: string) => `karider.reserva.${reservaId}`
+
+function leerCacheReserva(reservaId: string): Reserva | null {
+  try {
+    const guardado = localStorage.getItem(claveCacheReserva(reservaId))
+    return guardado ? (JSON.parse(guardado) as Reserva) : null
+  } catch {
+    return null
+  }
+}
+
+function guardarCacheReserva(reservaId: string, r: Reserva) {
+  try {
+    localStorage.setItem(claveCacheReserva(reservaId), JSON.stringify(r))
+  } catch {
+    /* sin almacenamiento disponible: no es crítico */
+  }
+}
+
 /** P8: reserva confirmada, ubicación del conductor y estimaciones de llegada. */
 export function useMapaReserva() {
   const reserva = ref<Reserva | null>(null)
@@ -50,6 +70,8 @@ export function useMapaReserva() {
   /** El conductor aún no comparte su ubicación (404 VIAJE_UBICACION_NO_DISPONIBLE). */
   const esperandoConductor = ref(false)
   const sinConexion = ref(false)
+  /** HU-15: la reserva mostrada viene de la caché local, no del servidor. */
+  const sinConexionDatos = ref(false)
 
   let temporizador: ReturnType<typeof setTimeout> | null = null
   let activo = true
@@ -140,15 +162,25 @@ export function useMapaReserva() {
   async function cargar(reservaId: string) {
     cargando.value = true
     error.value = null
+    sinConexionDatos.value = false
     try {
       reserva.value = await reservasApi.obtener(reservaId)
+      guardarCacheReserva(reservaId, reserva.value)
       void cargarRuta(reserva.value.viaje.id)
       if (confirmada.value && viajeActivo.value) {
         await consultarUbicacion()
         programar()
       }
     } catch (e) {
-      error.value = comoApiError(e)
+      const err = comoApiError(e)
+      const cache = err.code === 'SIN_CONEXION' ? leerCacheReserva(reservaId) : null
+      if (cache) {
+        reserva.value = cache
+        sinConexionDatos.value = true
+        ubicacion.value ??= leerCache(cache.viaje.id)
+      } else {
+        error.value = err
+      }
     } finally {
       cargando.value = false
     }
@@ -171,6 +203,7 @@ export function useMapaReserva() {
     error,
     esperandoConductor,
     sinConexion,
+    sinConexionDatos,
     confirmada,
     viajeActivo,
     distancia,
