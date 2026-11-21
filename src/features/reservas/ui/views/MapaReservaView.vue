@@ -43,6 +43,7 @@ const {
   error,
   esperandoConductor,
   sinConexion,
+  sinConexionDatos,
   confirmada,
   viajeActivo,
   distancia,
@@ -268,12 +269,16 @@ const gpsEnVivo = computed(() => confirmada.value && viajeActivo.value && !!ubic
       >
         <AlertMessage v-if="textoEstadoReserva" tipo="aviso">{{ textoEstadoReserva }}</AlertMessage>
 
+        <AlertMessage v-if="sinConexionDatos" tipo="aviso">
+          Sin conexión. Mostrando tu folio, punto de encuentro y contacto guardados.
+        </AlertMessage>
+
         <template v-if="confirmada">
           <AlertMessage v-if="!viajeActivo" tipo="aviso">
             El viaje ya terminó o fue cancelado, por eso dejamos de mostrar la ubicación del
             conductor.
           </AlertMessage>
-          <AlertMessage v-if="sinConexion" tipo="aviso">
+          <AlertMessage v-if="sinConexion && !sinConexionDatos" tipo="aviso">
             Sin conexión, mostrando la última ubicación disponible.
           </AlertMessage>
           <AlertMessage v-if="viajeActivo && esperandoConductor && !ubicacion" tipo="info">

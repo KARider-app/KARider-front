@@ -154,6 +154,19 @@ describe('MapaReservaView (HU-08)', () => {
     expect(wrapper.find('[role="alert"]').exists()).toBe(true)
   })
 
+  it('HU-15: sin conexión, muestra el folio y contacto guardados de una visita anterior', async () => {
+    instalarApiFalsa(base())
+    await abrir()
+    await flushPromises()
+
+    instalarApiFalsa(base([['/reservas/r1', errorApi(0, 'SIN_CONEXION')]]))
+    const { wrapper } = await abrir()
+    expect(wrapper.text()).toContain(
+      'Sin conexión. Mostrando tu folio, punto de encuentro y contacto guardados.',
+    )
+    expect(wrapper.text()).toContain('KAR-UTTT-2026-9874')
+  })
+
   it('criterio 1: dibuja la ruta por calles y la llegada calculada por calles', async () => {
     instalarApiFalsa(base())
     const { wrapper } = await abrir()
