@@ -56,7 +56,9 @@ function instalarNavegadorConPush(opciones: { suscripcionInicial?: Suscripcion |
     writable: true,
     value: Object.assign(vi.fn(), {
       permission: 'default' as NotificationPermission,
-      requestPermission: vi.fn<() => Promise<NotificationPermission>>().mockResolvedValue('granted'),
+      requestPermission: vi
+        .fn<() => Promise<NotificationPermission>>()
+        .mockResolvedValue('granted'),
     }),
   })
   return registro

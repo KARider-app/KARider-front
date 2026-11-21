@@ -1,7 +1,11 @@
 /// <reference lib="webworker" />
 import { CacheableResponsePlugin } from 'workbox-cacheable-response'
 import { ExpirationPlugin } from 'workbox-expiration'
-import { cleanupOutdatedCaches, createHandlerBoundToURL, precacheAndRoute } from 'workbox-precaching'
+import {
+  cleanupOutdatedCaches,
+  createHandlerBoundToURL,
+  precacheAndRoute,
+} from 'workbox-precaching'
 import { NavigationRoute, registerRoute } from 'workbox-routing'
 import { CacheFirst, NetworkOnly, StaleWhileRevalidate } from 'workbox-strategies'
 
@@ -22,16 +26,10 @@ registerRoute(
 )
 
 // Catálogos: se pueden usar sin conexión.
-registerRoute(
-  /\/api\/v1\/catalogos\//,
-  new StaleWhileRevalidate({ cacheName: 'catalogos' }),
-)
+registerRoute(/\/api\/v1\/catalogos\//, new StaleWhileRevalidate({ cacheName: 'catalogos' }))
 
 // Autenticación y datos personales: NUNCA en caché.
-registerRoute(
-  /\/api\/v1\/(auth|perfil|vehiculos|viajes|reservas)(\/|$|\?)/,
-  new NetworkOnly(),
-)
+registerRoute(/\/api\/v1\/(auth|perfil|vehiculos|viajes|reservas)(\/|$|\?)/, new NetworkOnly())
 
 // Teselas del mapa (HU-08): las ya vistas se muestran sin conexión.
 registerRoute(

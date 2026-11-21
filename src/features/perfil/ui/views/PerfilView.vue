@@ -638,7 +638,13 @@ onMounted(() => {
                   <Bell class="w-4 h-4" aria-hidden="true" />
                   Activar notificaciones
                 </BaseButton>
-                <BaseButton v-else variante="secundario" bloque :cargando="pushCargando" @click="desactivarPush">
+                <BaseButton
+                  v-else
+                  variante="secundario"
+                  bloque
+                  :cargando="pushCargando"
+                  @click="desactivarPush"
+                >
                   <BellOff class="w-4 h-4" aria-hidden="true" />
                   Desactivar notificaciones
                 </BaseButton>
