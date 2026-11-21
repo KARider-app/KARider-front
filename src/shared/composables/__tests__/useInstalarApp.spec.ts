@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { defineComponent } from 'vue'
+import { eventoInstalacion } from '@/__tests__/apoyo/eventoInstalarPwa'
 import { useInstalarApp } from '../useInstalarApp'
 
 const Anfitrion = defineComponent({
@@ -9,16 +10,6 @@ const Anfitrion = defineComponent({
   },
   template: '<div />',
 })
-
-function eventoInstalacion() {
-  const evento = new Event('beforeinstallprompt', { cancelable: true }) as Event & {
-    prompt: () => Promise<void>
-    userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>
-  }
-  evento.prompt = vi.fn<() => Promise<void>>().mockResolvedValue(undefined)
-  evento.userChoice = Promise.resolve({ outcome: 'accepted' })
-  return evento
-}
 
 describe('useInstalarApp (HU-14)', () => {
   beforeEach(() => {
