@@ -2,6 +2,7 @@
 import { onBeforeUnmount, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import BottomNav from '@/shared/components/BottomNav.vue'
+import InstalarAppBanner from '@/shared/components/InstalarAppBanner.vue'
 import TopNav from '@/shared/components/TopNav.vue'
 import { useAuthStore } from '@/features/auth/application/useAuthStore'
 
@@ -42,5 +43,6 @@ onBeforeUnmount(() => window.removeEventListener('karider:sesion-expirada', alEx
       <RouterView />
     </div>
     <BottomNav :autenticado="auth.autenticado" :es-conductor="auth.esConductor" @salir="salir" />
+    <InstalarAppBanner />
   </div>
 </template>

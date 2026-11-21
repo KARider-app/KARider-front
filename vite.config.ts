@@ -13,7 +13,14 @@ export default defineConfig({
     tailwindcss(),
     vueDevTools(),
     VitePWA({
-      registerType: 'autoUpdate',
+      // HU-13: el service worker necesita manejar el evento "push", así que ya no se
+      // autogenera (generateSW); se inyecta el precache sobre src/sw.ts.
+      strategies: 'injectManifest',
+      srcDir: 'src',
+      filename: 'sw.ts',
+      injectManifest: {
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,webmanifest}'],
+      },
       includeAssets: ['favicon.ico', 'icons/*.png'],
       manifest: {
         name: 'KARider · Viajes compartidos UTTT',
@@ -35,33 +42,8 @@ export default defineConfig({
           },
         ],
       },
-      workbox: {
-        navigateFallback: '/index.html',
-        runtimeCaching: [
-          // Catálogos: se pueden usar sin conexión
-          {
-            urlPattern: /\/api\/v1\/catalogos\//,
-            handler: 'StaleWhileRevalidate',
-            options: { cacheName: 'catalogos' },
-          },
-          // Autenticación y datos personales: NUNCA en caché
-          {
-            urlPattern: /\/api\/v1\/(auth|perfil|vehiculos|viajes|reservas)(\/|$|\?)/,
-            handler: 'NetworkOnly',
-          },
-          // Teselas del mapa (HU-08): las ya vistas se muestran sin conexión
-          {
-            urlPattern: /^https:\/\/tile\.openstreetmap\.org\//,
-            handler: 'CacheFirst',
-            options: {
-              // v2: la caché anterior pudo guardar mosaicos bloqueados (respuestas opacas); se descarta.
-              cacheName: 'mapa-osm-v2',
-              expiration: { maxEntries: 200, maxAgeSeconds: 60 * 60 * 24 * 7 },
-              cacheableResponse: { statuses: [200] },
-            },
-          },
-        ],
-      },
+      // El enrutamiento de Workbox (antes en `workbox.runtimeCaching`) ahora vive en src/sw.ts,
+      // porque injectManifest no genera esas rutas automáticamente.
     }),
   ],
   resolve: {

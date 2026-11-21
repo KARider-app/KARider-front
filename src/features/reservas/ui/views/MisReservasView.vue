@@ -15,6 +15,7 @@ const {
   reservas,
   cargando: cargandoReservas,
   error: errorReservas,
+  sinConexion: reservasSinConexion,
   cargar: cargarReservas,
 } = useMisReservas()
 const { rutas, cargando: cargandoRutas, error: errorRutas, cargar: cargarRutas } = useMisRutas()
@@ -147,6 +148,9 @@ const estiloViaje: Record<EstadoViaje, string> = {
       </template>
 
       <template v-else>
+        <AlertMessage v-if="reservasSinConexion" tipo="aviso">
+          Sin conexión. Mostrando tus reservas confirmadas guardadas en este dispositivo.
+        </AlertMessage>
         <AlertMessage v-if="errorReservas" tipo="error">{{
           mensajeDeError(errorReservas)
         }}</AlertMessage>

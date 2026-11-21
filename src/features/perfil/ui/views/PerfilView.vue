@@ -2,6 +2,8 @@
 import { computed, onMounted, ref } from 'vue'
 import {
   ArrowLeft,
+  Bell,
+  BellOff,
   Calendar,
   Car,
   CircleCheck,
@@ -11,11 +13,23 @@ import {
   Users,
 } from 'lucide-vue-next'
 import { fechaCorta, fechaHora, horaCorta, mxn } from '@/core/utils/formato'
+import { useNotificacionesPush } from '@/features/notificaciones/application/useNotificacionesPush'
 import AlertMessage from '@/shared/components/AlertMessage.vue'
+import BaseButton from '@/shared/components/BaseButton.vue'
 import { mensajeDeError } from '@/shared/composables/useApiError'
 import { usePerfil } from '../../application/usePerfil'
 import type { FiltroRolHistorial, HistorialItem } from '../../domain/tipos'
 import EvaluarCompanero from '../components/EvaluarCompanero.vue'
+
+const {
+  soportado: pushSoportado,
+  permiso: pushPermiso,
+  suscrito: pushSuscrito,
+  cargando: pushCargando,
+  error: pushError,
+  activar: activarPush,
+  desactivar: desactivarPush,
+} = useNotificacionesPush()
 
 const {
   perfil,
@@ -592,6 +606,50 @@ onMounted(() => {
                 verificación institucional de la UTTT para garantizar viajes 100% seguros.
               </p>
             </div>
+
+            <!-- HU-13: notificaciones push de eventos del viaje -->
+            <section class="p-4 rounded-2xl bg-white border border-[#C9DCE8] shadow-xs space-y-3">
+              <h2 class="flex items-center gap-2 text-xs font-bold text-[#1D2D44] font-sans">
+                <Bell class="w-4 h-4 text-[#0284C7]" aria-hidden="true" />
+                <span>Notificaciones Push</span>
+              </h2>
+              <p class="text-[11px] text-[#4B5563] leading-relaxed">
+                Recibe un aviso en tu celular cuando tu reserva se confirme, el conductor comparta
+                su ubicación, o el viaje cambie o se cancele.
+              </p>
+              <AlertMessage v-if="!pushSoportado" tipo="aviso">
+                Tu navegador no admite notificaciones push.
+              </AlertMessage>
+              <AlertMessage v-else-if="pushPermiso === 'denied'" tipo="aviso">
+                Bloqueaste los permisos de notificaciones para KARider. Actívalos desde los ajustes
+                del navegador para este sitio.
+              </AlertMessage>
+              <template v-else>
+                <AlertMessage v-if="pushError" tipo="error">
+                  {{ mensajeDeError(pushError) }}
+                </AlertMessage>
+                <BaseButton
+                  v-if="!pushSuscrito"
+                  variante="acento"
+                  bloque
+                  :cargando="pushCargando"
+                  @click="activarPush"
+                >
+                  <Bell class="w-4 h-4" aria-hidden="true" />
+                  Activar notificaciones
+                </BaseButton>
+                <BaseButton
+                  v-else
+                  variante="secundario"
+                  bloque
+                  :cargando="pushCargando"
+                  @click="desactivarPush"
+                >
+                  <BellOff class="w-4 h-4" aria-hidden="true" />
+                  Desactivar notificaciones
+                </BaseButton>
+              </template>
+            </section>
           </template>
         </div>
       </template>
