@@ -339,4 +339,88 @@ describe('PerfilView (P13-P15)', () => {
     await flushPromises()
     expect(document.body.querySelector('[role="dialog"]')).toBeNull()
   })
+
+  describe('HU-13 · Notificaciones push', () => {
+    function instalarNavegadorConPush() {
+      const registro = {
+        pushManager: {
+          getSubscription: vi.fn<() => Promise<null>>(async () => null),
+          subscribe: vi
+            .fn<() => Promise<{ endpoint: string; toJSON: () => unknown }>>()
+            .mockResolvedValue({
+              endpoint: 'https://push.ejemplo/abc',
+              toJSON: () => ({
+                endpoint: 'https://push.ejemplo/abc',
+                keys: { p256dh: 'p', auth: 'a' },
+              }),
+            }),
+        },
+      }
+      Object.defineProperty(navigator, 'serviceWorker', {
+        configurable: true,
+        value: { ready: Promise.resolve(registro) },
+      })
+      Object.defineProperty(window, 'PushManager', { configurable: true, value: class {} })
+      Object.defineProperty(window, 'Notification', {
+        configurable: true,
+        writable: true,
+        value: Object.assign(vi.fn(), {
+          permission: 'default' as NotificationPermission,
+          requestPermission: vi
+            .fn<() => Promise<NotificationPermission>>()
+            .mockResolvedValue('granted'),
+        }),
+      })
+    }
+
+    afterEach(() => {
+      Reflect.deleteProperty(navigator, 'serviceWorker')
+      Reflect.deleteProperty(window, 'PushManager')
+      Reflect.deleteProperty(window, 'Notification')
+    })
+
+    it('sin soporte del navegador, avisa que no admite notificaciones push', async () => {
+      instalarApiFalsa(base())
+      const { wrapper } = await abrir()
+      await pestana(wrapper, 'Credenciales UTTT')
+      expect(wrapper.text()).toContain('Notificaciones Push')
+      expect(wrapper.text()).toContain('Tu navegador no admite notificaciones push.')
+    })
+
+    it('con soporte del navegador, activar pide permiso y se suscribe en el backend', async () => {
+      instalarNavegadorConPush()
+      instalarApiFalsa(
+        base([
+          [
+            '/notificaciones/push/clave-publica',
+            { publicKey: 'QVZQSUQtUFVCTElDLUtFWQ', habilitado: true },
+          ],
+          ['/notificaciones/push/suscripciones', null],
+        ]),
+      )
+      const { wrapper } = await abrir()
+      await pestana(wrapper, 'Credenciales UTTT')
+
+      const boton = wrapper.findAll('button').find((b) => b.text() === 'Activar notificaciones')!
+      await boton.trigger('click')
+      await flushPromises()
+
+      expect(wrapper.text()).toContain('Desactivar notificaciones')
+    })
+
+    it('si el backend no tiene VAPID configurada, muestra el error sin suscribirse', async () => {
+      instalarNavegadorConPush()
+      instalarApiFalsa(
+        base([['/notificaciones/push/clave-publica', { publicKey: null, habilitado: false }]]),
+      )
+      const { wrapper } = await abrir()
+      await pestana(wrapper, 'Credenciales UTTT')
+
+      const boton = wrapper.findAll('button').find((b) => b.text() === 'Activar notificaciones')!
+      await boton.trigger('click')
+      await flushPromises()
+
+      expect(wrapper.find('[role="alert"]').exists()).toBe(true)
+    })
+  })
 })

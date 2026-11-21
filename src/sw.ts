@@ -8,10 +8,15 @@ import {
 } from 'workbox-precaching'
 import { NavigationRoute, registerRoute } from 'workbox-routing'
 import { CacheFirst, NetworkOnly, StaleWhileRevalidate } from 'workbox-strategies'
+import {
+  pestanaParaEnfocar,
+  urlDestino,
+  type PayloadPush,
+} from './features/notificaciones/domain/push'
 
 declare const self: ServiceWorkerGlobalScope
 
-self.skipWaiting()
+void self.skipWaiting()
 self.addEventListener('activate', () => self.clients.claim())
 
 // --- Precache de la app (equivalente a lo que generaba generateSW) ---
@@ -45,14 +50,6 @@ registerRoute(
 )
 
 // --- HU-13: notificaciones push de eventos del viaje ---
-interface PayloadPush {
-  titulo: string
-  mensaje: string
-  tipo: string
-  viajeId?: string | null
-  reservaId?: string | null
-}
-
 self.addEventListener('push', (event) => {
   if (!event.data) return
   let payload: PayloadPush
@@ -62,19 +59,13 @@ self.addEventListener('push', (event) => {
     return
   }
 
-  const url = payload.reservaId
-    ? `/reservas/${payload.reservaId}/mapa`
-    : payload.viajeId
-      ? `/viajes/${payload.viajeId}`
-      : '/'
-
   event.waitUntil(
     self.registration.showNotification(payload.titulo, {
       body: payload.mensaje,
       icon: '/icons/icon-192.png',
       badge: '/icons/icon-192.png',
       tag: payload.tipo,
-      data: { url },
+      data: { url: urlDestino(payload) },
     }),
   )
 })
@@ -85,7 +76,7 @@ self.addEventListener('notificationclick', (event) => {
 
   event.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((lista) => {
-      const existente = lista.find((c) => new URL(c.url).pathname === url)
+      const existente = pestanaParaEnfocar(lista, url)
       if (existente) return existente.focus()
       return self.clients.openWindow(url)
     }),
