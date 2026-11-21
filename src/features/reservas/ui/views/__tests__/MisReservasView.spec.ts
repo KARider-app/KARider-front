@@ -47,6 +47,18 @@ describe('MisReservasView', () => {
     expect(wrapper.find('[role="alert"]').exists()).toBe(true)
   })
 
+  it('HU-15: sin conexión, muestra las reservas guardadas de una carga anterior', async () => {
+    instalarApiFalsa([['/reservas', pagina([reserva()])]])
+    await abrir('Pasajero')
+
+    instalarApiFalsa([['/reservas', errorApi(0, 'SIN_CONEXION')]])
+    const { wrapper } = await abrir('Pasajero')
+    expect(wrapper.text()).toContain(
+      'Sin conexión. Mostrando tus reservas confirmadas guardadas en este dispositivo.',
+    )
+    expect(wrapper.text()).toContain('KAR-UTTT-2026-9874')
+  })
+
   it('el conductor ve sus rutas publicadas (sin borradores)', async () => {
     instalarApiFalsa([
       [
