@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { flushPromises } from '@vue/test-utils'
+import { instalarNavegadorConPush } from '@/__tests__/apoyo/navegadorPush'
 import {
   credenciales,
   errorApi,
@@ -341,38 +342,6 @@ describe('PerfilView (P13-P15)', () => {
   })
 
   describe('HU-13 · Notificaciones push', () => {
-    function instalarNavegadorConPush() {
-      const registro = {
-        pushManager: {
-          getSubscription: vi.fn<() => Promise<null>>(async () => null),
-          subscribe: vi
-            .fn<() => Promise<{ endpoint: string; toJSON: () => unknown }>>()
-            .mockResolvedValue({
-              endpoint: 'https://push.ejemplo/abc',
-              toJSON: () => ({
-                endpoint: 'https://push.ejemplo/abc',
-                keys: { p256dh: 'p', auth: 'a' },
-              }),
-            }),
-        },
-      }
-      Object.defineProperty(navigator, 'serviceWorker', {
-        configurable: true,
-        value: { ready: Promise.resolve(registro) },
-      })
-      Object.defineProperty(window, 'PushManager', { configurable: true, value: class {} })
-      Object.defineProperty(window, 'Notification', {
-        configurable: true,
-        writable: true,
-        value: Object.assign(vi.fn(), {
-          permission: 'default' as NotificationPermission,
-          requestPermission: vi
-            .fn<() => Promise<NotificationPermission>>()
-            .mockResolvedValue('granted'),
-        }),
-      })
-    }
-
     afterEach(() => {
       Reflect.deleteProperty(navigator, 'serviceWorker')
       Reflect.deleteProperty(window, 'PushManager')

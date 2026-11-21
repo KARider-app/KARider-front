@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { defineComponent } from 'vue'
 import { mount } from '@vue/test-utils'
+import { instalarNavegadorConPush, suscripcionFalsa } from '@/__tests__/apoyo/navegadorPush'
 import { ApiError } from '@/core/http/apiError'
 import { notificacionesApi } from '../../api/notificacionesApi'
 import type { ClaveVapid, SuscripcionPushRequest } from '../../domain/tipos'
@@ -24,45 +25,6 @@ const Anfitrion = defineComponent({
   },
   template: '<div />',
 })
-
-function suscripcionFalsa(endpoint = 'https://push.ejemplo/abc') {
-  return {
-    endpoint,
-    unsubscribe: vi.fn<() => Promise<boolean>>().mockResolvedValue(true),
-    toJSON: () => ({ endpoint, keys: { p256dh: 'clave-p256dh', auth: 'clave-auth' } }),
-  }
-}
-
-type Suscripcion = ReturnType<typeof suscripcionFalsa>
-
-function instalarNavegadorConPush(opciones: { suscripcionInicial?: Suscripcion | null } = {}) {
-  let suscripcionActual = opciones.suscripcionInicial ?? null
-  const registro = {
-    pushManager: {
-      getSubscription: vi.fn<() => Promise<Suscripcion | null>>(async () => suscripcionActual),
-      subscribe: vi.fn<() => Promise<Suscripcion>>(async () => {
-        suscripcionActual = suscripcionFalsa()
-        return suscripcionActual
-      }),
-    },
-  }
-  Object.defineProperty(navigator, 'serviceWorker', {
-    configurable: true,
-    value: { ready: Promise.resolve(registro) },
-  })
-  Object.defineProperty(window, 'PushManager', { configurable: true, value: class {} })
-  Object.defineProperty(window, 'Notification', {
-    configurable: true,
-    writable: true,
-    value: Object.assign(vi.fn(), {
-      permission: 'default' as NotificationPermission,
-      requestPermission: vi
-        .fn<() => Promise<NotificationPermission>>()
-        .mockResolvedValue('granted'),
-    }),
-  })
-  return registro
-}
 
 describe('useNotificacionesPush (HU-13)', () => {
   beforeEach(() => {
