@@ -26,8 +26,12 @@ describe('pestanaParaEnfocar (HU-13)', () => {
     expect(pestanaParaEnfocar(pestanas, '/reservas/r1/mapa')).toBe(pestanas[1])
   })
 
-  it('devuelve null si ninguna pestaña coincide', () => {
+  it('sin coincidencia exacta, reutiliza cualquier pestaña abierta (se navega ahí)', () => {
     const pestanas = [{ url: 'https://karider.app/perfil' }]
-    expect(pestanaParaEnfocar(pestanas, '/reservas/r1/mapa')).toBeNull()
+    expect(pestanaParaEnfocar(pestanas, '/reservas/r1/mapa')).toBe(pestanas[0])
+  })
+
+  it('sin ninguna pestaña abierta, devuelve null (hay que abrir una ventana nueva)', () => {
+    expect(pestanaParaEnfocar([], '/reservas/r1/mapa')).toBeNull()
   })
 })
