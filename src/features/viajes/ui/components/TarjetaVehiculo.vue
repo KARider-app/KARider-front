@@ -27,11 +27,12 @@ defineProps<{
     >
       Verificado
     </span>
+    <!-- HU-23: ningún vehículo queda «sin verificar»; si nadie lo ha revisado, está registrado. -->
     <span
       v-else
-      class="text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200 shrink-0"
+      class="text-[10px] font-bold text-sky-800 bg-sky-50 px-2 py-0.5 rounded border border-sky-200 shrink-0"
     >
-      Sin verificar
+      Registrado
     </span>
   </div>
 </template>
