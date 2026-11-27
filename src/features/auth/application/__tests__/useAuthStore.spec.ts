@@ -6,12 +6,16 @@ import { authApi } from '../../api/authApi'
 import type { AuthResponse } from '../../domain/tipos'
 import { useAuthStore } from '../useAuthStore'
 
-const { refrescarSesion } = vi.hoisted(() => ({
+const { refrescarSesion, desactivarPushLocal } = vi.hoisted(() => ({
   refrescarSesion: vi.fn<() => Promise<string | null>>(),
+  desactivarPushLocal: vi.fn<() => Promise<void>>(),
 }))
 vi.mock('@/core/http/apiClient', async (original) => ({
   ...(await original<typeof import('@/core/http/apiClient')>()),
   refrescarSesion,
+}))
+vi.mock('@/features/notificaciones/application/desactivarPushLocal', () => ({
+  desactivarPushLocal,
 }))
 
 function respuestaLogin(rol: 'Pasajero' | 'Conductor'): AuthResponse {
@@ -38,6 +42,7 @@ describe('useAuthStore · modo de uso (HU-17)', () => {
     localStorage.clear()
     sessionStorage.clear()
     refrescarSesion.mockReset()
+    desactivarPushLocal.mockReset().mockResolvedValue(undefined)
   })
   afterEach(() => vi.restoreAllMocks())
 
@@ -136,5 +141,27 @@ describe('useAuthStore · modo de uso (HU-17)', () => {
 
     expect(auth.modoActivo).toBe('Pasajero')
     expect(localStorage.getItem('karider.modo')).toBeNull()
+  })
+
+  it('al cerrar sesión cancela la suscripción push de este dispositivo (otra cuenta podría usarlo después)', async () => {
+    vi.spyOn(authApi, 'logout').mockResolvedValue(undefined as never)
+    const auth = useAuthStore()
+    auth.usuario = usuario('Conductor')
+
+    await auth.logout()
+
+    expect(desactivarPushLocal).toHaveBeenCalledOnce()
+    expect(auth.autenticado).toBe(false)
+  })
+
+  it('si falla la cancelación push, de todas formas cierra la sesión', async () => {
+    desactivarPushLocal.mockRejectedValue(new Error('sin conexión'))
+    vi.spyOn(authApi, 'logout').mockResolvedValue(undefined as never)
+    const auth = useAuthStore()
+    auth.usuario = usuario('Conductor')
+
+    await auth.logout()
+
+    expect(auth.autenticado).toBe(false)
   })
 })

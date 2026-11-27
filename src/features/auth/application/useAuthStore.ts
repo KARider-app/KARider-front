@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import { session } from '@/core/auth/session'
 import { EVENTO_USUARIO_ACTUALIZADO, refrescarSesion } from '@/core/http/apiClient'
+import { desactivarPushLocal } from '@/features/notificaciones/application/desactivarPushLocal'
 import { authApi } from '../api/authApi'
 import type { LoginRequest, RolIngreso, UsuarioSesion } from '../domain/tipos'
 
@@ -89,6 +90,8 @@ export const useAuthStore = defineStore('auth', () => {
 
   async function logout() {
     const refreshToken = session.getRefreshToken()
+    // Evita que la siguiente persona que use este dispositivo reciba avisos de esta cuenta.
+    await desactivarPushLocal().catch(() => {})
     if (refreshToken) await authApi.logout(refreshToken).catch(() => {})
     cerrarLocal()
   }
