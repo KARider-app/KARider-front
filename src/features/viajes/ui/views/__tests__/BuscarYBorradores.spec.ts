@@ -111,6 +111,30 @@ describe('BuscarViajesView (HU-06)', () => {
     expect(wrapper.text()).toContain('Regístralo en tu perfil')
   })
 
+  it('HU-18: un viaje recién publicado aparece solo, sin recargar la página', async () => {
+    vi.useFakeTimers({ toFake: ['setInterval', 'clearInterval', 'Date'] })
+    vi.spyOn(document, 'visibilityState', 'get').mockReturnValue('visible')
+    try {
+      let publicados = [viajeResumen('v1')]
+      instalarApiFalsa([
+        ['/catalogos/puntos-encuentro', []],
+        ['/viajes', () => pagina(publicados)],
+      ])
+      const { wrapper } = await abrir()
+      expect(wrapper.findAll('a[href^="/viajes/v"]')).toHaveLength(1)
+
+      publicados = [viajeResumen('v2', { destino: 'Tula de Allende' }), ...publicados]
+      vi.advanceTimersByTime(20_000)
+      await flushPromises()
+
+      expect(wrapper.text()).toContain('Tula de Allende')
+      expect(wrapper.text()).toContain('Se publicó 1 viaje nuevo.')
+      expect(wrapper.text()).toContain('2 disponibles')
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
   it('carga más viajes cuando hay otra página', async () => {
     const primera = { ...pagina([viajeResumen('v1')]), tieneSiguiente: true, total: 2 }
     const buscar = vi.fn<(url: string) => unknown>(() => primera)
