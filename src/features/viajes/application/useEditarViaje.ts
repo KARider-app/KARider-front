@@ -10,6 +10,8 @@ import type { ViajeDetalle } from '../domain/tipos'
 export interface FormularioEdicion {
   puntoEncuentroId: number | ''
   destino: string
+  destinoLatitud: number | null
+  destinoLongitud: number | null
   paradas: string[]
   fecha: string
   hora: string
@@ -21,6 +23,8 @@ export interface FormularioEdicion {
 const vacio = (): FormularioEdicion => ({
   puntoEncuentroId: '',
   destino: '',
+  destinoLatitud: null,
+  destinoLongitud: null,
   paradas: [],
   fecha: '',
   hora: '',
@@ -60,6 +64,7 @@ export function useEditarViaje() {
       a.hora !== b.hora ||
       a.puntoEncuentroId !== b.puntoEncuentroId ||
       a.destino !== b.destino ||
+      a.destinoLatitud !== b.destinoLatitud ||
       JSON.stringify(a.paradas) !== JSON.stringify(b.paradas)
     )
   })
@@ -75,6 +80,8 @@ export function useEditarViaje() {
       valores.value = {
         puntoEncuentroId: v.puntoEncuentro.id,
         destino: v.destino,
+        destinoLatitud: v.destinoLatitud,
+        destinoLongitud: v.destinoLongitud,
         paradas: v.paradas.map((p) => p.nombre),
         fecha,
         hora,
@@ -99,6 +106,8 @@ export function useEditarViaje() {
       await viajesApi.editar(actual.id, {
         puntoEncuentroId: d.puntoEncuentroId,
         destino: d.destino,
+        destinoLatitud: d.destinoLatitud,
+        destinoLongitud: d.destinoLongitud,
         paradas: d.paradas,
         fechaSalida: aIsoUtc(d.fecha, d.hora),
         asientos: d.asientos,

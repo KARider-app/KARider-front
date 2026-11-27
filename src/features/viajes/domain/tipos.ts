@@ -27,6 +27,9 @@ export interface PublicarViajeRequest {
   vehiculoId?: string
   puntoEncuentroId: number
   destino: string
+  /** HU-22: coordenadas del lugar que eligió el conductor; sin ellas la API ubica el texto. */
+  destinoLatitud: number | null
+  destinoLongitud: number | null
   fechaSalida: string
   asientos: number
   gastoTotal: number
@@ -71,6 +74,14 @@ export interface MiReserva {
   estado: EstadoReserva
   asientos: number
   montoAporte: number
+}
+
+/** HU-22: lugar sugerido por la API (`GET /mapas/lugares`) para fijar el destino exacto. */
+export interface LugarMapa {
+  nombre: string
+  direccion: string
+  latitud: number
+  longitud: number
 }
 
 export interface ConductorResumen {

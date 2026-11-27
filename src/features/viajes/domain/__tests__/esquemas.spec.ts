@@ -23,6 +23,20 @@ describe('paso1Esquema (HU-04)', () => {
     expect(erroresDe(valido)).toEqual([])
   })
 
+  it('HU-22: las coordenadas del destino son opcionales y se conservan si se eligieron', () => {
+    const sinUbicar = paso1Esquema.parse(valido)
+    expect(sinUbicar.destinoLatitud).toBeNull()
+    expect(sinUbicar.destinoLongitud).toBeNull()
+
+    const ubicado = paso1Esquema.parse({
+      ...valido,
+      destinoLatitud: 20.05,
+      destinoLongitud: -99.34,
+    })
+    expect(ubicado.destinoLatitud).toBe(20.05)
+    expect(ubicado.destinoLongitud).toBe(-99.34)
+  })
+
   it('rechaza una fecha pasada', () => {
     const ayer = aFechaInput(sumarDias(new Date(), -1))
     expect(erroresDe({ ...valido, fecha: ayer })).toContain('hora')

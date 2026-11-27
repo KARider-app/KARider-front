@@ -4,6 +4,7 @@ import type {
   EditarViajeRequest,
   EstadoViaje,
   LlegadaConductor,
+  LugarMapa,
   PagedResult,
   PublicarViajeRequest,
   RutaViaje,
@@ -15,6 +16,9 @@ import type {
 
 export const viajesApi = {
   misVehiculos: () => apiClient.get<Vehiculo[]>('/vehiculos').then((r) => r.data),
+  /** HU-22: lugares que coinciden con el texto, del más cercano al campus al más lejano. */
+  buscarLugares: (texto: string) =>
+    apiClient.get<LugarMapa[]>('/mapas/lugares', { params: { texto } }).then((r) => r.data),
   publicar: (p: PublicarViajeRequest) =>
     apiClient.post<ViajeDetalle>('/viajes', p).then((r) => r.data),
   publicarBorrador: (id: string) =>
