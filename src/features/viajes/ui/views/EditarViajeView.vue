@@ -127,7 +127,8 @@ async function guardarCambios() {
             @validar="validarCampo('destino')"
           />
           <ParadasChips v-model="valores.paradas" :error="errores.paradas" />
-          <div class="grid grid-cols-2 gap-3">
+          <!-- En tablet la columna es angosta: fecha y hora van una debajo de la otra. -->
+          <div class="grid grid-cols-2 gap-3 md:grid-cols-1 lg:grid-cols-2">
             <BaseInput
               v-model="valores.fecha"
               etiqueta="Fecha"
