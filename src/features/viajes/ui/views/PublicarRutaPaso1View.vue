@@ -38,6 +38,7 @@ import { usePublicarViajeStore } from '../../application/usePublicarViajeStore'
 import { DIAS_MAX_ANTICIPACION, paso1Esquema } from '../../domain/esquemas'
 
 // Componentes para mostrar las paradas y seleccionar los asientos.
+import DestinoEnMapa from '../components/DestinoEnMapa.vue'
 import ParadasChips from '../components/ParadasChips.vue'
 import SelectorAsientos from '../components/SelectorAsientos.vue'
 
@@ -135,15 +136,14 @@ function continuar() {
           @change="validarCampo('puntoEncuentroId')"
         />
 
-        <!-- Campo para introducir el destino final del recorrido. -->
-        <BaseInput
-          v-model="valores.destino"
+        <!-- HU-22: destino final; el conductor lo ubica en el mapa para que la ruta sea exacta. -->
+        <DestinoEnMapa
+          v-model:destino="valores.destino"
+          v-model:latitud="valores.destinoLatitud"
+          v-model:longitud="valores.destinoLongitud"
           etiqueta="Destino Final *"
-          suave
           :error="errores.destino"
-          maxlength="150"
-          placeholder="Ej. Pachuca Plaza Galerías / Tula Centro"
-          @blur="validarCampo('destino')"
+          @validar="validarCampo('destino')"
         />
 
         <!-- Permite agregar y administrar las paradas intermedias. -->

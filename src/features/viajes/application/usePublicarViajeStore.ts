@@ -12,6 +12,9 @@ const CLAVE = 'karider.borrador-viaje'
 export interface BorradorViaje {
   puntoEncuentroId: number | ''
   destino: string
+  /** HU-22: lugar exacto elegido en el mapa. */
+  destinoLatitud: number | null
+  destinoLongitud: number | null
   paradas: string[]
   fecha: string
   hora: string
@@ -24,6 +27,8 @@ export interface BorradorViaje {
 const vacio = (): BorradorViaje => ({
   puntoEncuentroId: '',
   destino: '',
+  destinoLatitud: null,
+  destinoLongitud: null,
   paradas: [],
   fecha: '',
   hora: '',
@@ -80,6 +85,8 @@ export const usePublicarViajeStore = defineStore('publicarViaje', () => {
       vehiculoId: paso2.vehiculoId || undefined,
       puntoEncuentroId: paso1.puntoEncuentroId,
       destino: paso1.destino,
+      destinoLatitud: paso1.destinoLatitud,
+      destinoLongitud: paso1.destinoLongitud,
       fechaSalida: aIsoUtc(paso1.fecha, paso1.hora),
       asientos: paso1.asientos,
       gastoTotal: paso2.gastoTotal,
