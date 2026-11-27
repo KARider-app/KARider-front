@@ -3,11 +3,12 @@ import { Car } from 'lucide-vue-next'
 import BaseInput from '@/shared/components/BaseInput.vue'
 import BaseSelect from '@/shared/components/BaseSelect.vue'
 import type { Errores } from '@/shared/composables/useFormulario'
+import { COLOR_MAXIMO } from '../../domain/esquemas'
 
 export interface DatosVehiculo {
   modelo: string
   color: string
-  anio: number | ''
+  anio: number | string
   placas: string
   capacidad: number | ''
 }
@@ -57,6 +58,8 @@ const opcionesCapacidad = [1, 2, 3, 4].map((n) => ({
         v-model="vehiculo.color"
         etiqueta="Color"
         :error="errores['vehiculo.color']"
+        filtro="letras"
+        :maxlength="COLOR_MAXIMO"
         placeholder="Ej. Gris"
         @blur="emit('validar', 'vehiculo.color')"
       />
@@ -64,11 +67,12 @@ const opcionesCapacidad = [1, 2, 3, 4].map((n) => ({
         v-model="vehiculo.anio"
         etiqueta="Año"
         :error="errores['vehiculo.anio']"
-        type="number"
+        type="text"
         inputmode="numeric"
-        min="1990"
-        :max="anioMax"
+        filtro="numeros"
+        maxlength="4"
         placeholder="Ej. 2019"
+        :ayuda="`4 números, de 1990 a ${anioMax}`"
         @blur="emit('validar', 'vehiculo.anio')"
       />
     </div>
