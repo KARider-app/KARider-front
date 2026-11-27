@@ -1,5 +1,6 @@
 import { apiClient } from '@/core/http/apiClient'
-import type { PagedResult } from '@/features/viajes/domain/tipos'
+import type { VehiculoRequest } from '@/features/auth/domain/tipos'
+import type { PagedResult, Vehiculo } from '@/features/viajes/domain/tipos'
 import type {
   ActualizarPerfilRequest,
   CalificacionPendiente,
@@ -25,4 +26,7 @@ export const perfilApi = {
   pendientes: () =>
     apiClient.get<CalificacionPendiente[]>('/calificaciones/pendientes').then((r) => r.data),
   calificar: (p: CalificarRequest) => apiClient.post('/calificaciones', p).then(() => undefined),
+  /** HU-17: registrar el primer vehículo convierte la cuenta en conductor. */
+  registrarVehiculo: (v: VehiculoRequest) =>
+    apiClient.post<Vehiculo>('/vehiculos', v).then((r) => r.data),
 }

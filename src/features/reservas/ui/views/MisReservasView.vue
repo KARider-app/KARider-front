@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { onMounted, watch } from 'vue'
 import { ArrowLeft, Car, ChevronRight, Clock, MapPin, Navigation } from 'lucide-vue-next'
 import { useAuthStore } from '@/features/auth/application/useAuthStore'
 import { useMisRutas } from '@/features/viajes/application/useMisRutas'
@@ -36,10 +36,14 @@ const textoEstadoViaje: Record<EstadoViaje, string> = {
   Cancelado: 'Cancelado',
 }
 
-onMounted(() => {
-  if (auth.esConductor) void cargarRutas()
+/** HU-17: lo que se muestra depende del modo (un conductor también puede tener reservas). */
+function cargar() {
+  if (auth.modoConductor) void cargarRutas()
   else void cargarReservas()
-})
+}
+
+onMounted(cargar)
+watch(() => auth.modoConductor, cargar)
 
 const estiloReserva: Record<EstadoReserva, string> = {
   Pendiente: 'bg-amber-50 text-amber-800 border-amber-200',
@@ -79,11 +83,11 @@ const estiloViaje: Record<EstadoViaje, string> = {
           class="text-sm md:text-xl font-extrabold text-white flex items-center gap-1.5 font-sans"
         >
           <Navigation class="w-4 h-4 text-[#0284C7]" aria-hidden="true" />
-          <span>{{ auth.esConductor ? 'Mapa de mis rutas' : 'Mis reservas' }}</span>
+          <span>{{ auth.modoConductor ? 'Mapa de mis rutas' : 'Mis reservas' }}</span>
         </h1>
         <p class="text-xs text-[#C9DCE8] mt-0.5">
           {{
-            auth.esConductor
+            auth.modoConductor
               ? 'Entra a una ruta programada o en curso para compartir tu ubicación.'
               : 'Entra a una reserva confirmada para ver el mapa de tu viaje.'
           }}
@@ -92,7 +96,7 @@ const estiloViaje: Record<EstadoViaje, string> = {
     </header>
 
     <div class="p-5 space-y-3 flex-1 md:px-8 md:py-8 md:max-w-[76rem] md:mx-auto md:w-full">
-      <template v-if="auth.esConductor">
+      <template v-if="auth.modoConductor">
         <AlertMessage v-if="errorRutas" tipo="error">{{ mensajeDeError(errorRutas) }}</AlertMessage>
         <p v-if="cargandoRutas" class="py-8 text-center text-xs text-[#4B5563]">Cargando…</p>
         <section

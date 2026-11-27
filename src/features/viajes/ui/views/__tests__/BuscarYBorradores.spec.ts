@@ -108,7 +108,7 @@ describe('BuscarViajesView (HU-06)', () => {
     await wrapper.get('form').trigger('submit')
     await flushPromises()
     expect(wrapper.text()).toContain('hacia "Tepeji"')
-    expect(wrapper.text()).toContain('Con una cuenta de conductor')
+    expect(wrapper.text()).toContain('Regístralo en tu perfil')
   })
 
   it('carga más viajes cuando hay otra página', async () => {
