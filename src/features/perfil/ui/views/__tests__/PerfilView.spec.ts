@@ -102,8 +102,18 @@ describe('PerfilView (P13-P15)', () => {
     expect(texto).toContain('Registro Histórico de Viajes (0)')
     const estadisticas = wrapper.get('[aria-label="Estadísticas"]').text()
     expect(estadisticas).toContain('0Viajes Hechos')
-    expect(estadisticas).toContain('$0')
-    expect(estadisticas).toContain('0 kg')
+  })
+
+  it('HU-23: la cabecera solo muestra los viajes hechos, sin ahorro de gasolina ni CO₂', async () => {
+    instalarApiFalsa(base())
+    const { wrapper } = await abrir()
+
+    const estadisticas = wrapper.get('[aria-label="Estadísticas"]').text()
+    expect(estadisticas).toContain('Viajes Hechos')
+    expect(estadisticas).not.toContain('Ahorro')
+    expect(estadisticas).not.toContain('CO₂')
+    expect(estadisticas).not.toContain('kg')
+    expect(estadisticas).not.toContain('$')
   })
 
   it('HU-10 criterio 2: el vacío de un filtro concreto nombra el rol', async () => {
@@ -233,7 +243,7 @@ describe('PerfilView (P13-P15)', () => {
       expect(texto).not.toContain('Pendiente')
     })
 
-    it('criterio 3: un vehículo pendiente muestra «Pendiente» sin ocultar sus datos', async () => {
+    it('HU-23: un vehículo sin revisión aparece «Registrado», no pendiente, con sus datos', async () => {
       const wrapper = await abrirCredenciales([
         [
           '/perfil/credenciales',
@@ -241,7 +251,8 @@ describe('PerfilView (P13-P15)', () => {
         ],
       ])
       const bloque = wrapper.findAll('section').find((s) => s.text().includes('Vehículo'))!
-      expect(bloque.text()).toContain('Pendiente')
+      expect(bloque.text()).toContain('Registrado')
+      expect(bloque.text()).not.toContain('Pendiente')
       expect(bloque.text()).not.toContain('Verificado')
       expect(bloque.text()).toContain('HNX-421-C')
       expect(bloque.text()).toContain('2022')

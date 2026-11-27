@@ -215,27 +215,16 @@ onMounted(() => {
               </div>
             </div>
 
+            <!-- HU-23: el perfil solo muestra los viajes hechos (sin ahorro de gasolina ni CO₂). -->
             <section
-              class="grid grid-cols-3 gap-2 mt-4 pt-3 border-t border-white/15 text-center md:mt-0 md:pt-0 md:border-t-0 md:w-[420px] md:shrink-0"
+              class="mt-4 pt-3 border-t border-white/15 text-center md:mt-0 md:pt-0 md:border-t-0 md:w-44 md:shrink-0"
               aria-label="Estadísticas"
             >
-              <div class="bg-white/5 rounded-xl p-1.5">
-                <span class="text-sm md:text-xl font-black text-white block">
+              <div class="bg-white/5 rounded-xl p-2 md:p-3">
+                <span class="text-lg md:text-2xl font-black text-white block">
                   {{ perfil.estadisticas.viajesRealizados }}
                 </span>
-                <span class="text-[9px] text-[#C9DCE8]">Viajes Hechos</span>
-              </div>
-              <div class="bg-white/5 rounded-xl p-1.5">
-                <span class="text-sm md:text-xl font-black text-emerald-300 block">
-                  {{ mxn(perfil.estadisticas.ahorroCombustible) }}
-                </span>
-                <span class="text-[9px] text-[#C9DCE8]">Ahorro Gasolina</span>
-              </div>
-              <div class="bg-white/5 rounded-xl p-1.5">
-                <span class="text-sm md:text-xl font-black text-sky-300 block">
-                  {{ perfil.estadisticas.co2EvitadoKg.toFixed(0) }} kg
-                </span>
-                <span class="text-[9px] text-[#C9DCE8]">CO₂ Evitado</span>
+                <span class="text-[10px] text-[#C9DCE8]">Viajes Hechos</span>
               </div>
             </section>
           </div>
@@ -580,13 +569,14 @@ onMounted(() => {
                   <Car class="w-4 h-4 text-[#0284C7]" aria-hidden="true" />
                   <span>Vehículo para Carpooling</span>
                 </h2>
+                <!-- HU-23: «Verificado» solo si un administrador revisó el vehículo; si no, está registrado. -->
                 <span
                   class="text-[10px] font-bold px-2 py-0.5 rounded"
                   :class="
-                    v.verificado ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+                    v.verificado ? 'bg-emerald-100 text-emerald-800' : 'bg-sky-100 text-sky-800'
                   "
                 >
-                  {{ v.verificado ? 'Verificado' : 'Pendiente' }}
+                  {{ v.verificado ? 'Verificado' : 'Registrado' }}
                 </span>
               </div>
               <dl class="text-xs space-y-1.5">
