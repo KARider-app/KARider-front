@@ -6,6 +6,7 @@ import BaseSelect from '@/shared/components/BaseSelect.vue'
 import PasswordInput from '@/shared/components/PasswordInput.vue'
 import type { Errores } from '@/shared/composables/useFormulario'
 import type { Carrera } from '@/features/catalogos/domain/tipos'
+import { NOMBRE_MAXIMO, PASSWORD_MAXIMA } from '../../domain/esquemas'
 
 export interface DatosPersonales {
   nombreCompleto: string
@@ -21,6 +22,14 @@ export interface DatosPersonales {
 const props = defineProps<{ errores: Errores; carreras: Carrera[]; dominio: string }>()
 const emit = defineEmits<{ validar: [campo: string] }>()
 const datos = defineModel<DatosPersonales>({ required: true })
+
+/**
+ * HU-16: el nombre y la contraseña se validan mientras se escribe en cuanto rebasan su límite,
+ * para avisar de inmediato («Máximo 60 letras» / «Máximo 30 caracteres») y no hasta salir del campo.
+ */
+function validarLimite(campo: 'nombreCompleto' | 'password', valor: unknown, maximo: number) {
+  if (String(valor ?? '').length > maximo || props.errores[campo]) emit('validar', campo)
+}
 
 const opcionesCarrera = computed(() =>
   props.carreras.map((c) => ({ valor: c.id, texto: c.nombre })),
@@ -40,8 +49,10 @@ const opcionesCuatrimestre = Array.from({ length: 11 }, (_, i) => ({
     type="text"
     autocomplete="name"
     filtro="letras"
-    maxlength="40"
+    :maxlength="NOMBRE_MAXIMO + 10"
     placeholder="Ej. Rodrigo Hernández Morales"
+    :ayuda="`Solo letras, máximo ${NOMBRE_MAXIMO}.`"
+    @update:model-value="(v) => validarLimite('nombreCompleto', v, NOMBRE_MAXIMO)"
     @blur="emit('validar', 'nombreCompleto')"
   />
   <div class="grid grid-cols-2 gap-2">
@@ -107,7 +118,9 @@ const opcionesCuatrimestre = Array.from({ length: 11 }, (_, i) => ({
     etiqueta="Contraseña"
     nueva
     :error="errores.password"
-    ayuda="Mínimo 8 caracteres con mayúscula, minúscula, número y carácter especial."
+    :maxlength="PASSWORD_MAXIMA + 10"
+    :ayuda="`De 8 a ${PASSWORD_MAXIMA} caracteres con mayúscula, minúscula, número y carácter especial.`"
+    @update:model-value="(v) => validarLimite('password', v, PASSWORD_MAXIMA)"
     @blur="emit('validar', 'password')"
   />
   <PasswordInput

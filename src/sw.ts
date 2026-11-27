@@ -75,10 +75,12 @@ self.addEventListener('notificationclick', (event) => {
   const url = (event.notification.data as { url?: string } | undefined)?.url ?? '/'
 
   event.waitUntil(
-    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((lista) => {
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(async (lista) => {
       const existente = pestanaParaEnfocar(lista, url)
-      if (existente) return existente.focus()
-      return self.clients.openWindow(url)
+      if (!existente) return self.clients.openWindow(url)
+      // Reutilizar la pestaña (en vez de abrir una ventana nueva) conserva la sesión en memoria.
+      if (new URL(existente.url).pathname !== url) await existente.navigate(url)
+      return existente.focus()
     }),
   )
 })

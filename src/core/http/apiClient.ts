@@ -14,7 +14,12 @@ apiClient.interceptors.request.use((config) => {
 interface RespuestaRefresh {
   accessToken: string
   refreshToken: string
+  /** Datos de la sesión con el rol vigente (p. ej. si la cuenta ya se volvió conductor). */
+  usuario?: unknown
 }
+
+/** Evento que avisa al store de sesión que la API devolvió datos de usuario más recientes. */
+export const EVENTO_USUARIO_ACTUALIZADO = 'karider:usuario-actualizado'
 
 // Un solo refresh a la vez aunque fallen varias peticiones simultáneas.
 let refrescando: Promise<string | null> | null = null
@@ -29,6 +34,9 @@ export function refrescarSesion(): Promise<string | null> {
         refreshToken,
       })
       session.guardar(data.accessToken, data.refreshToken, session.recordarme())
+      if (data.usuario) {
+        window.dispatchEvent(new CustomEvent(EVENTO_USUARIO_ACTUALIZADO, { detail: data.usuario }))
+      }
       return data.accessToken
     } catch (e) {
       // Sin conexión se conserva el refresh token para reintentar; si la API lo rechazó, se descarta.

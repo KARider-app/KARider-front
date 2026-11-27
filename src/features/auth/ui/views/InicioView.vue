@@ -2,6 +2,7 @@
 import { computed, type Component } from 'vue'
 import type { RouteLocationRaw } from 'vue-router'
 import {
+  ArrowLeftRight,
   ArrowRight,
   Car,
   CirclePlus,
@@ -22,6 +23,9 @@ import { useAuthStore } from '../../application/useAuthStore'
 
 const auth = useAuthStore()
 
+/** HU-17: un conductor cambia aquí mismo entre usar la app como pasajero o como conductor. */
+const otroModo = computed(() => (auth.modoConductor ? 'Pasajero' : 'Conductor'))
+
 interface Accion {
   titulo: string
   descripcion: string
@@ -41,7 +45,7 @@ const acciones = computed<Accion[]>(() => [
     color: 'text-[#0284C7]',
     hover: 'hover:border-[#3E5C76]',
   },
-  ...(auth.esConductor
+  ...(auth.modoConductor
     ? [
         {
           titulo: 'Publicar Ruta',
@@ -197,14 +201,25 @@ const compromisos = [
           class="mt-4 md:mt-0 md:w-64 flex items-center justify-between bg-[#111827]/40 p-1 md:p-2 rounded-xl border border-white/10"
         >
           <span class="text-[11px] font-semibold text-[#C9DCE8] pl-2">Modo activo:</span>
-          <span
+          <component
+            :is="auth.esConductor ? 'button' : 'span'"
+            :type="auth.esConductor ? 'button' : undefined"
             class="px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1 text-white shadow-xs"
-            :class="auth.esConductor ? 'bg-[#0284C7]' : 'bg-[#3E5C76]'"
+            :class="[
+              auth.modoConductor ? 'bg-[#0284C7]' : 'bg-[#3E5C76]',
+              auth.esConductor && 'hover:opacity-90 cursor-pointer',
+            ]"
+            :aria-label="
+              auth.esConductor ? `Modo ${auth.modoActivo}. Cambiar a ${otroModo}` : undefined
+            "
+            :title="auth.esConductor ? `Cambiar a ${otroModo}` : undefined"
+            @click="auth.esConductor && auth.cambiarModo(otroModo)"
           >
-            <Car v-if="auth.esConductor" class="w-3.5 h-3.5" aria-hidden="true" />
+            <Car v-if="auth.modoConductor" class="w-3.5 h-3.5" aria-hidden="true" />
             <UserCheck v-else class="w-3.5 h-3.5" aria-hidden="true" />
-            <span>{{ auth.usuario?.rol }}</span>
-          </span>
+            <span>{{ auth.modoActivo }}</span>
+            <ArrowLeftRight v-if="auth.esConductor" class="w-3 h-3 opacity-80" aria-hidden="true" />
+          </component>
         </div>
       </div>
     </header>

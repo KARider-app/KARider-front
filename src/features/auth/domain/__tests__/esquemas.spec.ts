@@ -69,14 +69,68 @@ describe('registroEsquema (HU-01 / HU-02)', () => {
     expect(erroresDe({ ...pasajero, cuatrimestre: 12 })).toContain('cuatrimestre')
   })
 
-  it('rechaza un nombre completo que no sea exactamente 40 letras, o con números/símbolos', () => {
-    expect(erroresDe({ ...pasajero, nombreCompleto: 'Ana López' })).toContain('nombreCompleto')
+  it('acepta nombres de cualquier longitud hasta 60 letras (HU-16)', () => {
+    expect(erroresDe({ ...pasajero, nombreCompleto: 'Ana López' })).toEqual([])
     expect(
-      erroresDe({ ...pasajero, nombreCompleto: 'Kazumi Alejandra Barrera Avila Hernández Gómez' }),
-    ).toContain('nombreCompleto')
+      erroresDe({
+        ...pasajero,
+        nombreCompleto: 'Ana Sofía Ximena Guadalupe Hernández Gutiérrez de la Fuentes',
+      }),
+    ).toEqual([])
+  })
+
+  it('rechaza un nombre de más de 60 letras, vacío o con números/símbolos (HU-16)', () => {
+    const largo = registroEsquema.safeParse({
+      ...pasajero,
+      nombreCompleto: 'Ana Sofía Ximena Guadalupe Hernández Gutiérrez de la Fuente Ruiz',
+    })
+    expect(largo.success).toBe(false)
+    expect(largo.error?.issues[0]?.message).toBe('Máximo 60 letras')
+    expect(erroresDe({ ...pasajero, nombreCompleto: '' })).toContain('nombreCompleto')
     expect(
       erroresDe({ ...pasajero, nombreCompleto: 'Kazumi Alejandra Barrera Avila #2026' }),
     ).toContain('nombreCompleto')
+  })
+
+  it('limita la contraseña a 30 caracteres (HU-16)', () => {
+    const treinta = 'Segura#2026Segura#2026Segura#2'
+    expect(treinta).toHaveLength(30)
+    expect(erroresDe({ ...pasajero, password: treinta, confirmarPassword: treinta })).toEqual([])
+    const larga = treinta + 'X'
+    expect(erroresDe({ ...pasajero, password: larga, confirmarPassword: larga })).toContain(
+      'password',
+    )
+  })
+
+  it('acepta solo letras en el color, máximo 15 (HU-16)', () => {
+    const conColor = (color: string) =>
+      erroresDe({ ...pasajero, rol: 'Conductor', vehiculo: { ...vehiculo, color } })
+    expect(conColor('Gris Oxford')).toEqual([])
+    expect(conColor('Rojo Cereza Mat')).toEqual([])
+    expect(conColor('Rojo Cereza Mate')).toContain('vehiculo.color')
+    expect(conColor('Azul 2')).toContain('vehiculo.color')
+    expect(conColor('Gris-Plata')).toContain('vehiculo.color')
+  })
+
+  it('exige un año de exactamente 4 números (HU-16)', () => {
+    const conAnio = (anio: unknown) =>
+      erroresDe({ ...pasajero, rol: 'Conductor', vehiculo: { ...vehiculo, anio } })
+    expect(conAnio('2019')).toEqual([])
+    expect(conAnio(2019)).toEqual([])
+    expect(conAnio('201')).toContain('vehiculo.anio')
+    expect(conAnio('20190')).toContain('vehiculo.anio')
+    expect(conAnio('20a9')).toContain('vehiculo.anio')
+    expect(conAnio('1985')).toContain('vehiculo.anio')
+    expect(conAnio('')).toContain('vehiculo.anio')
+  })
+
+  it('entrega el año como número a la API', () => {
+    const r = registroEsquema.safeParse({
+      ...pasajero,
+      rol: 'Conductor',
+      vehiculo: { ...vehiculo, anio: '2019' },
+    })
+    expect(r.success && r.data.vehiculo?.anio).toBe(2019)
   })
 
   it('rechaza una matrícula que no sean exactamente 8 dígitos', () => {

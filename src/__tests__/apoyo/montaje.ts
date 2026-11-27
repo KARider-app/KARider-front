@@ -261,16 +261,25 @@ export function usuario(rol: Rol = 'Pasajero'): UsuarioSesion {
 
 /**
  * Monta `componente` en la ruta `ruta` (cuyo nombre es `nombre`).
- * `rol` null = sin sesión.
+ * `rol` null = sin sesión. `modo` (HU-17): por omisión, un conductor entra en modo conductor.
  */
 export async function montar(
   componente: Component,
-  opciones: { ruta: string; nombre: string; rol?: Rol | null; stubs?: Record<string, Component> },
+  opciones: {
+    ruta: string
+    nombre: string
+    rol?: Rol | null
+    modo?: 'Pasajero' | 'Conductor'
+    stubs?: Record<string, Component>
+  },
 ) {
   const pinia = createPinia()
   setActivePinia(pinia)
   const auth = useAuthStore()
-  if (opciones.rol) auth.usuario = usuario(opciones.rol)
+  if (opciones.rol) {
+    auth.usuario = usuario(opciones.rol)
+    auth.cambiarModo(opciones.modo ?? (opciones.rol === 'Pasajero' ? 'Pasajero' : 'Conductor'))
+  }
 
   const routes: RouteRecordRaw[] = NOMBRES.map(([path, name]) => ({
     path,

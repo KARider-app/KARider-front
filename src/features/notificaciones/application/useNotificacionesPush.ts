@@ -1,6 +1,7 @@
 import { onMounted, ref } from 'vue'
 import { comoApiError, type ApiError } from '@/core/http/apiError'
 import { notificacionesApi } from '../api/notificacionesApi'
+import { desactivarPushLocal } from './desactivarPushLocal'
 
 /** Convierte la clave VAPID (base64url) al formato que pide PushManager.subscribe. */
 function aUint8Array(base64Url: string): Uint8Array {
@@ -70,12 +71,7 @@ export function useNotificacionesPush() {
     cargando.value = true
     error.value = null
     try {
-      const registro = await navigator.serviceWorker.ready
-      const sub = await registro.pushManager.getSubscription()
-      if (sub) {
-        await notificacionesApi.cancelarSuscripcion(sub.endpoint)
-        await sub.unsubscribe()
-      }
+      await desactivarPushLocal()
       suscrito.value = false
     } catch (e) {
       error.value = comoApiError(e)

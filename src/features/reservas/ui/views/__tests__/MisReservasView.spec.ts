@@ -7,6 +7,8 @@ import {
   reserva,
   viajeResumen,
 } from '@/__tests__/apoyo/montaje'
+import { flushPromises } from '@vue/test-utils'
+import { useAuthStore } from '@/features/auth/application/useAuthStore'
 import MisReservasView from '../MisReservasView.vue'
 
 const abrir = (rol: 'Pasajero' | 'Conductor') =>
@@ -88,5 +90,25 @@ describe('MisReservasView', () => {
     instalarApiFalsa([['/viajes/publicados', errorApi(500, 'ERROR_SERVIDOR')]])
     const { wrapper } = await abrir('Conductor')
     expect(wrapper.find('[role="alert"]').exists()).toBe(true)
+  })
+
+  it('HU-17: un conductor en modo pasajero ve sus reservas y al cambiar de modo ve sus rutas', async () => {
+    instalarApiFalsa([
+      ['/reservas', pagina([reserva()])],
+      ['/viajes/publicados', pagina([])],
+    ])
+    const { wrapper } = await montar(MisReservasView, {
+      ruta: '/reservas',
+      nombre: 'mis-reservas',
+      rol: 'Conductor',
+      modo: 'Pasajero',
+    })
+    expect(wrapper.text()).toContain('Mis reservas')
+    expect(wrapper.text()).toContain('KAR-UTTT-2026-9874')
+
+    useAuthStore().cambiarModo('Conductor')
+    await flushPromises()
+
+    expect(wrapper.text()).toContain('Mapa de mis rutas')
   })
 })

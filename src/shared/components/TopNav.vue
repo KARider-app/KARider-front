@@ -81,7 +81,7 @@ function clases(item: ItemNavegacion) {
                 class="px-2 py-0.5 rounded text-[10px] font-bold uppercase"
                 :class="esConductor ? 'bg-sky-100 text-sky-800' : 'bg-emerald-100 text-emerald-800'"
               >
-                {{ usuario.rol }}
+                {{ esConductor ? 'Conductor' : 'Pasajero' }}
               </span>
             </div>
             <img

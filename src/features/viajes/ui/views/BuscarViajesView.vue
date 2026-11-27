@@ -7,6 +7,7 @@ import AlertMessage from '@/shared/components/AlertMessage.vue'
 import BaseButton from '@/shared/components/BaseButton.vue'
 import { ArrowLeft, Car, Search, SlidersHorizontal, X } from 'lucide-vue-next'
 import { mensajeDeError } from '@/shared/composables/useApiError'
+import { useActualizacionAutomatica } from '@/shared/composables/useActualizacionAutomatica'
 import { useBuscarViajes, type FiltrosViajes } from '../../application/useBuscarViajes'
 import type { OrdenViajes } from '../../domain/tipos'
 import TarjetaViaje from '../components/TarjetaViaje.vue'
@@ -14,8 +15,19 @@ import TarjetaViaje from '../components/TarjetaViaje.vue'
 const router = useRouter()
 const auth = useAuthStore()
 const catalogos = useCatalogosStore()
-const { viajes, total, tieneSiguiente, cargando, cargandoMas, buscado, error, buscar, cargarMas } =
-  useBuscarViajes()
+const {
+  viajes,
+  total,
+  tieneSiguiente,
+  cargando,
+  cargandoMas,
+  buscado,
+  error,
+  nuevos,
+  buscar,
+  cargarMas,
+  actualizar,
+} = useBuscarViajes()
 
 const filtros = reactive<{
   destino: string
@@ -56,6 +68,13 @@ onMounted(() => {
   void catalogos.cargarPuntosEncuentro()
   void ejecutar()
 })
+
+// HU-18: los viajes recién publicados aparecen solos, sin recargar la página.
+useActualizacionAutomatica(() => actualizar(filtrosActuales()))
+
+const textoNuevos = computed(() =>
+  nuevos.value === 1 ? 'Se publicó 1 viaje nuevo.' : `Se publicaron ${nuevos.value} viajes nuevos.`,
+)
 
 const textoContador = computed(
   () => `${total.value} ${total.value === 1 ? 'viaje disponible' : 'viajes disponibles'}`,
@@ -174,6 +193,7 @@ function limpiarDestino() {
 
     <div class="p-5 pt-1 space-y-3 flex-1 md:px-8 md:pb-8 md:max-w-[76rem] md:mx-auto md:w-full">
       <AlertMessage v-if="error" tipo="error">{{ mensajeDeError(error) }}</AlertMessage>
+      <AlertMessage v-else-if="nuevos > 0" tipo="info">{{ textoNuevos }}</AlertMessage>
 
       <template v-if="buscado && !error">
         <!-- P6: estado vacío -->
@@ -193,16 +213,15 @@ function limpiarDestino() {
               ¿Te gustaría publicar esta ruta como conductor?</template
             >
             <template v-else>
-              ¿Tienes vehículo? Con una cuenta de conductor puedes publicar tu propia ruta.
+              ¿Tienes vehículo? Regístralo en tu perfil y publica tu propia ruta.
             </template>
           </p>
           <button
-            v-if="auth.esConductor"
             type="button"
             class="mt-4 px-4 py-2 rounded-xl bg-[#1D2D44] text-white text-xs font-bold hover:bg-[#3E5C76]"
-            @click="router.push({ name: 'publicar-1' })"
+            @click="router.push({ name: auth.esConductor ? 'publicar-1' : 'perfil' })"
           >
-            Publicar Ruta
+            {{ auth.esConductor ? 'Publicar Ruta' : 'Quiero ser conductor' }}
           </button>
         </section>
 
