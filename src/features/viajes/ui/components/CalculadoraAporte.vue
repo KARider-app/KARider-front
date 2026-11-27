@@ -51,7 +51,8 @@ const aporte = computed(() => calcularAporte(Number(gastoTotal.value), props.asi
     resaltada
     etiqueta="Reglamento UTTT"
   >
-    <div class="grid grid-cols-2 gap-3 items-center">
+    <!-- En tablet la tarjeta es angosta: el gasto y el aporte van uno debajo del otro. -->
+    <div class="grid grid-cols-2 gap-3 items-center md:grid-cols-1 lg:grid-cols-2">
       <BaseInput
         v-model="gastoTotal"
         etiqueta="Gasto Total (Gasolina + Casetas):"

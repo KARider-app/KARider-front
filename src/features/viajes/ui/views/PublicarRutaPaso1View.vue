@@ -152,7 +152,8 @@ function continuar() {
 
       <!-- Sección para establecer la fecha, hora y capacidad del viaje. -->
       <TarjetaSeccion titulo="2. Horario y Capacidad" :icono="Clock">
-        <div class="grid grid-cols-2 gap-2.5">
+        <!-- En tablet la columna es angosta: fecha y hora van una debajo de la otra. -->
+        <div class="grid grid-cols-2 gap-2.5 md:grid-cols-1 lg:grid-cols-2">
           <!-- El usuario selecciona una fecha dentro del rango permitido. -->
           <BaseInput
             v-model="valores.fecha"
