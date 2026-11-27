@@ -56,6 +56,20 @@ describe('PerfilView (P13-P15)', () => {
     expect(texto).toContain('Aporte de combustible liquidado')
   })
 
+  it('HU-17: un conductor en modo pasajero ve «Pasajero» en la cabecera, no «Conductor»', async () => {
+    instalarApiFalsa(base())
+    const { wrapper } = await montar(PerfilView, {
+      ruta: '/perfil',
+      nombre: 'perfil',
+      rol: 'Conductor',
+      modo: 'Pasajero',
+    })
+
+    const cabecera = wrapper.get('header').text()
+    expect(cabecera).toContain('Pasajero')
+    expect(cabecera).not.toContain('Conductor')
+  })
+
   it('filtra el historial por rol', async () => {
     const historialPorRol = vi.fn<() => unknown>(() => pagina([historial[1]]))
     instalarApiFalsa(base([['/perfil/historial', historialPorRol]]))

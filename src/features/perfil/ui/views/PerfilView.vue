@@ -13,6 +13,7 @@ import {
   Users,
 } from 'lucide-vue-next'
 import { fechaCorta, fechaHora, horaCorta, mxn } from '@/core/utils/formato'
+import { useAuthStore } from '@/features/auth/application/useAuthStore'
 import { useNotificacionesPush } from '@/features/notificaciones/application/useNotificacionesPush'
 import AlertMessage from '@/shared/components/AlertMessage.vue'
 import BaseButton from '@/shared/components/BaseButton.vue'
@@ -21,6 +22,8 @@ import { usePerfil } from '../../application/usePerfil'
 import type { FiltroRolHistorial, HistorialItem } from '../../domain/tipos'
 import EvaluarCompanero from '../components/EvaluarCompanero.vue'
 import ModoUso from '../components/ModoUso.vue'
+
+const auth = useAuthStore()
 
 const {
   soportado: pushSoportado,
@@ -160,7 +163,8 @@ onMounted(() => {
             <ShieldCheck class="w-3.5 h-3.5" aria-hidden="true" />
             <span>UTTT Verificado</span>
           </div>
-          <span class="text-[11px] font-mono text-[#8AA9C4]">{{ perfil?.rol }}</span>
+          <!-- HU-17: muestra el modo activo (pasajero/conductor), no el rol permanente de la cuenta. -->
+          <span class="text-[11px] font-mono text-[#8AA9C4]">{{ auth.modoActivo }}</span>
         </div>
 
         <template v-if="perfil">
