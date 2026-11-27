@@ -5,13 +5,20 @@ import { env } from '@/core/config/env'
 
 const anioMax = new Date().getFullYear() + 1
 
+/** Límites compartidos con la API (HU-16). */
+export const NOMBRE_MAXIMO = 60
+export const PASSWORD_MAXIMA = 30
+export const COLOR_MAXIMO = 15
+
+const soloLetras = /^[\p{L}\s]+$/u
+
 /** Convierte "" o null en undefined para campos numéricos opcionales. */
 const vacioComoIndefinido = (v: unknown) => (v === '' || v === null ? undefined : v)
 
 export const passwordSegura = z
   .string()
   .min(8, 'Al menos 8 caracteres')
-  .max(128, 'Máximo 128 caracteres')
+  .max(PASSWORD_MAXIMA, `Máximo ${PASSWORD_MAXIMA} caracteres`)
   .regex(/[A-Z]/, 'Incluye una mayúscula')
   .regex(/[a-z]/, 'Incluye una minúscula')
   .regex(/[0-9]/, 'Incluye un número')
@@ -36,13 +43,25 @@ export const vehiculoEsquema = z.object({
     .trim()
     .min(1, 'Captura el modelo (ej. Nissan Versa)')
     .max(20, 'Máximo 20 caracteres')
-    .regex(/^[\p{L}\s]+$/u, 'Solo letras (sin números)'),
-  color: z.string().trim().min(1, 'Captura el color').max(30),
-  anio: z.coerce
-    .number<unknown>()
-    .int('Año no válido')
-    .min(1990, `Entre 1990 y ${anioMax}`)
-    .max(anioMax, `Entre 1990 y ${anioMax}`),
+    .regex(soloLetras, 'Solo letras (sin números)'),
+  color: z
+    .string()
+    .trim()
+    .min(1, 'Captura el color')
+    .max(COLOR_MAXIMO, `Máximo ${COLOR_MAXIMO} letras`)
+    .regex(soloLetras, 'Solo letras, sin números ni símbolos'),
+  /** Exactamente 4 dígitos (sin letras ni símbolos) y dentro del rango permitido. */
+  anio: z.preprocess(
+    (v) => (typeof v === 'number' ? String(v) : v),
+    z
+      .string()
+      .trim()
+      .regex(/^\d{4}$/, 'Exactamente 4 números (ej. 2019)')
+      .transform(Number)
+      .pipe(
+        z.number().min(1990, `Entre 1990 y ${anioMax}`).max(anioMax, `Entre 1990 y ${anioMax}`),
+      ),
+  ),
   placas: z
     .string()
     .trim()
@@ -56,8 +75,9 @@ export const registroEsquema = z
     nombreCompleto: z
       .string()
       .trim()
-      .length(40, 'Debe tener exactamente 40 letras')
-      .regex(/^[\p{L}\s]+$/u, 'Solo letras, como en tu credencial'),
+      .min(1, 'Captura tu nombre completo')
+      .max(NOMBRE_MAXIMO, `Máximo ${NOMBRE_MAXIMO} letras`)
+      .regex(soloLetras, 'Solo letras, como en tu credencial'),
     matricula: z
       .string()
       .trim()
