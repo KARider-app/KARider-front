@@ -38,7 +38,7 @@ withDefaults(
       </h2>
       <span
         v-if="etiqueta"
-        class="text-[9px] font-bold px-2 py-0.5 rounded-full bg-white text-[#3E5C76]"
+        class="text-[9px] font-bold px-2 py-0.5 rounded-full bg-white text-[#3E5C76] whitespace-nowrap shrink-0"
       >
         {{ etiqueta }}
       </span>

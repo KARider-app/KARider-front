@@ -3,13 +3,15 @@ import { calcularAporte, esEditable } from '../aporte'
 import type { ViajeDetalle } from '../tipos'
 
 describe('calcularAporte (HU-05)', () => {
-  it('divide el gasto entre los asientos más el conductor', () => {
-    expect(calcularAporte(160, 3)).toBe(40)
+  it('HU-21: divide el gasto solo entre los pasajeros, sin contar al conductor', () => {
+    expect(calcularAporte(150, 3)).toBe(50)
+    expect(calcularAporte(160, 4)).toBe(40)
+    expect(calcularAporte(100, 1)).toBe(100)
   })
 
   it('redondea a 2 decimales como la API', () => {
-    expect(calcularAporte(100, 2)).toBe(33.33)
-    expect(calcularAporte(0.05, 1)).toBe(0.03) // AwayFromZero
+    expect(calcularAporte(100, 3)).toBe(33.33)
+    expect(calcularAporte(0.05, 2)).toBe(0.03) // AwayFromZero
   })
 
   it('devuelve 0 si aún no hay datos válidos', () => {

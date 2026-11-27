@@ -58,7 +58,7 @@ function alEscribir(evento: Event) {
       <slot name="prefijo" />
       <input
         :id="id"
-        class="w-full pr-3 py-2.5 text-xs rounded-xl border focus:ring-1 outline-none transition-all"
+        class="w-full min-w-0 pr-3 py-2.5 text-xs rounded-xl border focus:ring-1 outline-none transition-all [&::-webkit-date-and-time-value]:text-left"
         :class="[
           'bg-white',
           icono || $slots.prefijo ? 'pl-9' : 'pl-3',

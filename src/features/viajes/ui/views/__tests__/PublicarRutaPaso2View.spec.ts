@@ -56,7 +56,10 @@ describe('PublicarRutaPaso2View: selección accesible del vehículo', () => {
     expect(opciones).toHaveLength(2)
     expect(opciones[0]!.get('span.sr-only').text()).toContain('Nissan Versa Azul, placas HNX-421-C')
     expect(opciones[0]!.get('span.sr-only').text()).toContain('verificado')
-    expect(opciones[1]!.get('span.sr-only').text()).toContain('sin verificar')
+    expect(opciones[1]!.get('span.sr-only').text()).toContain('registrado')
+    // HU-23: la tarjeta visible ya no dice «Sin verificar».
+    expect(opciones[1]!.get('.vehiculos__tarjeta').text()).toContain('Registrado')
+    expect(wrapper.text()).not.toContain('Sin verificar')
     expect(opciones[0]!.get('.vehiculos__tarjeta').attributes('aria-hidden')).toBe('true')
   })
 })

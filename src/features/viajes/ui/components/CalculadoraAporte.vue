@@ -40,7 +40,7 @@ const emit = defineEmits<{
 // entregar temporalmente su valor como texto.
 const gastoTotal = defineModel<number | string>({ required: true })
 
-// Aporte por pasajero: gasto total entre los asientos más el conductor.
+// HU-21: aporte por pasajero = gasto total entre los asientos ofrecidos (el conductor no se cuenta).
 const aporte = computed(() => calcularAporte(Number(gastoTotal.value), props.asientos))
 </script>
 
@@ -51,7 +51,8 @@ const aporte = computed(() => calcularAporte(Number(gastoTotal.value), props.asi
     resaltada
     etiqueta="Reglamento UTTT"
   >
-    <div class="grid grid-cols-2 gap-3 items-center">
+    <!-- En tablet la tarjeta es angosta: el gasto y el aporte van uno debajo del otro. -->
+    <div class="grid grid-cols-2 gap-3 items-center md:grid-cols-1 lg:grid-cols-2">
       <BaseInput
         v-model="gastoTotal"
         etiqueta="Gasto Total (Gasolina + Casetas):"
@@ -82,7 +83,7 @@ const aporte = computed(() => calcularAporte(Number(gastoTotal.value), props.asi
           {{ mxn(aporte) }} MXN
         </strong>
         <span class="text-[9px] text-emerald-700 font-medium block">
-          Dividido entre {{ asientos + 1 }} personas
+          Dividido entre {{ asientos }} {{ asientos === 1 ? 'pasajero' : 'pasajeros' }}
         </span>
       </div>
     </div>

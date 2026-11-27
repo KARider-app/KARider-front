@@ -14,6 +14,7 @@ import { useCatalogosStore } from '@/features/catalogos/application/useCatalogos
 import { useEditarViaje } from '../../application/useEditarViaje'
 import { DIAS_MAX_ANTICIPACION } from '../../domain/esquemas'
 import CalculadoraAporte from '../components/CalculadoraAporte.vue'
+import DestinoEnMapa from '../components/DestinoEnMapa.vue'
 import ParadasChips from '../components/ParadasChips.vue'
 import SelectorAsientos from '../components/SelectorAsientos.vue'
 
@@ -117,16 +118,17 @@ async function guardarCambios() {
             :ayuda="puntoSeleccionado?.descripcion"
             @change="validarCampo('puntoEncuentroId')"
           />
-          <BaseInput
-            v-model="valores.destino"
+          <DestinoEnMapa
+            v-model:destino="valores.destino"
+            v-model:latitud="valores.destinoLatitud"
+            v-model:longitud="valores.destinoLongitud"
             etiqueta="Destino final"
-            suave
             :error="errores.destino"
-            maxlength="150"
-            @blur="validarCampo('destino')"
+            @validar="validarCampo('destino')"
           />
           <ParadasChips v-model="valores.paradas" :error="errores.paradas" />
-          <div class="grid grid-cols-2 gap-3">
+          <!-- En tablet la columna es angosta: fecha y hora van una debajo de la otra. -->
+          <div class="grid grid-cols-2 gap-3 md:grid-cols-1 lg:grid-cols-2">
             <BaseInput
               v-model="valores.fecha"
               etiqueta="Fecha"

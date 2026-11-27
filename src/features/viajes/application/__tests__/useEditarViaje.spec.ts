@@ -123,6 +123,24 @@ describe('useEditarViaje (HU-09)', () => {
     )
   })
 
+  it('HU-22: conserva la ubicación del destino y envía la nueva si se eligió otra en el mapa', async () => {
+    detalle.mockResolvedValue(viaje({ destinoLatitud: 20.05, destinoLongitud: -99.34 }))
+    editar.mockResolvedValue(viaje())
+    const { cargar, formulario, guardar, cambiosRelevantes } = useEditarViaje()
+    await cargar('v1')
+    expect(formulario.valores.value.destinoLatitud).toBe(20.05)
+
+    formulario.valores.value.destinoLatitud = 20.06
+    formulario.valores.value.destinoLongitud = -99.33
+    expect(cambiosRelevantes.value).toBe(true)
+    await guardar()
+
+    expect(editar).toHaveBeenCalledWith(
+      'v1',
+      expect.objectContaining({ destinoLatitud: 20.06, destinoLongitud: -99.33 }),
+    )
+  })
+
   it('no guarda y expone el error general si la API rechaza la edición', async () => {
     detalle.mockResolvedValue(viaje())
     editar.mockRejectedValue(new ApiError(409, 'VIAJE_SIN_CUPO', 'Ya no hay cupo suficiente.'))

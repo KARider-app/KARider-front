@@ -199,7 +199,7 @@ function guardar(publicar: boolean) {
             <!-- Nombre accesible de la opción: el lector de pantalla lo anuncia al elegir el vehículo. -->
             <span class="sr-only">
               {{ v.modelo }} {{ v.color }}, placas {{ v.placas }},
-              {{ v.verificado ? 'verificado' : 'sin verificar' }}
+              {{ v.verificado ? 'verificado' : 'registrado' }}
             </span>
 
             <!-- Presenta los datos del vehículo de esta opción (solo visual; el texto accesible está arriba). -->

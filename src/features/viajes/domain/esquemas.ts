@@ -11,10 +11,15 @@ export const paradaEsquema = z
   .min(1, 'La parada no puede estar vacía')
   .max(100, 'Máximo 100 caracteres por parada')
 
+/** HU-22: coordenada del destino elegido en el mapa (null si el conductor no eligió un lugar). */
+const coordenada = z.number().nullable().default(null)
+
 export const paso1Esquema = z
   .object({
     puntoEncuentroId: z.coerce.number<unknown>().int().positive('Selecciona el punto de encuentro'),
     destino: z.string().trim().min(3, 'Captura el destino final').max(150, 'Máximo 150 caracteres'),
+    destinoLatitud: coordenada,
+    destinoLongitud: coordenada,
     paradas: z.array(paradaEsquema).max(MAX_PARADAS, `Máximo ${MAX_PARADAS} paradas`),
     fecha: z.string().min(1, 'Selecciona la fecha'), // "2026-10-20"  (input type="date")
     hora: z.string().min(1, 'Selecciona la hora'), // "14:30"       (input type="time")

@@ -38,6 +38,7 @@ import { usePublicarViajeStore } from '../../application/usePublicarViajeStore'
 import { DIAS_MAX_ANTICIPACION, paso1Esquema } from '../../domain/esquemas'
 
 // Componentes para mostrar las paradas y seleccionar los asientos.
+import DestinoEnMapa from '../components/DestinoEnMapa.vue'
 import ParadasChips from '../components/ParadasChips.vue'
 import SelectorAsientos from '../components/SelectorAsientos.vue'
 
@@ -135,15 +136,14 @@ function continuar() {
           @change="validarCampo('puntoEncuentroId')"
         />
 
-        <!-- Campo para introducir el destino final del recorrido. -->
-        <BaseInput
-          v-model="valores.destino"
+        <!-- HU-22: destino final; el conductor lo ubica en el mapa para que la ruta sea exacta. -->
+        <DestinoEnMapa
+          v-model:destino="valores.destino"
+          v-model:latitud="valores.destinoLatitud"
+          v-model:longitud="valores.destinoLongitud"
           etiqueta="Destino Final *"
-          suave
           :error="errores.destino"
-          maxlength="150"
-          placeholder="Ej. Pachuca Plaza Galerías / Tula Centro"
-          @blur="validarCampo('destino')"
+          @validar="validarCampo('destino')"
         />
 
         <!-- Permite agregar y administrar las paradas intermedias. -->
@@ -152,7 +152,8 @@ function continuar() {
 
       <!-- Sección para establecer la fecha, hora y capacidad del viaje. -->
       <TarjetaSeccion titulo="2. Horario y Capacidad" :icono="Clock">
-        <div class="grid grid-cols-2 gap-2.5">
+        <!-- En tablet la columna es angosta: fecha y hora van una debajo de la otra. -->
+        <div class="grid grid-cols-2 gap-2.5 md:grid-cols-1 lg:grid-cols-2">
           <!-- El usuario selecciona una fecha dentro del rango permitido. -->
           <BaseInput
             v-model="valores.fecha"
