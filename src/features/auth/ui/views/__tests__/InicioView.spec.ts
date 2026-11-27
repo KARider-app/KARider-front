@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it } from 'vitest'
 import { montar } from '@/__tests__/apoyo/montaje'
+import { useAuthStore } from '../../../application/useAuthStore'
 import InicioView from '../InicioView.vue'
 
 const abrir = (rol: 'Pasajero' | 'Conductor' | null) =>
@@ -37,5 +38,18 @@ describe('InicioView', () => {
     expect(texto).toContain('Publicar Ruta')
     expect(texto).toContain('Mis Borradores')
     expect(wrapper.find('a[href="/publicar/borradores"]').exists()).toBe(true)
+  })
+
+  it('HU-17: el conductor cambia a modo pasajero desde el indicador de modo', async () => {
+    const { wrapper } = await abrir('Conductor')
+    await wrapper.get('button[aria-label="Modo Conductor. Cambiar a Pasajero"]').trigger('click')
+
+    expect(useAuthStore().modoActivo).toBe('Pasajero')
+    expect(wrapper.text()).not.toContain('Publicar Ruta')
+  })
+
+  it('HU-17: el pasajero sin vehículo no tiene botón para cambiar de modo', async () => {
+    const { wrapper } = await abrir('Pasajero')
+    expect(wrapper.find('button[aria-label^="Modo"]').exists()).toBe(false)
   })
 })

@@ -33,7 +33,7 @@ onBeforeUnmount(() => window.removeEventListener('karider:sesion-expirada', alEx
   <div class="min-h-dvh bg-[#F0F4F8] text-[#1D2D44] flex flex-col items-center font-sans">
     <TopNav
       :autenticado="auth.autenticado"
-      :es-conductor="auth.esConductor"
+      :es-conductor="auth.modoConductor"
       :usuario="auth.usuario"
       @salir="salir"
     />
@@ -42,7 +42,7 @@ onBeforeUnmount(() => window.removeEventListener('karider:sesion-expirada', alEx
     >
       <RouterView />
     </div>
-    <BottomNav :autenticado="auth.autenticado" :es-conductor="auth.esConductor" @salir="salir" />
+    <BottomNav :autenticado="auth.autenticado" :es-conductor="auth.modoConductor" @salir="salir" />
     <InstalarAppBanner />
   </div>
 </template>

@@ -20,6 +20,7 @@ import { mensajeDeError } from '@/shared/composables/useApiError'
 import { usePerfil } from '../../application/usePerfil'
 import type { FiltroRolHistorial, HistorialItem } from '../../domain/tipos'
 import EvaluarCompanero from '../components/EvaluarCompanero.vue'
+import ModoUso from '../components/ModoUso.vue'
 
 const {
   soportado: pushSoportado,
@@ -126,6 +127,13 @@ function textoPasajeros(h: HistorialItem): string {
   return h.pasajeros ? `${h.pasajeros} pasajero${h.pasajeros === 1 ? '' : 's'}` : 'Sin pasajeros'
 }
 
+/** HU-17: al registrar su vehículo, el perfil y las credenciales ya muestran el rol de conductor. */
+function alVolverseConductor() {
+  void cargarPerfil()
+  credencialesCargadas.value = pestana.value === 'credenciales'
+  if (credencialesCargadas.value) void cargarCredenciales()
+}
+
 onMounted(() => {
   void cargarPerfil()
   void cargarHistorial('Todos')
@@ -230,6 +238,12 @@ onMounted(() => {
         </template>
       </div>
     </header>
+
+    <div v-if="perfil" class="px-4 pt-3 md:px-8 md:pt-4">
+      <div class="md:max-w-2xl md:mx-auto">
+        <ModoUso @ahora-conductor="alVolverseConductor" />
+      </div>
+    </div>
 
     <div
       v-if="perfil"

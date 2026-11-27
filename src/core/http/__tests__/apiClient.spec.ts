@@ -6,7 +6,7 @@ import axios, {
 } from 'axios'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { session } from '@/core/auth/session'
-import { apiClient } from '../apiClient'
+import { apiClient, EVENTO_USUARIO_ACTUALIZADO, refrescarSesion } from '../apiClient'
 import { ApiError } from '../apiError'
 
 /** Responde 401 AUTH_TOKEN_EXPIRADO con el token viejo y 200 con el nuevo. */
@@ -56,6 +56,21 @@ describe('apiClient: renovación automática (HU-03)', () => {
     expect(session.getRefreshToken()).toBe('refresh-2')
     expect(localStorage.getItem('karider.rt')).toBe('refresh-2')
     expect(adaptador).toHaveBeenCalledTimes(4)
+  })
+
+  it('HU-17: avisa a la app del usuario con su rol vigente que devuelve el refresh', async () => {
+    const usuario = { id: 'u1', rol: 'Conductor' }
+    vi.spyOn(axios, 'post').mockResolvedValue({
+      data: { accessToken: 'nuevo', refreshToken: 'refresh-2', usuario },
+    })
+    const escucha = vi.fn<(e: Event) => void>()
+    window.addEventListener(EVENTO_USUARIO_ACTUALIZADO, escucha)
+
+    await refrescarSesion()
+
+    window.removeEventListener(EVENTO_USUARIO_ACTUALIZADO, escucha)
+    expect(escucha).toHaveBeenCalledOnce()
+    expect((escucha.mock.calls[0]![0] as CustomEvent).detail).toEqual(usuario)
   })
 
   it('si el refresh falla, cierra la sesión y avisa a la app', async () => {

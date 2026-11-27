@@ -193,16 +193,15 @@ function limpiarDestino() {
               ¿Te gustaría publicar esta ruta como conductor?</template
             >
             <template v-else>
-              ¿Tienes vehículo? Con una cuenta de conductor puedes publicar tu propia ruta.
+              ¿Tienes vehículo? Regístralo en tu perfil y publica tu propia ruta.
             </template>
           </p>
           <button
-            v-if="auth.esConductor"
             type="button"
             class="mt-4 px-4 py-2 rounded-xl bg-[#1D2D44] text-white text-xs font-bold hover:bg-[#3E5C76]"
-            @click="router.push({ name: 'publicar-1' })"
+            @click="router.push({ name: auth.esConductor ? 'publicar-1' : 'perfil' })"
           >
-            Publicar Ruta
+            {{ auth.esConductor ? 'Publicar Ruta' : 'Quiero ser conductor' }}
           </button>
         </section>
 
