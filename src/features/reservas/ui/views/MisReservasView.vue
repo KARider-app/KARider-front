@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { onMounted, watch } from 'vue'
-import { ArrowLeft, Car, ChevronRight, Clock, MapPin, Navigation } from 'lucide-vue-next'
+import { ArrowLeft, Car, ChevronRight, Clock, History, MapPin, Navigation } from 'lucide-vue-next'
 import { useAuthStore } from '@/features/auth/application/useAuthStore'
 import { useMisRutas } from '@/features/viajes/application/useMisRutas'
+import { yaEsHoraDeSalir } from '@/features/viajes/domain/rutasActivas'
 import type { EstadoViaje } from '@/features/viajes/domain/tipos'
-import { fechaHora, mxn } from '@/core/utils/formato'
+import { fechaHora, horaCorta, mxn } from '@/core/utils/formato'
 import AlertMessage from '@/shared/components/AlertMessage.vue'
 import { mensajeDeError } from '@/shared/composables/useApiError'
 import { useMisReservas } from '../../application/useMisReservas'
@@ -18,7 +19,13 @@ const {
   sinConexion: reservasSinConexion,
   cargar: cargarReservas,
 } = useMisReservas()
-const { rutas, cargando: cargandoRutas, error: errorRutas, cargar: cargarRutas } = useMisRutas()
+const {
+  grupos,
+  pasadas,
+  cargando: cargandoRutas,
+  error: errorRutas,
+  cargar: cargarRutas,
+} = useMisRutas()
 
 const textoEstadoReserva: Record<EstadoReserva, string> = {
   Pendiente: 'Pendiente',
@@ -88,7 +95,7 @@ const estiloViaje: Record<EstadoViaje, string> = {
         <p class="text-xs text-[#C9DCE8] mt-0.5">
           {{
             auth.modoConductor
-              ? 'Entra a una ruta programada o en curso para compartir tu ubicación.'
+              ? 'Tus rutas en curso y por salir. Entra a una para compartir tu ubicación.'
               : 'Entra a una reserva confirmada para ver el mapa de tu viaje.'
           }}
         </p>
@@ -100,11 +107,13 @@ const estiloViaje: Record<EstadoViaje, string> = {
         <AlertMessage v-if="errorRutas" tipo="error">{{ mensajeDeError(errorRutas) }}</AlertMessage>
         <p v-if="cargandoRutas" class="py-8 text-center text-xs text-[#4B5563]">Cargando…</p>
         <section
-          v-else-if="!errorRutas && rutas.length === 0"
+          v-else-if="!errorRutas && grupos.length === 0"
           class="py-12 px-4 text-center rounded-2xl bg-white border border-[#C9DCE8]"
         >
           <Car class="w-10 h-10 text-[#8AA9C4] mx-auto mb-2" aria-hidden="true" />
-          <h2 class="text-sm font-bold text-[#1D2D44] font-sans">Aún no tienes rutas publicadas</h2>
+          <h2 class="text-sm font-bold text-[#1D2D44] font-sans">
+            {{ pasadas > 0 ? 'No tienes rutas por salir' : 'Aún no tienes rutas publicadas' }}
+          </h2>
           <RouterLink
             :to="{ name: 'publicar-1' }"
             class="inline-block mt-4 px-4 py-2 rounded-xl bg-[#1D2D44] text-white text-xs font-bold hover:bg-[#3E5C76]"
@@ -113,42 +122,72 @@ const estiloViaje: Record<EstadoViaje, string> = {
           </RouterLink>
         </section>
 
-        <ul class="space-y-3 md:space-y-0 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-4">
-          <li v-for="v in rutas" :key="v.id">
-            <RouterLink
-              :to="{ name: 'viaje', params: { id: v.id } }"
-              class="block h-full p-4 rounded-2xl bg-white border border-[#C9DCE8] shadow-xs hover:border-[#3E5C76] hover:shadow-md transition-all group"
-            >
-              <div class="flex items-start justify-between gap-2">
-                <div class="space-y-1 min-w-0">
-                  <div class="flex items-center gap-2 text-xs text-[#4B5563]">
-                    <Clock class="w-3.5 h-3.5 text-[#3E5C76]" aria-hidden="true" />
-                    <span>{{ fechaHora(v.fechaSalida) }}</span>
+        <!-- HU-24: solo rutas activas, agrupadas: en curso, hoy, mañana, … -->
+        <section
+          v-for="grupo in cargandoRutas ? [] : grupos"
+          :key="grupo.clave"
+          class="space-y-2"
+          :aria-labelledby="`grupo-${grupo.clave}`"
+        >
+          <h2
+            :id="`grupo-${grupo.clave}`"
+            class="text-[11px] font-bold uppercase tracking-wider text-[#3E5C76] pt-1"
+          >
+            {{ grupo.titulo }}
+          </h2>
+          <ul class="space-y-3 md:space-y-0 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-4">
+            <li v-for="v in grupo.rutas" :key="v.id">
+              <RouterLink
+                :to="{ name: 'viaje', params: { id: v.id } }"
+                class="block h-full p-4 rounded-2xl bg-white border border-[#C9DCE8] shadow-xs hover:border-[#3E5C76] hover:shadow-md transition-all group"
+              >
+                <div class="flex items-start justify-between gap-2">
+                  <div class="space-y-1 min-w-0">
+                    <div class="flex items-center gap-2 text-xs text-[#4B5563]">
+                      <Clock class="w-3.5 h-3.5 text-[#3E5C76]" aria-hidden="true" />
+                      <span>{{ horaCorta(v.fechaSalida) }}</span>
+                    </div>
+                    <div class="text-sm font-bold text-[#1D2D44]">
+                      {{ v.puntoEncuentro.nombre }} → {{ v.destino }}
+                    </div>
+                    <div class="text-[11px] text-[#3E5C76]">
+                      {{ v.asientosDisponibles }}/{{ v.asientosOfrecidos }} asientos disponibles ·
+                      {{ mxn(v.aportePorAsiento) }}
+                    </div>
+                    <p v-if="yaEsHoraDeSalir(v)" class="text-[11px] font-semibold text-amber-700">
+                      Ya es hora de salir: entra para iniciar el viaje.
+                    </p>
                   </div>
-                  <div class="text-sm font-bold text-[#1D2D44]">
-                    {{ v.puntoEncuentro.nombre }} → {{ v.destino }}
-                  </div>
-                  <div class="text-[11px] text-[#3E5C76]">
-                    {{ v.asientosDisponibles }}/{{ v.asientosOfrecidos }} asientos disponibles ·
-                    {{ mxn(v.aportePorAsiento) }}
+                  <div class="flex flex-col items-end gap-2 shrink-0">
+                    <span
+                      class="text-[10px] font-bold px-2 py-0.5 rounded-full border"
+                      :class="estiloViaje[v.estado]"
+                    >
+                      {{ textoEstadoViaje[v.estado] }}
+                    </span>
+                    <ChevronRight
+                      class="w-4 h-4 text-[#8AA9C4] group-hover:translate-x-0.5 transition-transform"
+                      aria-hidden="true"
+                    />
                   </div>
                 </div>
-                <div class="flex flex-col items-end gap-2 shrink-0">
-                  <span
-                    class="text-[10px] font-bold px-2 py-0.5 rounded-full border"
-                    :class="estiloViaje[v.estado]"
-                  >
-                    {{ textoEstadoViaje[v.estado] }}
-                  </span>
-                  <ChevronRight
-                    class="w-4 h-4 text-[#8AA9C4] group-hover:translate-x-0.5 transition-transform"
-                    aria-hidden="true"
-                  />
-                </div>
-              </div>
-            </RouterLink>
-          </li>
-        </ul>
+              </RouterLink>
+            </li>
+          </ul>
+        </section>
+
+        <!-- Las rutas pasadas no se borran: están en el historial del perfil. -->
+        <RouterLink
+          v-if="!cargandoRutas && !errorRutas && pasadas > 0"
+          :to="{ name: 'perfil' }"
+          class="flex items-center justify-center gap-1.5 pt-2 text-xs font-semibold text-[#0284C7] hover:underline"
+        >
+          <History class="w-3.5 h-3.5" aria-hidden="true" />
+          <span>
+            {{ pasadas === 1 ? 'Tu ruta pasada está' : `Tus ${pasadas} rutas pasadas están` }} en
+            Perfil › Historial de viajes
+          </span>
+        </RouterLink>
       </template>
 
       <template v-else>

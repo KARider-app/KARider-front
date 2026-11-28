@@ -80,6 +80,51 @@ describe('MisReservasView', () => {
     expect(texto).not.toContain('Borrador oculto')
   })
 
+  it('HU-24: solo muestra rutas activas agrupadas por día; las pasadas van al historial', async () => {
+    const haceDosDias = new Date(Date.now() - 2 * 86_400_000).toISOString()
+    const haceUnaHora = new Date(Date.now() - 3_600_000).toISOString()
+    instalarApiFalsa([
+      [
+        '/viajes/publicados',
+        pagina([
+          viajeResumen('v1', { destino: 'Mañana a Pachuca' }),
+          viajeResumen('v2', { estado: 'EnCurso', destino: 'En curso a Tula' }),
+          viajeResumen('v3', { fechaSalida: haceUnaHora, destino: 'Sin iniciar' }),
+          viajeResumen('v4', { fechaSalida: haceDosDias, destino: 'Vencida' }),
+          viajeResumen('v5', { estado: 'Completado', destino: 'Completada' }),
+          viajeResumen('v6', { estado: 'Cancelado', destino: 'Cancelada' }),
+        ]),
+      ],
+    ])
+    const { wrapper } = await abrir('Conductor')
+
+    const titulos = wrapper.findAll('section h2').map((h) => h.text())
+    expect(titulos[0]).toBe('En curso')
+    expect(titulos.some((t) => t.startsWith('Mañana'))).toBe(true)
+    const texto = wrapper.text()
+    expect(texto).toContain('En curso a Tula')
+    expect(texto).toContain('Mañana a Pachuca')
+    expect(texto).toContain('Sin iniciar')
+    expect(texto).toContain('Ya es hora de salir: entra para iniciar el viaje.')
+    expect(texto).not.toContain('Vencida')
+    expect(texto).not.toContain('Completada')
+    expect(texto).not.toContain('Cancelada')
+    const historial = wrapper.findAll('a').find((a) => a.text().includes('Historial de viajes'))!
+    expect(historial.text()).toContain('Tus 3 rutas pasadas están en Perfil › Historial de viajes')
+    expect(historial.attributes('href')).toBe('/perfil')
+  })
+
+  it('HU-24: si todas sus rutas ya pasaron, invita a publicar y enlaza al historial', async () => {
+    instalarApiFalsa([
+      ['/viajes/publicados', pagina([viajeResumen('v1', { estado: 'Completado' })])],
+    ])
+    const { wrapper } = await abrir('Conductor')
+
+    expect(wrapper.text()).toContain('No tienes rutas por salir')
+    expect(wrapper.text()).toContain('Publicar una ruta')
+    expect(wrapper.text()).toContain('Tu ruta pasada está en Perfil › Historial de viajes')
+  })
+
   it('el conductor sin rutas ve la invitación a publicar', async () => {
     instalarApiFalsa([['/viajes/publicados', pagina([])]])
     const { wrapper } = await abrir('Conductor')
