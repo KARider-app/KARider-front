@@ -53,4 +53,25 @@
     outline: 2px solid #0284c7;
     outline-offset: 2px;
   }
+
+  /*
+   * HU-20: Safari de iPad/iPhone dibuja fecha y hora con su estilo nativo y un ancho mínimo
+   * propio que ignora width: 100%, así que el campo se sale de su recuadro. Sin el estilo
+   * nativo respeta el ancho; el alto mínimo evita que se encoja cuando está vacío.
+   */
+  input[type='date'],
+  input[type='time'],
+  input[type='datetime-local'] {
+    -webkit-appearance: none;
+    appearance: none;
+    display: block;
+    min-width: 0;
+    max-width: 100%;
+    min-height: 2.375rem;
+  }
+
+  input::-webkit-date-and-time-value {
+    margin: 0;
+    text-align: left;
+  }
 }
