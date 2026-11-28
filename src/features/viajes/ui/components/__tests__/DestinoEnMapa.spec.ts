@@ -41,13 +41,25 @@ function montar(
         />
       </form>`,
   })
-  const wrapper = mount(Contenedor)
+  const wrapper = mount(Contenedor, {
+    global: {
+      stubs: {
+        // El mapa real (Leaflet) se prueba en SelectorPuntoMapa.spec; aquí basta simular un toque.
+        SelectorPuntoMapa: {
+          props: ['latitud', 'longitud'],
+          emits: ['update:latitud', 'update:longitud', 'marcado'],
+          template: `<button type="button" class="mapa-falso" :data-lat="latitud"
+            @click="$emit('update:latitud', 20.0201); $emit('update:longitud', -99.3301); $emit('marcado')">mapa</button>`,
+        },
+      },
+    },
+  })
   const estado = wrapper.vm as unknown as {
     destino: string
     latitud: number | null
     longitud: number | null
   }
-  const botonUbicar = () => wrapper.findAll('button').find((b) => b.text().includes('Ubicar'))
+  const botonUbicar = () => wrapper.findAll('button').find((b) => b.text().includes('Buscar lugar'))
   return { wrapper, estado, enviado, botonUbicar }
 }
 
@@ -122,14 +134,14 @@ describe('DestinoEnMapa (HU-22)', () => {
     expect(botonUbicar()).toBeDefined()
   })
 
-  it('al editar un viaje ya ubicado lo muestra así y «Cambiar» busca de nuevo', async () => {
+  it('al editar un viaje ya ubicado lo muestra así y «Buscar otro» busca de nuevo', async () => {
     instalarApiFalsa([['/mapas/lugares', [tulaCentro, plazaTula]]])
     const { wrapper, estado } = montar({ destino: 'Tula Centro', latitud: 20.05, longitud: -99.34 })
 
     expect(wrapper.text()).toContain('Ubicado en el mapa')
     expect(wrapper.text()).toContain('La ruta se dibuja con este lugar.')
 
-    const cambiar = wrapper.findAll('button').find((b) => b.text() === 'Cambiar')!
+    const cambiar = wrapper.findAll('button').find((b) => b.text() === 'Buscar otro')!
     await cambiar.trigger('click')
     await flushPromises()
 
@@ -144,7 +156,7 @@ describe('DestinoEnMapa (HU-22)', () => {
     await botonUbicar()!.trigger('click')
     await flushPromises()
 
-    expect(wrapper.text()).toContain('No encontramos «Pachuca / Tula» en el mapa')
+    expect(wrapper.text()).toContain('No encontramos «Pachuca / Tula» cerca del campus')
   })
 
   it('si el mapa no responde deja continuar sin ubicar', async () => {
@@ -154,7 +166,7 @@ describe('DestinoEnMapa (HU-22)', () => {
     await botonUbicar()!.trigger('click')
     await flushPromises()
 
-    expect(wrapper.text()).toContain('No pudimos consultar el mapa. Puedes continuar')
+    expect(wrapper.text()).toContain('No pudimos consultar la búsqueda.')
     expect(estado.latitud).toBeNull()
   })
 
@@ -173,6 +185,77 @@ describe('DestinoEnMapa (HU-22)', () => {
 
     expect(wrapper.findAll('button.lugar')).toHaveLength(0)
     expect(wrapper.text()).not.toContain('Buscando…')
-    expect(wrapper.text()).toContain('Ubicar en el mapa')
+    expect(wrapper.text()).toContain('Buscar lugar')
+  })
+
+  it('«Marcar en el mapa» abre el mapa y el punto tocado queda como destino', async () => {
+    const { wrapper, estado } = montar({ destino: 'Infonavit El Cerrito' })
+    expect(wrapper.find('.mapa-falso').exists()).toBe(false)
+
+    await wrapper
+      .findAll('button')
+      .find((b) => b.text() === 'Marcar en el mapa')!
+      .trigger('click')
+    await wrapper.get('.mapa-falso').trigger('click')
+
+    expect(estado.latitud).toBe(20.0201)
+    expect(estado.longitud).toBe(-99.3301)
+    expect(wrapper.text()).toContain('Punto que marcaste en el mapa.')
+    expect(wrapper.text()).not.toContain('Marcar en el mapa')
+  })
+
+  it('un punto marcado a mano se conserva aunque se corrija el texto', async () => {
+    const { wrapper, estado } = montar({ destino: 'Infonavit El Cerito' })
+    await wrapper
+      .findAll('button')
+      .find((b) => b.text() === 'Marcar en el mapa')!
+      .trigger('click')
+    await wrapper.get('.mapa-falso').trigger('click')
+
+    await wrapper.get('input').setValue('Infonavit El Cerrito')
+
+    expect(estado.latitud).toBe(20.0201)
+    expect(wrapper.text()).toContain('Ubicado en el mapa')
+  })
+
+  it('al elegir una sugerencia muestra el pin para confirmarla o ajustarla', async () => {
+    instalarApiFalsa([['/mapas/lugares', [tulaCentro]]])
+    const { wrapper, botonUbicar } = montar({ destino: 'Tula Centro' })
+    await botonUbicar()!.trigger('click')
+    await flushPromises()
+
+    await wrapper.get('button.lugar').trigger('click')
+
+    expect(wrapper.get('.mapa-falso').attributes('data-lat')).toBe('20.0539')
+  })
+
+  it.each([
+    [[] as unknown, 'No encontramos'],
+    [errorApi(503, 'SERVICIO_NO_DISPONIBLE'), 'No pudimos consultar'],
+    [[tulaCentro], '¿No está tu lugar?'],
+  ])('si la búsqueda no sirve, ofrece marcarlo en el mapa (%#)', async (respuesta, mensaje) => {
+    instalarApiFalsa([['/mapas/lugares', respuesta]])
+    const { wrapper, botonUbicar } = montar({ destino: 'Infonavit El Cerrito' })
+    await botonUbicar()!.trigger('click')
+    await flushPromises()
+    expect(wrapper.text()).toContain(mensaje)
+
+    await wrapper
+      .findAll('button')
+      .find((b) => b.text() === 'Márcalo en el mapa')!
+      .trigger('click')
+
+    expect(wrapper.find('.mapa-falso').exists()).toBe(true)
+  })
+
+  it('«Ver en el mapa» muestra la ubicación guardada de un viaje', async () => {
+    const { wrapper } = montar({ destino: 'Tula Centro', latitud: 20.05, longitud: -99.34 })
+
+    await wrapper
+      .findAll('button')
+      .find((b) => b.text() === 'Ver en el mapa')!
+      .trigger('click')
+
+    expect(wrapper.get('.mapa-falso').attributes('data-lat')).toBe('20.05')
   })
 })
