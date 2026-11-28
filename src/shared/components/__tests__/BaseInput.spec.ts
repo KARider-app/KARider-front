@@ -51,3 +51,19 @@ describe('BaseInput: filtrado de caracteres mientras se escribe', () => {
     expect(input.element.value).toBe('abc123!@#')
   })
 })
+
+describe('BaseInput: fecha y hora no se salen de su recuadro (HU-20, Safari de iPad)', () => {
+  it.each(['date', 'time'])('type="%s" recorta el campo al ancho de su contenedor', (tipo) => {
+    const wrapper = mount(BaseInput, { props: { etiqueta: 'Campo' }, attrs: { type: tipo } })
+
+    const contenedor = wrapper.get('input').element.parentElement!
+    expect(contenedor.classList).toContain('overflow-hidden')
+    expect(wrapper.get('input').classes()).toContain('max-w-full')
+  })
+
+  it('los demás campos no se recortan (no se pierde el anillo de foco)', () => {
+    const wrapper = mount(BaseInput, { props: { etiqueta: 'Nombre' } })
+
+    expect(wrapper.get('input').element.parentElement!.classList).not.toContain('overflow-hidden')
+  })
+})

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useId, type Component } from 'vue'
+import { computed, useAttrs, useId, type Component } from 'vue'
 
 defineOptions({ inheritAttrs: false })
 
@@ -19,6 +19,15 @@ const props = defineProps<{
 
 const modelo = defineModel<string | number>({ default: '' })
 const id = useId()
+const attrs = useAttrs()
+
+/**
+ * HU-20: en Safari (iPad/iPhone) la fecha y la hora pueden pedir más ancho que su columna;
+ * el contenedor las recorta para que el borde siempre coincida con el recuadro.
+ */
+const esFechaUHora = computed(() =>
+  ['date', 'time', 'datetime-local'].includes(String(attrs.type ?? '')),
+)
 
 const filtros: Record<NonNullable<typeof props.filtro>, RegExp> = {
   letras: /[^\p{L}\s]/gu,
@@ -48,7 +57,7 @@ function alEscribir(evento: Event) {
       >
       <slot name="etiqueta-extra" />
     </div>
-    <div class="relative">
+    <div class="relative" :class="{ 'overflow-hidden rounded-xl': esFechaUHora }">
       <component
         :is="icono"
         v-if="icono"
@@ -58,7 +67,7 @@ function alEscribir(evento: Event) {
       <slot name="prefijo" />
       <input
         :id="id"
-        class="w-full min-w-0 pr-3 py-2.5 text-xs rounded-xl border focus:ring-1 outline-none transition-all [&::-webkit-date-and-time-value]:text-left"
+        class="w-full min-w-0 max-w-full pr-3 py-2.5 text-xs rounded-xl border focus:ring-1 outline-none transition-all"
         :class="[
           'bg-white',
           icono || $slots.prefijo ? 'pl-9' : 'pl-3',
